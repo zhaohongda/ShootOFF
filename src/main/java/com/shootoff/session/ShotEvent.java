@@ -27,92 +27,92 @@ import com.shootoff.camera.shot.DisplayShot;
 import com.shootoff.camera.shot.ShotColor;
 
 public class ShotEvent implements Event {
-	private final String cameraName;
-	private final long timestamp;
-	private final DisplayShot shot;
-	private final boolean isMalfunction;
-	private final boolean isReload;
-	private final Optional<Integer> targetIndex;
-	private final Optional<Integer> hitRegionIndex;
-	private final Optional<String> videoString;
-	private final Map<String, File> videos = new HashMap<>();
+    private final String cameraName;
+    private final long timestamp;
+    private final DisplayShot shot;
+    private final boolean isMalfunction;
+    private final boolean isReload;
+    private final Optional<Integer> targetIndex;
+    private final Optional<Integer> hitRegionIndex;
+    private final Optional<String> videoString;
+    private final Map<String, File> videos = new HashMap<>();
 
-	public ShotEvent(String cameraName, long timestamp, DisplayShot shot, boolean isMalfunction, boolean isReload,
-			Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
-		this.cameraName = cameraName;
-		this.timestamp = timestamp;
-		this.shot = shot;
-		this.isMalfunction = isMalfunction;
-		this.isReload = isReload;
-		this.targetIndex = targetIndex;
-		this.hitRegionIndex = hitRegionIndex;
-		this.videoString = videoString;
+    public ShotEvent(String cameraName, long timestamp, DisplayShot shot, boolean isMalfunction, boolean isReload,
+            Optional<Integer> targetIndex, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+        this.cameraName = cameraName;
+        this.timestamp = timestamp;
+        this.shot = shot;
+        this.isMalfunction = isMalfunction;
+        this.isReload = isReload;
+        this.targetIndex = targetIndex;
+        this.hitRegionIndex = hitRegionIndex;
+        this.videoString = videoString;
 
-		if (videoString.isPresent()) {
-			final String[] videoSet = videoString.get().split(",");
+        if (videoString.isPresent()) {
+            final String[] videoSet = videoString.get().split(",");
 
-			for (final String video : videoSet) {
-				final String[] v = video.split(":");
-				videos.put(v[0], new File("sessions" + File.separator + v[1]));
-			}
-		}
-	}
+            for (final String video : videoSet) {
+                final String[] v = video.split(":");
+                videos.put(v[0], new File("sessions" + File.separator + v[1]));
+            }
+        }
+    }
 
-	@Override
-	public String getCameraName() {
-		return cameraName;
-	}
+    @Override
+    public String getCameraName() {
+        return cameraName;
+    }
 
-	public DisplayShot getShot() {
-		return shot;
-	}
+    public DisplayShot getShot() {
+        return shot;
+    }
 
-	public boolean isMalfunction() {
-		return isMalfunction;
-	}
+    public boolean isMalfunction() {
+        return isMalfunction;
+    }
 
-	public boolean isReload() {
-		return isReload;
-	}
+    public boolean isReload() {
+        return isReload;
+    }
 
-	public Optional<Integer> getTargetIndex() {
-		return targetIndex;
-	}
+    public Optional<Integer> getTargetIndex() {
+        return targetIndex;
+    }
 
-	public Optional<Integer> getHitRegionIndex() {
-		return hitRegionIndex;
-	}
+    public Optional<Integer> getHitRegionIndex() {
+        return hitRegionIndex;
+    }
 
-	public Optional<String> getVideoString() {
-		return videoString;
-	}
+    public Optional<String> getVideoString() {
+        return videoString;
+    }
 
-	public Map<String, File> getVideos() {
-		return videos;
-	}
+    public Map<String, File> getVideos() {
+        return videos;
+    }
 
-	@Override
-	public EventType getType() {
-		return EventType.SHOT;
-	}
+    @Override
+    public EventType getType() {
+        return EventType.SHOT;
+    }
 
-	@Override
-	public long getTimestamp() {
-		return timestamp;
-	}
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-	@Override
-	public String toString() {
-		String colorName;
+    @Override
+    public String toString() {
+        String colorName;
 
-		if (shot.getColor().equals(ShotColor.RED)) {
-			colorName = "red";
-		} else if (shot.getColor().equals(ShotColor.INFRARED)) {
-			colorName = "infrared";
-		} else {
-			colorName = "green";
-		}
+        if (shot.getColor().equals(ShotColor.RED)) {
+            colorName = "red";
+        } else if (shot.getColor().equals(ShotColor.INFRARED)) {
+            colorName = "infrared";
+        } else {
+            colorName = "green";
+        }
 
-		return String.format("%s shot (%.2f, %.2f)", colorName, shot.getX(), shot.getY());
-	}
+        return String.format("%s shot (%.2f, %.2f)", colorName, shot.getX(), shot.getY());
+    }
 }

@@ -41,117 +41,120 @@ import javafx.scene.image.ImageView;
 import javafx.util.Duration;
 
 public class GifAnimation extends SpriteAnimation {
-	private static ImageFrame[] frames;
+    private static ImageFrame[] frames;
 
-	public GifAnimation(ImageView imageView, InputStream gifStream) throws IOException {
-		super(imageView, readGif(gifStream));
+    public GifAnimation(ImageView imageView, InputStream gifStream) throws IOException {
+        super(imageView, readGif(gifStream));
 
-		int delay = frames[0].getDelay();
-		if (delay < 1) delay = SpriteAnimation.DEFAULT_DELAY;
+        int delay = frames[0].getDelay();
+        if (delay < 1)
+            delay = SpriteAnimation.DEFAULT_DELAY;
 
-		setCycleDuration(Duration.millis(delay));
-	}
+        setCycleDuration(Duration.millis(delay));
+    }
 
-	public GifAnimation(ImageView imageView, File gifFile) throws FileNotFoundException, IOException {
-		super(imageView, readGif(new FileInputStream(gifFile)));
+    public GifAnimation(ImageView imageView, File gifFile) throws FileNotFoundException, IOException {
+        super(imageView, readGif(new FileInputStream(gifFile)));
 
-		int delay = frames[0].getDelay();
-		if (delay < 1) delay = SpriteAnimation.DEFAULT_DELAY;
+        int delay = frames[0].getDelay();
+        if (delay < 1)
+            delay = SpriteAnimation.DEFAULT_DELAY;
 
-		setCycleDuration(Duration.millis(delay));
-	}
+        setCycleDuration(Duration.millis(delay));
+    }
 
-	// This method is from http://stackoverflow.com/a/17269591
-	private static ImageFrame[] readGif(InputStream stream) throws IOException {
-		final ArrayList<ImageFrame> frames = new ArrayList<>(2);
+    // This method is from http://stackoverflow.com/a/17269591
+    private static ImageFrame[] readGif(InputStream stream) throws IOException {
+        final ArrayList<ImageFrame> frames = new ArrayList<>(2);
 
-		int width = -1;
-		int height = -1;
+        int width = -1;
+        int height = -1;
 
-		final ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
-		reader.setInput(ImageIO.createImageInputStream(stream));
-		final IIOMetadata metadata = reader.getStreamMetadata();
-		if (metadata != null) {
-			final IIOMetadataNode globalRoot = (IIOMetadataNode) metadata.getAsTree(metadata.getNativeMetadataFormatName());
+        final ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
+        reader.setInput(ImageIO.createImageInputStream(stream));
+        final IIOMetadata metadata = reader.getStreamMetadata();
+        if (metadata != null) {
+            final IIOMetadataNode globalRoot = (IIOMetadataNode) metadata
+                    .getAsTree(metadata.getNativeMetadataFormatName());
 
-			final NodeList globalScreenDescriptor = globalRoot.getElementsByTagName("LogicalScreenDescriptor");
+            final NodeList globalScreenDescriptor = globalRoot.getElementsByTagName("LogicalScreenDescriptor");
 
-			if (globalScreenDescriptor.getLength() > 0) {
-				final IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor.item(0);
+            if (globalScreenDescriptor.getLength() > 0) {
+                final IIOMetadataNode screenDescriptor = (IIOMetadataNode) globalScreenDescriptor.item(0);
 
-				if (screenDescriptor != null) {
-					width = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenWidth"));
-					height = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenHeight"));
-				}
-			}
-		}
+                if (screenDescriptor != null) {
+                    width = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenWidth"));
+                    height = Integer.parseInt(screenDescriptor.getAttribute("logicalScreenHeight"));
+                }
+            }
+        }
 
-		BufferedImage master = null;
-		Graphics2D masterGraphics = null;
+        BufferedImage master = null;
+        Graphics2D masterGraphics = null;
 
-		for (int frameIndex = 0;; frameIndex++) {
-			BufferedImage image;
-			try {
-				image = reader.read(frameIndex);
-			} catch (final IndexOutOfBoundsException io) {
-				break;
-			}
+        for (int frameIndex = 0;; frameIndex++) {
+            BufferedImage image;
+            try {
+                image = reader.read(frameIndex);
+            } catch (final IndexOutOfBoundsException io) {
+                break;
+            }
 
-			if (width == -1 || height == -1) {
-				width = image.getWidth();
-				height = image.getHeight();
-			}
+            if (width == -1 || height == -1) {
+                width = image.getWidth();
+                height = image.getHeight();
+            }
 
-			final IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex)
-					.getAsTree("javax_imageio_gif_image_1.0");
-			final IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
-			final int delay = Integer.parseInt(gce.getAttribute("delayTime")) * 10;
-			final String disposal = gce.getAttribute("disposalMethod");
+            final IIOMetadataNode root = (IIOMetadataNode) reader.getImageMetadata(frameIndex)
+                    .getAsTree("javax_imageio_gif_image_1.0");
+            final IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
+            final int delay = Integer.parseInt(gce.getAttribute("delayTime")) * 10;
+            final String disposal = gce.getAttribute("disposalMethod");
 
-			int x = 0;
-			int y = 0;
+            int x = 0;
+            int y = 0;
 
-			if (master == null) {
-				master = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-				masterGraphics = master.createGraphics();
-				masterGraphics.setBackground(new Color(0, 0, 0, 0));
-			} else {
-				final NodeList children = root.getChildNodes();
-				for (int nodeIndex = 0; nodeIndex < children.getLength(); nodeIndex++) {
-					final Node nodeItem = children.item(nodeIndex);
-					if (nodeItem.getNodeName().equals("ImageDescriptor")) {
-						final NamedNodeMap map = nodeItem.getAttributes();
-						x = Integer.parseInt(map.getNamedItem("imageLeftPosition").getNodeValue());
-						y = Integer.parseInt(map.getNamedItem("imageTopPosition").getNodeValue());
-					}
-				}
-			}
-			masterGraphics.drawImage(image, x, y, null);
+            if (master == null) {
+                master = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                masterGraphics = master.createGraphics();
+                masterGraphics.setBackground(new Color(0, 0, 0, 0));
+            } else {
+                final NodeList children = root.getChildNodes();
+                for (int nodeIndex = 0; nodeIndex < children.getLength(); nodeIndex++) {
+                    final Node nodeItem = children.item(nodeIndex);
+                    if (nodeItem.getNodeName().equals("ImageDescriptor")) {
+                        final NamedNodeMap map = nodeItem.getAttributes();
+                        x = Integer.parseInt(map.getNamedItem("imageLeftPosition").getNodeValue());
+                        y = Integer.parseInt(map.getNamedItem("imageTopPosition").getNodeValue());
+                    }
+                }
+            }
+            masterGraphics.drawImage(image, x, y, null);
 
-			final BufferedImage copy = new BufferedImage(master.getColorModel(), master.copyData(null),
-					master.isAlphaPremultiplied(), null);
-			frames.add(new ImageFrame(copy, delay, disposal));
+            final BufferedImage copy = new BufferedImage(master.getColorModel(), master.copyData(null),
+                    master.isAlphaPremultiplied(), null);
+            frames.add(new ImageFrame(copy, delay, disposal));
 
-			if (disposal.equals("restoreToPrevious")) {
-				BufferedImage from = null;
-				for (int i = frameIndex - 1; i >= 0; i--) {
-					if (!frames.get(i).getDisposal().equals("restoreToPrevious") || frameIndex == 0) {
-						from = frames.get(i).getBufferedImage();
-						break;
-					}
-				}
+            if (disposal.equals("restoreToPrevious")) {
+                BufferedImage from = null;
+                for (int i = frameIndex - 1; i >= 0; i--) {
+                    if (!frames.get(i).getDisposal().equals("restoreToPrevious") || frameIndex == 0) {
+                        from = frames.get(i).getBufferedImage();
+                        break;
+                    }
+                }
 
-				master = new BufferedImage(from.getColorModel(), from.copyData(null), from.isAlphaPremultiplied(),
-						null);
-				masterGraphics = master.createGraphics();
-				masterGraphics.setBackground(new Color(0, 0, 0, 0));
-			} else if (disposal.equals("restoreToBackgroundColor")) {
-				masterGraphics.clearRect(x, y, image.getWidth(), image.getHeight());
-			}
-		}
-		reader.dispose();
+                master = new BufferedImage(from.getColorModel(), from.copyData(null), from.isAlphaPremultiplied(),
+                        null);
+                masterGraphics = master.createGraphics();
+                masterGraphics.setBackground(new Color(0, 0, 0, 0));
+            } else if (disposal.equals("restoreToBackgroundColor")) {
+                masterGraphics.clearRect(x, y, image.getWidth(), image.getHeight());
+            }
+        }
+        reader.dispose();
 
-		GifAnimation.frames = frames.toArray(new ImageFrame[frames.size()]);
-		return GifAnimation.frames;
-	}
+        GifAnimation.frames = frames.toArray(new ImageFrame[frames.size()]);
+        return GifAnimation.frames;
+    }
 }

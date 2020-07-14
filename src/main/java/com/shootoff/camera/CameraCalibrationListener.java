@@ -24,8 +24,8 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Dimension2D;
 
 public interface CameraCalibrationListener {
-	public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims, boolean calibratedFromCanvas,
-			long frameDelay);
+    public void calibrate(Bounds arenaBounds, Optional<Dimension2D> perspectivePaperDims, boolean calibratedFromCanvas,
+            long frameDelay);
 
-	public void setArenaBackground(String resourceFilename);
+    public void setArenaBackground(String resourceFilename);
 }

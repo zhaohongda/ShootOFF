@@ -37,263 +37,270 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.NamedThreadFactory;
 
 public class SteelChallenge extends ProjectorTrainingExerciseBase implements TrainingExercise {
-	private final static String LENGTH_COL_NAME = "Length";
-	private final static int LENGTH_COL_WIDTH = 60;
-	private final static String HIT_COL_NAME = "Hit";
-	private final static int HIT_COL_WIDTH = 60;
-	private final static int START_DELAY = 4; // s
-	private final static int PAUSE_DELAY = 1; // s
-	private static final int CORE_POOL_SIZE = 2;
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
-			new NamedThreadFactory("SteelChallengeExercise"));
-	private TrainingExerciseBase thisSuper;
-	private List<Target> targets;
-	private Set<Target> roundTargets;
-	private long startTime = 0;
-	private boolean repeatExercise = true;
-	private boolean testing = false;
+    private final static String LENGTH_COL_NAME = "Length";
+    private final static int LENGTH_COL_WIDTH = 60;
+    private final static String HIT_COL_NAME = "Hit";
+    private final static int HIT_COL_WIDTH = 60;
+    private final static int START_DELAY = 4; // s
+    private final static int PAUSE_DELAY = 1; // s
+    private static final int CORE_POOL_SIZE = 2;
+    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+            new NamedThreadFactory("SteelChallengeExercise"));
+    private TrainingExerciseBase thisSuper;
+    private List<Target> targets;
+    private Set<Target> roundTargets;
+    private long startTime = 0;
+    private boolean repeatExercise = true;
+    private boolean testing = false;
 
-	public SteelChallenge() {}
+    public SteelChallenge() {
+    }
 
-	public SteelChallenge(List<Target> targets) {
-		super(targets);
+    public SteelChallenge(List<Target> targets) {
+        super(targets);
 
-		thisSuper = super.getInstance();
-		this.targets = targets;
-	}
+        thisSuper = super.getInstance();
+        this.targets = targets;
+    }
 
-	@Override
-	public void init() {
-		super.pauseShotDetection(true);
+    @Override
+    public void init() {
+        super.pauseShotDetection(true);
 
-		super.addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
-		super.addShotTimerColumn(HIT_COL_NAME, HIT_COL_WIDTH);
-		
-		repeatExercise = checkTargets(targets);
-		startRound();
-	}
+        super.addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
+        super.addShotTimerColumn(HIT_COL_NAME, HIT_COL_WIDTH);
 
-	// For testing
-	public void init(final Course course) {
-		testing = true;
-		thisSuper = super.getInstance();
+        repeatExercise = checkTargets(targets);
+        startRound();
+    }
 
-		targets = new ArrayList<>();
-		targets.addAll(course.getTargets());
+    // For testing
+    public void init(final Course course) {
+        testing = true;
+        thisSuper = super.getInstance();
 
-		repeatExercise = checkTargets(targets);
-		startRound();
-	}
+        targets = new ArrayList<>();
+        targets.addAll(course.getTargets());
 
-	@Override
-	public void targetUpdate(Target target, TargetChange change) {
-		switch (change) {
-		case ADDED:
-			targets.add(target);
+        repeatExercise = checkTargets(targets);
+        startRound();
+    }
 
-			if (!repeatExercise && isStopTarget(target)) {
-				repeatExercise = checkTargets(targets);
-				startRound();
-			}
+    @Override
+    public void targetUpdate(Target target, TargetChange change) {
+        switch (change) {
+        case ADDED:
+            targets.add(target);
 
-			break;
-		case REMOVED:
-			targets.remove(target);
+            if (!repeatExercise && isStopTarget(target)) {
+                repeatExercise = checkTargets(targets);
+                startRound();
+            }
 
-			if (repeatExercise && targets.isEmpty()) {
-				repeatExercise = false;
-			} else if (repeatExercise && isStopTarget(target) && !hasStopTarget()) {
-				repeatExercise = false;
-			}
+            break;
+        case REMOVED:
+            targets.remove(target);
 
-			break;
-		}
-	}
+            if (repeatExercise && targets.isEmpty()) {
+                repeatExercise = false;
+            } else if (repeatExercise && isStopTarget(target) && !hasStopTarget()) {
+                repeatExercise = false;
+            }
 
-	private boolean isStopTarget(Target target) {
-		for (final TargetRegion r : target.getRegions()) {
-			if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
-				return true;
-			}
-		}
+            break;
+        }
+    }
 
-		return false;
-	}
+    private boolean isStopTarget(Target target) {
+        for (final TargetRegion r : target.getRegions()) {
+            if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
+                return true;
+            }
+        }
 
-	private boolean checkTargets(final List<Target> targets) {
-		final boolean hasStopTarget = hasStopTarget();
+        return false;
+    }
 
-		if (!hasStopTarget) {
-			final List<File> errorMessages = new ArrayList<>();
-			errorMessages.add(new File("sounds/voice/shootoff-lay-out-own-course.wav"));
-			errorMessages.add(new File("sounds/voice/shootoff-add-stop-target.wav"));
+    private boolean checkTargets(final List<Target> targets) {
+        final boolean hasStopTarget = hasStopTarget();
 
-			TrainingExerciseBase.playSounds(errorMessages);
-		}
+        if (!hasStopTarget) {
+            final List<File> errorMessages = new ArrayList<>();
+            errorMessages.add(new File("sounds/voice/shootoff-lay-out-own-course.wav"));
+            errorMessages.add(new File("sounds/voice/shootoff-add-stop-target.wav"));
 
-		return hasStopTarget;
-	}
+            TrainingExerciseBase.playSounds(errorMessages);
+        }
 
-	private boolean hasStopTarget() {
-		for (final Target t : targets) {
-			if (isStopTarget(t)) return true;
-		}
+        return hasStopTarget;
+    }
 
-		return false;
-	}
+    private boolean hasStopTarget() {
+        for (final Target t : targets) {
+            if (isStopTarget(t))
+                return true;
+        }
 
-	private void startRound() {
-		if (!repeatExercise) return;
+        return false;
+    }
 
-		reloadVirtualMagazine();
-		roundTargets = new HashSet<>(targets);
+    private void startRound() {
+        if (!repeatExercise)
+            return;
 
-		if (testing) {
-			new AreYouReady().run();
-		} else {
-			executorService.schedule(new AreYouReady(), START_DELAY, TimeUnit.SECONDS);
-		}
-	}
+        reloadVirtualMagazine();
+        roundTargets = new HashSet<>(targets);
 
-	private class AreYouReady implements Runnable {
-		@Override
-		public void run() {
-			if (!repeatExercise) return;
+        if (testing) {
+            new AreYouReady().run();
+        } else {
+            executorService.schedule(new AreYouReady(), START_DELAY, TimeUnit.SECONDS);
+        }
+    }
 
-			TrainingExerciseBase.playSound("sounds/voice/shootoff-are-you-ready.wav");
+    private class AreYouReady implements Runnable {
+        @Override
+        public void run() {
+            if (!repeatExercise)
+                return;
 
-			if (!testing) {
-				executorService.schedule(new Standby(), PAUSE_DELAY, TimeUnit.SECONDS);
-			} else {
-				new Standby().run();
-			}
-		}
-	}
+            TrainingExerciseBase.playSound("sounds/voice/shootoff-are-you-ready.wav");
 
-	private class Standby implements Runnable {
-		@Override
-		public void run() {
-			if (!repeatExercise) return;
+            if (!testing) {
+                executorService.schedule(new Standby(), PAUSE_DELAY, TimeUnit.SECONDS);
+            } else {
+                new Standby().run();
+            }
+        }
+    }
 
-			TrainingExerciseBase.playSound("sounds/voice/shootoff-standby.wav");
+    private class Standby implements Runnable {
+        @Override
+        public void run() {
+            if (!repeatExercise)
+                return;
 
-			if (testing) {
-				new BeginTimer().run();
-			} else {
-				executorService.schedule(new BeginTimer(), START_DELAY, TimeUnit.SECONDS);
-			}
+            TrainingExerciseBase.playSound("sounds/voice/shootoff-standby.wav");
 
-		}
-	}
+            if (testing) {
+                new BeginTimer().run();
+            } else {
+                executorService.schedule(new BeginTimer(), START_DELAY, TimeUnit.SECONDS);
+            }
 
-	private class BeginTimer implements Runnable {
-		@Override
-		public void run() {
-			if (!repeatExercise) return;
+        }
+    }
 
-			TrainingExerciseBase.playSound("sounds/beep.wav");
-			thisSuper.pauseShotDetection(false);
-			startTime = System.currentTimeMillis();
-		}
-	}
+    private class BeginTimer implements Runnable {
+        @Override
+        public void run() {
+            if (!repeatExercise)
+                return;
 
-	@Override
-	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("Steel Challenge", "1.0", "phrack",
-				"This exercise assumes you will load one of the provided steel challenge courses "
-						+ "or lay out your own. When the beep sounds you must shoot every target at least once, "
-						+ "ending with the stop target (target with an 's' on it). After you hit the stop target, "
-						+ "ShootOFF will tell you your time and how many targets you missed. After you hit the stop "
-						+ "target a new round will automatically start.");
-	}
+            TrainingExerciseBase.playSound("sounds/beep.wav");
+            thisSuper.pauseShotDetection(false);
+            startTime = System.currentTimeMillis();
+        }
+    }
 
-	@Override
-	public void shotListener(Shot shot, Optional<Hit> hit) {
-		// This is evidence the round hasn't actually started
-		if (roundTargets == null) return;
-		
-		final long elapsedTime = System.currentTimeMillis() - startTime;
-		final String elapsedTimeSeconds;
+    @Override
+    public ExerciseMetadata getInfo() {
+        return new ExerciseMetadata("Steel Challenge", "1.0", "phrack",
+                "This exercise assumes you will load one of the provided steel challenge courses "
+                        + "or lay out your own. When the beep sounds you must shoot every target at least once, "
+                        + "ending with the stop target (target with an 's' on it). After you hit the stop target, "
+                        + "ShootOFF will tell you your time and how many targets you missed. After you hit the stop "
+                        + "target a new round will automatically start.");
+    }
 
-		if (testing) {
-			elapsedTimeSeconds = "0.00";
-		} else {
-			elapsedTimeSeconds = String.format("%.2f", (double) elapsedTime / (double) 1000);
-		}
+    @Override
+    public void shotListener(Shot shot, Optional<Hit> hit) {
+        // This is evidence the round hasn't actually started
+        if (roundTargets == null)
+            return;
 
-		super.setShotTimerColumnText(LENGTH_COL_NAME, elapsedTimeSeconds);
+        final long elapsedTime = System.currentTimeMillis() - startTime;
+        final String elapsedTimeSeconds;
 
-		if (hit.isPresent()) {
-			final TargetRegion r = hit.get().getHitRegion();
+        if (testing) {
+            elapsedTimeSeconds = "0.00";
+        } else {
+            elapsedTimeSeconds = String.format("%.2f", (double) elapsedTime / (double) 1000);
+        }
 
-			// Ignore tagless regions
-			if (r.getAllTags().size() == 0) {
-				super.setShotTimerColumnText(HIT_COL_NAME, "No");
-				return;
-			}
+        super.setShotTimerColumnText(LENGTH_COL_NAME, elapsedTimeSeconds);
 
-			super.setShotTimerColumnText(HIT_COL_NAME, "Yes");
+        if (hit.isPresent()) {
+            final TargetRegion r = hit.get().getHitRegion();
 
-			final Iterator<Target> it = roundTargets.iterator();
+            // Ignore tagless regions
+            if (r.getAllTags().size() == 0) {
+                super.setShotTimerColumnText(HIT_COL_NAME, "No");
+                return;
+            }
 
-			while (it.hasNext()) {
-				final Target t = it.next();
+            super.setShotTimerColumnText(HIT_COL_NAME, "Yes");
 
-				if (t.hasRegion(r)) {
-					it.remove();
-					break;
-				}
-			}
+            final Iterator<Target> it = roundTargets.iterator();
 
-			if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
-				super.pauseShotDetection(true);
+            while (it.hasNext()) {
+                final Target t = it.next();
 
-				final String roundAnnouncement;
+                if (t.hasRegion(r)) {
+                    it.remove();
+                    break;
+                }
+            }
 
-				if (roundTargets.size() == 1) {
-					roundAnnouncement = String.format("Your time was %s seconds. You missed one target!",
-							elapsedTimeSeconds);
-				} else if (roundTargets.size() > 1) {
-					roundAnnouncement = String.format("Your time was %s seconds. You missed %d targets!",
-							elapsedTimeSeconds, roundTargets.size());
-				} else {
-					roundAnnouncement = String.format("Your time was %s seconds", elapsedTimeSeconds);
-				}
+            if (r.tagExists("subtarget") && r.getTag("subtarget").equalsIgnoreCase("stop_target")) {
+                super.pauseShotDetection(true);
 
-				TextToSpeech.say(roundAnnouncement);
+                final String roundAnnouncement;
 
-				if (testing) {
-					startRound();
-				} else {
-					executorService.schedule(() -> startRound(), START_DELAY, TimeUnit.SECONDS);
-				}
-			}
-		} else {
-			super.setShotTimerColumnText(HIT_COL_NAME, "No");
-		}
-	}
+                if (roundTargets.size() == 1) {
+                    roundAnnouncement = String.format("Your time was %s seconds. You missed one target!",
+                            elapsedTimeSeconds);
+                } else if (roundTargets.size() > 1) {
+                    roundAnnouncement = String.format("Your time was %s seconds. You missed %d targets!",
+                            elapsedTimeSeconds, roundTargets.size());
+                } else {
+                    roundAnnouncement = String.format("Your time was %s seconds", elapsedTimeSeconds);
+                }
 
-	@Override
-	public void reset(List<Target> targets) {
-		super.pauseShotDetection(true);
+                TextToSpeech.say(roundAnnouncement);
 
-		repeatExercise = false;
-		executorService.shutdownNow();
+                if (testing) {
+                    startRound();
+                } else {
+                    executorService.schedule(() -> startRound(), START_DELAY, TimeUnit.SECONDS);
+                }
+            }
+        } else {
+            super.setShotTimerColumnText(HIT_COL_NAME, "No");
+        }
+    }
 
-		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
-				new NamedThreadFactory("SteelChallengeExercise"));
+    @Override
+    public void reset(List<Target> targets) {
+        super.pauseShotDetection(true);
 
-		this.targets = targets;
+        repeatExercise = false;
+        executorService.shutdownNow();
 
-		repeatExercise = checkTargets(targets);
-		startRound();
-	}
+        repeatExercise = true;
+        executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+                new NamedThreadFactory("SteelChallengeExercise"));
 
-	@Override
-	public void destroy() {
-		repeatExercise = false;
-		executorService.shutdownNow();
-		super.destroy();
-	}
+        this.targets = targets;
+
+        repeatExercise = checkTargets(targets);
+        startRound();
+    }
+
+    @Override
+    public void destroy() {
+        repeatExercise = false;
+        executorService.shutdownNow();
+        super.destroy();
+    }
 }

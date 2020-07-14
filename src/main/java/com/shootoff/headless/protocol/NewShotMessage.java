@@ -21,43 +21,43 @@ package com.shootoff.headless.protocol;
 import com.shootoff.camera.shot.ShotColor;
 
 public class NewShotMessage extends Message {
-	private final ShotColor color;
-	private final double x;
-	private final double y;
-	private final long timestamp;
-	private final double arenaWidth;
-	private final double arenaHeight;
+    private final ShotColor color;
+    private final double x;
+    private final double y;
+    private final long timestamp;
+    private final double arenaWidth;
+    private final double arenaHeight;
 
-	public NewShotMessage(ShotColor color, double x, double y, long timestamp, double arenaWidth, double arenaHeight) {
-		this.color = color;
-		this.x = x;
-		this.y = y;
-		this.timestamp = timestamp;
-		this.arenaWidth = arenaWidth;
-		this.arenaHeight = arenaHeight;
-	}
+    public NewShotMessage(ShotColor color, double x, double y, long timestamp, double arenaWidth, double arenaHeight) {
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.timestamp = timestamp;
+        this.arenaWidth = arenaWidth;
+        this.arenaHeight = arenaHeight;
+    }
 
-	public ShotColor getColor() {
-		return color;
-	}
+    public ShotColor getColor() {
+        return color;
+    }
 
-	public double getX() {
-		return x;
-	}
+    public double getX() {
+        return x;
+    }
 
-	public double getY() {
-		return y;
-	}
+    public double getY() {
+        return y;
+    }
 
-	public long getTimestamp() {
-		return timestamp;
-	}
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-	public double getArenaWidth() {
-		return arenaWidth;
-	}
+    public double getArenaWidth() {
+        return arenaWidth;
+    }
 
-	public double getArenaHeight() {
-		return arenaHeight;
-	}
+    public double getArenaHeight() {
+        return arenaHeight;
+    }
 }

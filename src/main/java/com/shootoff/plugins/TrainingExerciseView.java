@@ -12,13 +12,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 public interface TrainingExerciseView {
-	Pane getTrainingExerciseContainer();
+    Pane getTrainingExerciseContainer();
 
-	TableView<ShotEntry> getShotEntryTable();
-	
-	VBox getButtonsPane();
-	
-	Optional<CameraView> getArenaView();
-	
-	List<Target> getTargets();
+    TableView<ShotEntry> getShotEntryTable();
+
+    VBox getButtonsPane();
+
+    Optional<CameraView> getArenaView();
+
+    List<Target> getTargets();
 }

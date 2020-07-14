@@ -25,88 +25,88 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SystemInfo {
-	private static final Logger logger = LoggerFactory.getLogger(SystemInfo.class);
-	private static final boolean isLinux;
-	private static final boolean isMacOsX;
-	private static final boolean isWindows;
-	private static final boolean isX86;
-	private static final boolean isArm;
+    private static final Logger logger = LoggerFactory.getLogger(SystemInfo.class);
+    private static final boolean isLinux;
+    private static final boolean isMacOsX;
+    private static final boolean isWindows;
+    private static final boolean isX86;
+    private static final boolean isArm;
 
-	static {
-		final String os = System.getProperty("os.name");
+    static {
+        final String os = System.getProperty("os.name");
 
-		if (os != null) {
-			if ("Mac OS X".equals(os)) {
-				isMacOsX = true;
-				isLinux = false;
-				isWindows = false;
-			} else if (os.startsWith("Linux")) {
-				isLinux = true;
-				isMacOsX = false;
-				isWindows = false;
-			} else if (os.startsWith("Windows")) {
-				isWindows = true;
-				isLinux = false;
-				isMacOsX = false;
-			} else {
-				logger.warn("Untested operating system {}", os);
+        if (os != null) {
+            if ("Mac OS X".equals(os)) {
+                isMacOsX = true;
+                isLinux = false;
+                isWindows = false;
+            } else if (os.startsWith("Linux")) {
+                isLinux = true;
+                isMacOsX = false;
+                isWindows = false;
+            } else if (os.startsWith("Windows")) {
+                isWindows = true;
+                isLinux = false;
+                isMacOsX = false;
+            } else {
+                logger.warn("Untested operating system {}", os);
 
-				isLinux = false;
-				isMacOsX = false;
-				isWindows = false;
-			}
-		} else {
-			logger.warn("os.name property does not exist");
+                isLinux = false;
+                isMacOsX = false;
+                isWindows = false;
+            }
+        } else {
+            logger.warn("os.name property does not exist");
 
-			isLinux = false;
-			isMacOsX = false;
-			isWindows = false;
-		}
+            isLinux = false;
+            isMacOsX = false;
+            isWindows = false;
+        }
 
-		final String arch = System.getProperty("os.arch");
+        final String arch = System.getProperty("os.arch");
 
-		final List<String> x86_32 = Arrays.asList("i386", "i686", "x86");
-		final List<String> x86_64 = Arrays.asList("amd64", "x86_64");
-		final List<String> arm = Arrays.asList("arm");
+        final List<String> x86_32 = Arrays.asList("i386", "i686", "x86");
+        final List<String> x86_64 = Arrays.asList("amd64", "x86_64");
+        final List<String> arm = Arrays.asList("arm");
 
-		if (arch != null) {
-			if (x86_32.contains(arch) || x86_64.contains(arch)) {
-				isX86 = true;
-				isArm = false;
-			} else if (arm.contains(arch)) {
-				isArm = true;
-				isX86 = false;
-			} else {
-				logger.warn("Untested architecture {}", arch);
+        if (arch != null) {
+            if (x86_32.contains(arch) || x86_64.contains(arch)) {
+                isX86 = true;
+                isArm = false;
+            } else if (arm.contains(arch)) {
+                isArm = true;
+                isX86 = false;
+            } else {
+                logger.warn("Untested architecture {}", arch);
 
-				isX86 = false;
-				isArm = false;
-			}
-		} else {
-			logger.warn("os.arch property does not exist");
+                isX86 = false;
+                isArm = false;
+            }
+        } else {
+            logger.warn("os.arch property does not exist");
 
-			isX86 = false;
-			isArm = false;
-		}
-	}
+            isX86 = false;
+            isArm = false;
+        }
+    }
 
-	public static boolean isLinux() {
-		return isLinux;
-	}
+    public static boolean isLinux() {
+        return isLinux;
+    }
 
-	public static boolean isMacOsX() {
-		return isMacOsX;
-	}
+    public static boolean isMacOsX() {
+        return isMacOsX;
+    }
 
-	public static boolean isWindows() {
-		return isWindows;
-	}
+    public static boolean isWindows() {
+        return isWindows;
+    }
 
-	public static boolean isX86() {
-		return isX86;
-	}
+    public static boolean isX86() {
+        return isX86;
+    }
 
-	public static boolean isArm() {
-		return isArm;
-	}
+    public static boolean isArm() {
+        return isArm;
+    }
 }

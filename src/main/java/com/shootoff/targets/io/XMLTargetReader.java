@@ -53,214 +53,218 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 
 public class XMLTargetReader implements TargetReader {
-	private static final Logger logger = LoggerFactory.getLogger(XMLTargetReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(XMLTargetReader.class);
 
-	private final List<Node> targetNodes = new ArrayList<>();
-	private final Map<String, String> targetTags = new HashMap<>();
-	private final boolean playAnimations;
-	private final Optional<ClassLoader> loader;
+    private final List<Node> targetNodes = new ArrayList<>();
+    private final Map<String, String> targetTags = new HashMap<>();
+    private final boolean playAnimations;
+    private final Optional<ClassLoader> loader;
 
-	public XMLTargetReader(File targetFile, boolean playAnimations) {
-		this.playAnimations = playAnimations;
-		loader = Optional.empty();
+    public XMLTargetReader(File targetFile, boolean playAnimations) {
+        this.playAnimations = playAnimations;
+        loader = Optional.empty();
 
-		try (InputStream is = new FileInputStream(targetFile)) {
-			load(is);
-		} catch (final IOException e) {
-			logger.error("Problem initializing target reader from file", e);
-		}
-	}
+        try (InputStream is = new FileInputStream(targetFile)) {
+            load(is);
+        } catch (final IOException e) {
+            logger.error("Problem initializing target reader from file", e);
+        }
+    }
 
-	public XMLTargetReader(InputStream targetStream, boolean playAnimations) {
-		this.playAnimations = playAnimations;
-		loader = Optional.empty();
-		load(targetStream);
-	}
+    public XMLTargetReader(InputStream targetStream, boolean playAnimations) {
+        this.playAnimations = playAnimations;
+        loader = Optional.empty();
+        load(targetStream);
+    }
 
-	public XMLTargetReader(InputStream targetStream, boolean playAnimations, ClassLoader loader) {
-		this.playAnimations = playAnimations;
-		this.loader = Optional.ofNullable(loader);
-		load(targetStream);
-	}
+    public XMLTargetReader(InputStream targetStream, boolean playAnimations, ClassLoader loader) {
+        this.playAnimations = playAnimations;
+        this.loader = Optional.ofNullable(loader);
+        load(targetStream);
+    }
 
-	@Override
-	public List<Node> getTargetNodes() {
-		return targetNodes;
-	}
+    @Override
+    public List<Node> getTargetNodes() {
+        return targetNodes;
+    }
 
-	@Override
-	public Map<String, String> getTargetTags() {
-		return targetTags;
-	}
+    @Override
+    public Map<String, String> getTargetTags() {
+        return targetTags;
+    }
 
-	private void load(InputStream targetStream) {
-		try {
-			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-			final TargetXMLHandler handler = new TargetXMLHandler();
-			saxParser.parse(targetStream, handler);
+    private void load(InputStream targetStream) {
+        try {
+            final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+            final TargetXMLHandler handler = new TargetXMLHandler();
+            saxParser.parse(targetStream, handler);
 
-			targetNodes.addAll(handler.getRegions());
-			targetTags.putAll(handler.getTags());
+            targetNodes.addAll(handler.getRegions());
+            targetTags.putAll(handler.getTags());
 
-			return;
-		} catch (IOException | ParserConfigurationException | SAXException e) {
-			logger.error("Error reading XML target", e);
-		} finally {
-			if (targetStream != null) {
-				try {
-					targetStream.close();
-				} catch (final IOException e) {
-					logger.error("Error closing XMl target opened for reading", e);
-				}
-			}
-		}
-	}
+            return;
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            logger.error("Error reading XML target", e);
+        } finally {
+            if (targetStream != null) {
+                try {
+                    targetStream.close();
+                } catch (final IOException e) {
+                    logger.error("Error closing XMl target opened for reading", e);
+                }
+            }
+        }
+    }
 
-	private class TargetXMLHandler extends DefaultHandler {
-		private final Map<String, String> targetTags = new HashMap<>();
-		private final List<Node> regions = new ArrayList<>();
-		private TargetRegion currentRegion;
-		private List<Double> polygonPoints = null;
-		private Color polygonFill = null;
-		private Map<String, String> currentTags;
+    private class TargetXMLHandler extends DefaultHandler {
+        private final Map<String, String> targetTags = new HashMap<>();
+        private final List<Node> regions = new ArrayList<>();
+        private TargetRegion currentRegion;
+        private List<Double> polygonPoints = null;
+        private Color polygonFill = null;
+        private Map<String, String> currentTags;
 
-		public List<Node> getRegions() {
-			return regions;
-		}
+        public List<Node> getRegions() {
+            return regions;
+        }
 
-		public Map<String, String> getTags() {
-			return targetTags;
-		}
+        public Map<String, String> getTags() {
+            return targetTags;
+        }
 
-		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes)
-				throws SAXException {
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes)
+                throws SAXException {
 
-			switch (qName) {
-			case "target":
-				if (attributes.getLength() > 0) {
-					for (int i = 0; i < attributes.getLength(); i++) {
-						final String key = attributes.getQName(i);
-						final String value = attributes.getValue(key);
-						targetTags.put(key, value);
-					}
-				}
+            switch (qName) {
+            case "target":
+                if (attributes.getLength() > 0) {
+                    for (int i = 0; i < attributes.getLength(); i++) {
+                        final String key = attributes.getQName(i);
+                        final String value = attributes.getValue(key);
+                        targetTags.put(key, value);
+                    }
+                }
 
-				break;
+                break;
 
-			case "image":
-				currentTags = new HashMap<>();
+            case "image":
+                currentTags = new HashMap<>();
 
-				final File savedFile = new File(attributes.getValue("file"));
+                final File savedFile = new File(attributes.getValue("file"));
 
-				InputStream imageStream = null;
-				if ('@' == savedFile.toString().charAt(0) && loader.isPresent()) {
-					imageStream = loader.get().getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
-				}
+                InputStream imageStream = null;
+                if ('@' == savedFile.toString().charAt(0) && loader.isPresent()) {
+                    imageStream = loader.get()
+                            .getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
+                }
 
-				File imageFile;
-				if (savedFile.isAbsolute() || '@' == savedFile.toString().charAt(0)) {
-					imageFile = savedFile;
-				} else {
-					imageFile = new File(
-							System.getProperty("shootoff.home") + File.separator + attributes.getValue("file"));
-				}
+                File imageFile;
+                if (savedFile.isAbsolute() || '@' == savedFile.toString().charAt(0)) {
+                    imageFile = savedFile;
+                } else {
+                    imageFile = new File(
+                            System.getProperty("shootoff.home") + File.separator + attributes.getValue("file"));
+                }
 
-				ImageRegion imageRegion;
-				if (imageStream != null) {
-					imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
-							Double.parseDouble(attributes.getValue("y")), imageFile, imageStream);
-				} else {
-					try {
-						imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
-								Double.parseDouble(attributes.getValue("y")), imageFile);
-					} catch (final FileNotFoundException e) {
-						logger.error("Failed to load target image from file: {}", e);
-						return;
-					}
-				}
+                ImageRegion imageRegion;
+                if (imageStream != null) {
+                    imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
+                            Double.parseDouble(attributes.getValue("y")), imageFile, imageStream);
+                } else {
+                    try {
+                        imageRegion = new ImageRegion(Double.parseDouble(attributes.getValue("x")),
+                                Double.parseDouble(attributes.getValue("y")), imageFile);
+                    } catch (final FileNotFoundException e) {
+                        logger.error("Failed to load target image from file: {}", e);
+                        return;
+                    }
+                }
 
-				try {
-					final int firstDot = imageFile.getName().indexOf('.') + 1;
-					final String extension = imageFile.getName().substring(firstDot);
+                try {
+                    final int firstDot = imageFile.getName().indexOf('.') + 1;
+                    final String extension = imageFile.getName().substring(firstDot);
 
-					if (extension.endsWith("gif") && '@' == savedFile.toString().charAt(0) && loader.isPresent()) {
-						final InputStream gifStream = loader.get().getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
-						final GifAnimation gif = new GifAnimation(imageRegion, gifStream);
-						imageRegion.setImage(gif.getFirstFrame());
-						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
-					} else if (extension.endsWith("gif")) {
-						final GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
-						imageRegion.setImage(gif.getFirstFrame());
-						if (gif.getFrameCount() > 1) imageRegion.setAnimation(gif);
-					}
+                    if (extension.endsWith("gif") && '@' == savedFile.toString().charAt(0) && loader.isPresent()) {
+                        final InputStream gifStream = loader.get()
+                                .getResourceAsStream(savedFile.toString().substring(1).replace("\\", "/"));
+                        final GifAnimation gif = new GifAnimation(imageRegion, gifStream);
+                        imageRegion.setImage(gif.getFirstFrame());
+                        if (gif.getFrameCount() > 1)
+                            imageRegion.setAnimation(gif);
+                    } else if (extension.endsWith("gif")) {
+                        final GifAnimation gif = new GifAnimation(imageRegion, imageRegion.getImageFile());
+                        imageRegion.setImage(gif.getFirstFrame());
+                        if (gif.getFrameCount() > 1)
+                            imageRegion.setAnimation(gif);
+                    }
 
-					if (imageRegion.getAnimation().isPresent() && playAnimations) {
-						final SpriteAnimation animation = imageRegion.getAnimation().get();
-						animation.setCycleCount(1);
+                    if (imageRegion.getAnimation().isPresent() && playAnimations) {
+                        final SpriteAnimation animation = imageRegion.getAnimation().get();
+                        animation.setCycleCount(1);
 
-						animation.setOnFinished((e) -> {
-							animation.reset();
-							animation.setOnFinished(null);
-						});
+                        animation.setOnFinished((e) -> {
+                            animation.reset();
+                            animation.setOnFinished(null);
+                        });
 
-						animation.play();
-					}
-				} catch (final IOException e) {
-					logger.error("Error reading animation from XML target", e);
-				}
+                        animation.play();
+                    }
+                } catch (final IOException e) {
+                    logger.error("Error reading animation from XML target", e);
+                }
 
-				currentRegion = imageRegion;
+                currentRegion = imageRegion;
 
-				break;
-			case "rectangle":
-				currentTags = new HashMap<>();
-				currentRegion = new RectangleRegion(Double.parseDouble(attributes.getValue("x")),
-						Double.parseDouble(attributes.getValue("y")), Double.parseDouble(attributes.getValue("width")),
-						Double.parseDouble(attributes.getValue("height")));
-				((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
-				break;
-			case "ellipse":
-				currentTags = new HashMap<>();
-				currentRegion = new EllipseRegion(Double.parseDouble(attributes.getValue("centerX")),
-						Double.parseDouble(attributes.getValue("centerY")),
-						Double.parseDouble(attributes.getValue("radiusX")),
-						Double.parseDouble(attributes.getValue("radiusY")));
-				((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
-				break;
-			case "polygon":
-				currentTags = new HashMap<>();
-				polygonPoints = new ArrayList<>();
-				polygonFill = TargetEditorController.createColor(attributes.getValue("fill"));
-				break;
-			case "point":
-				polygonPoints.add(Double.parseDouble(attributes.getValue("x")));
-				polygonPoints.add(Double.parseDouble(attributes.getValue("y")));
-				break;
-			case "tag":
-				currentTags.put(attributes.getValue("name"), attributes.getValue("value"));
-				break;
-			}
-		}
+                break;
+            case "rectangle":
+                currentTags = new HashMap<>();
+                currentRegion = new RectangleRegion(Double.parseDouble(attributes.getValue("x")),
+                        Double.parseDouble(attributes.getValue("y")), Double.parseDouble(attributes.getValue("width")),
+                        Double.parseDouble(attributes.getValue("height")));
+                ((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
+                break;
+            case "ellipse":
+                currentTags = new HashMap<>();
+                currentRegion = new EllipseRegion(Double.parseDouble(attributes.getValue("centerX")),
+                        Double.parseDouble(attributes.getValue("centerY")),
+                        Double.parseDouble(attributes.getValue("radiusX")),
+                        Double.parseDouble(attributes.getValue("radiusY")));
+                ((Shape) currentRegion).setFill(TargetEditorController.createColor(attributes.getValue("fill")));
+                break;
+            case "polygon":
+                currentTags = new HashMap<>();
+                polygonPoints = new ArrayList<>();
+                polygonFill = TargetEditorController.createColor(attributes.getValue("fill"));
+                break;
+            case "point":
+                polygonPoints.add(Double.parseDouble(attributes.getValue("x")));
+                polygonPoints.add(Double.parseDouble(attributes.getValue("y")));
+                break;
+            case "tag":
+                currentTags.put(attributes.getValue("name"), attributes.getValue("value"));
+                break;
+            }
+        }
 
-		@Override
-		public void endElement(String uri, String localName, String qName) throws SAXException {
-			switch (qName) {
-			case "polygon":
-				final double[] points = new double[polygonPoints.size()];
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            switch (qName) {
+            case "polygon":
+                final double[] points = new double[polygonPoints.size()];
 
-				for (int i = 0; i < polygonPoints.size(); i++)
-					points[i] = polygonPoints.get(i);
+                for (int i = 0; i < polygonPoints.size(); i++)
+                    points[i] = polygonPoints.get(i);
 
-				currentRegion = new PolygonRegion(points);
-				((Shape) currentRegion).setFill(polygonFill);
-			case "image":
-			case "rectangle":
-			case "ellipse":
-				currentRegion.setTags(currentTags);
-				regions.add((Node) currentRegion);
-				break;
-			}
-		}
-	}
+                currentRegion = new PolygonRegion(points);
+                ((Shape) currentRegion).setFill(polygonFill);
+            case "image":
+            case "rectangle":
+            case "ellipse":
+                currentRegion.setTags(currentTags);
+                regions.add((Node) currentRegion);
+                break;
+            }
+        }
+    }
 }

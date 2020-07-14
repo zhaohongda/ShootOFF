@@ -42,202 +42,205 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 
 public class TargetDistancePane extends Pane {
-	private final static Logger logger = LoggerFactory.getLogger(TargetDistancePane.class);
+    private final static Logger logger = LoggerFactory.getLogger(TargetDistancePane.class);
 
-	private final Target target;
-	private final PerspectiveManager perspectiveManager;
-	private final Configuration config;
-	private final String cameraName;
-	private final String originalTargetDistance;
-	private final String originalCameraDistance;
-	private final TextField shooterDistance;
-	private final TextField targetDistance;
-	private final TextField cameraDistance;
-	private final TextField targetWidth;
-	private final TextField targetHeight;
+    private final Target target;
+    private final PerspectiveManager perspectiveManager;
+    private final Configuration config;
+    private final String cameraName;
+    private final String originalTargetDistance;
+    private final String originalCameraDistance;
+    private final TextField shooterDistance;
+    private final TextField targetDistance;
+    private final TextField cameraDistance;
+    private final TextField targetWidth;
+    private final TextField targetHeight;
 
-	private boolean defaultsSet = false;
+    private boolean defaultsSet = false;
 
-	public TargetDistancePane(Target target, PerspectiveManager perspectiveManager, Configuration config) {
-		this.target = target;
-		this.perspectiveManager = perspectiveManager;
-		this.config = config;
-		cameraName = perspectiveManager.getCalibratedCameraName();
+    public TargetDistancePane(Target target, PerspectiveManager perspectiveManager, Configuration config) {
+        this.target = target;
+        this.perspectiveManager = perspectiveManager;
+        this.config = config;
+        cameraName = perspectiveManager.getCalibratedCameraName();
 
-		final Image backgroundImage = new Image(
-				TargetDistancePane.class.getResourceAsStream("/images/perspective_settings.png"));
-		getChildren().add(new ImageView(backgroundImage));
+        final Image backgroundImage = new Image(
+                TargetDistancePane.class.getResourceAsStream("/images/perspective_settings.png"));
+        getChildren().add(new ImageView(backgroundImage));
 
-		shooterDistance = createDistanceTextField(234, 68);
-		targetDistance = createDistanceTextField(534, 126);
-		cameraDistance = createDistanceTextField(329, 252);
-		targetWidth = createDistanceTextField(745, 48);
-		targetHeight = createDistanceTextField(863, 191);
+        shooterDistance = createDistanceTextField(234, 68);
+        targetDistance = createDistanceTextField(534, 126);
+        cameraDistance = createDistanceTextField(329, 252);
+        targetWidth = createDistanceTextField(745, 48);
+        targetHeight = createDistanceTextField(863, 191);
 
-		getChildren().add(shooterDistance);
-		getChildren().add(targetDistance);
-		getChildren().add(cameraDistance);
-		getChildren().add(targetWidth);
-		getChildren().add(targetHeight);
+        getChildren().add(shooterDistance);
+        getChildren().add(targetDistance);
+        getChildren().add(cameraDistance);
+        getChildren().add(targetWidth);
+        getChildren().add(targetHeight);
 
-		setDefaults();
+        setDefaults();
 
-		originalCameraDistance = cameraDistance.getText();
-		originalTargetDistance = targetDistance.getText();
-	}
+        originalCameraDistance = cameraDistance.getText();
+        originalTargetDistance = targetDistance.getText();
+    }
 
-	private TextField createDistanceTextField(double x, double y) {
-		final TextField distanceTextField = new TextField();
-		distanceTextField.setPromptText("(mm)");
-		distanceTextField.setLayoutX(x);
-		distanceTextField.setLayoutY(y);
-		distanceTextField.setPrefWidth(75);
-		distanceTextField.setAlignment(Pos.CENTER);
-		distanceTextField.textProperty().addListener(new NumberOnlyChangeListener(distanceTextField));
+    private TextField createDistanceTextField(double x, double y) {
+        final TextField distanceTextField = new TextField();
+        distanceTextField.setPromptText("(mm)");
+        distanceTextField.setLayoutX(x);
+        distanceTextField.setLayoutY(y);
+        distanceTextField.setPrefWidth(75);
+        distanceTextField.setAlignment(Pos.CENTER);
+        distanceTextField.textProperty().addListener(new NumberOnlyChangeListener(distanceTextField));
 
-		return distanceTextField;
-	}
+        return distanceTextField;
+    }
 
-	private class NumberOnlyChangeListener implements ChangeListener<String> {
-		private final TextField observedTextField;
+    private class NumberOnlyChangeListener implements ChangeListener<String> {
+        private final TextField observedTextField;
 
-		public NumberOnlyChangeListener(TextField observedTextField) {
-			this.observedTextField = observedTextField;
-		}
+        public NumberOnlyChangeListener(TextField observedTextField) {
+            this.observedTextField = observedTextField;
+        }
 
-		@Override
-		public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-			if (!defaultsSet) return;
+        @Override
+        public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+            if (!defaultsSet)
+                return;
 
-			if (!newValue.matches("\\d*")) {
-				observedTextField.setText(oldValue);
-				observedTextField.positionCaret(observedTextField.getLength());
-			} else {
-				setDistance();
-			}
-		}
-	}
+            if (!newValue.matches("\\d*")) {
+                observedTextField.setText(oldValue);
+                observedTextField.positionCaret(observedTextField.getLength());
+            } else {
+                setDistance();
+            }
+        }
+    }
 
-	private void setDefaults() {
-		if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)) {
-			targetWidth.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
-		}
+    private void setDefaults() {
+        if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_WIDTH)) {
+            targetWidth.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_WIDTH));
+        }
 
-		if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)) {
-			targetHeight.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
-		}
+        if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_HEIGHT)) {
+            targetHeight.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_HEIGHT));
+        }
 
-		if (target.tagExists(Target.TAG_CURRENT_PERCEIVED_DISTANCE)) {
-			targetDistance.setText(target.getTag(Target.TAG_CURRENT_PERCEIVED_DISTANCE));
-		} else if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_DISTANCE)) {
-			targetDistance.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_DISTANCE));
-		}
+        if (target.tagExists(Target.TAG_CURRENT_PERCEIVED_DISTANCE)) {
+            targetDistance.setText(target.getTag(Target.TAG_CURRENT_PERCEIVED_DISTANCE));
+        } else if (target.tagExists(Target.TAG_DEFAULT_PERCEIVED_DISTANCE)) {
+            targetDistance.setText(target.getTag(Target.TAG_DEFAULT_PERCEIVED_DISTANCE));
+        }
 
-		if (perspectiveManager.getCameraDistance() > 0) {
-			cameraDistance.setText(String.valueOf(perspectiveManager.getCameraDistance()));
-		} else if (config.getCameraDistance(cameraName).isPresent()) {
-			cameraDistance.setText(String.valueOf(config.getCameraDistance(cameraName).get()));
-		}
+        if (perspectiveManager.getCameraDistance() > 0) {
+            cameraDistance.setText(String.valueOf(perspectiveManager.getCameraDistance()));
+        } else if (config.getCameraDistance(cameraName).isPresent()) {
+            cameraDistance.setText(String.valueOf(config.getCameraDistance(cameraName).get()));
+        }
 
-		if (!cameraDistance.getText().isEmpty() && !perspectiveManager.isInitialized()) {
-			throw new AssertionError(
-					"The perspective manager is not initialized. We should not have been " + "able to get here.");
-		}
+        if (!cameraDistance.getText().isEmpty() && !perspectiveManager.isInitialized()) {
+            throw new AssertionError(
+                    "The perspective manager is not initialized. We should not have been " + "able to get here.");
+        }
 
-		if (target.tagExists(Target.TAG_SHOOTER_DISTANCE)) {
-			shooterDistance.setText(target.getTag(Target.TAG_SHOOTER_DISTANCE));
-		} else if (!cameraDistance.getText().isEmpty()) {
-			shooterDistance.setText(cameraDistance.getText());
-		}
+        if (target.tagExists(Target.TAG_SHOOTER_DISTANCE)) {
+            shooterDistance.setText(target.getTag(Target.TAG_SHOOTER_DISTANCE));
+        } else if (!cameraDistance.getText().isEmpty()) {
+            shooterDistance.setText(cameraDistance.getText());
+        }
 
-		defaultsSet = true;
-	}
+        defaultsSet = true;
+    }
 
-	private void setDistance() {
-		if (!validateDistanceData()) return;
+    private void setDistance() {
+        if (!validateDistanceData())
+            return;
 
-		persistSettings();
+        persistSettings();
 
-		final int width = Integer.parseInt(targetWidth.getText());
-		final int height = Integer.parseInt(targetHeight.getText());
-		final int distance = Integer.parseInt(targetDistance.getText());
+        final int width = Integer.parseInt(targetWidth.getText());
+        final int height = Integer.parseInt(targetHeight.getText());
+        final int distance = Integer.parseInt(targetDistance.getText());
 
-		if (logger.isTraceEnabled()) {
-			logger.trace(
-					"New target settings from distance settings pane: current width = {}, "
-							+ "default height = {}, default distance = {}, new distance = {}",
-					width, height, originalTargetDistance, distance);
-		}
+        if (logger.isTraceEnabled()) {
+            logger.trace(
+                    "New target settings from distance settings pane: current width = {}, "
+                            + "default height = {}, default distance = {}, new distance = {}",
+                    width, height, originalTargetDistance, distance);
+        }
 
-		final Optional<Dimension2D> targetDimensions = perspectiveManager.calculateObjectSize(width, height, distance);
+        final Optional<Dimension2D> targetDimensions = perspectiveManager.calculateObjectSize(width, height, distance);
 
-		if (targetDimensions.isPresent()) {
-			final Dimension2D d = targetDimensions.get();
-			target.setDimensions(d.getWidth(), d.getHeight());
-		}
-	}
+        if (targetDimensions.isPresent()) {
+            final Dimension2D d = targetDimensions.get();
+            target.setDimensions(d.getWidth(), d.getHeight());
+        }
+    }
 
-	private boolean validateDistanceData() {
-		boolean isValid = validateDistanceField(shooterDistance);
-		isValid = validateDistanceField(targetDistance) && isValid;
-		isValid = validateDistanceField(cameraDistance) && isValid;
-		isValid = validateDistanceField(targetWidth) && isValid;
-		isValid = validateDistanceField(targetHeight) && isValid;
+    private boolean validateDistanceData() {
+        boolean isValid = validateDistanceField(shooterDistance);
+        isValid = validateDistanceField(targetDistance) && isValid;
+        isValid = validateDistanceField(cameraDistance) && isValid;
+        isValid = validateDistanceField(targetWidth) && isValid;
+        isValid = validateDistanceField(targetHeight) && isValid;
 
-		if (!isValid) return isValid;
+        if (!isValid)
+            return isValid;
 
-		if ("0".equals(targetDistance.getText())) {
-			final Alert invalidDataAlert = new Alert(AlertType.ERROR);
+        if ("0".equals(targetDistance.getText())) {
+            final Alert invalidDataAlert = new Alert(AlertType.ERROR);
 
-			final String message = "Target Distance cannot be 0, please set a value greater than 0.";
+            final String message = "Target Distance cannot be 0, please set a value greater than 0.";
 
-			invalidDataAlert.setTitle("Invalid Target Distance");
-			invalidDataAlert.setHeaderText("Target Distance Cannot Be Zero");
-			invalidDataAlert.setResizable(true);
-			invalidDataAlert.setContentText(message);
-			invalidDataAlert.initOwner(getScene().getWindow());
-			invalidDataAlert.showAndWait();
+            invalidDataAlert.setTitle("Invalid Target Distance");
+            invalidDataAlert.setHeaderText("Target Distance Cannot Be Zero");
+            invalidDataAlert.setResizable(true);
+            invalidDataAlert.setContentText(message);
+            invalidDataAlert.initOwner(getScene().getWindow());
+            invalidDataAlert.showAndWait();
 
-			isValid = false;
-		}
+            isValid = false;
+        }
 
-		return isValid;
-	}
+        return isValid;
+    }
 
-	private boolean validateDistanceField(TextField field) {
-		boolean isValid = true;
+    private boolean validateDistanceField(TextField field) {
+        boolean isValid = true;
 
-		if (field.getText().isEmpty()) {
-			isValid = false;
-			field.setStyle("-fx-text-box-border: red; -fx-focus-color: red;");
-		} else {
-			field.setStyle("");
-		}
+        if (field.getText().isEmpty()) {
+            isValid = false;
+            field.setStyle("-fx-text-box-border: red; -fx-focus-color: red;");
+        } else {
+            field.setStyle("");
+        }
 
-		return isValid;
-	}
+        return isValid;
+    }
 
-	private void persistSettings() {
-		final Map<String, String> tags = target.getAllTags();
-		if (!targetWidth.getText().isEmpty()) {
-			tags.put(Target.TAG_DEFAULT_PERCEIVED_WIDTH, targetWidth.getText());
-		}
-		if (!targetHeight.getText().isEmpty()) {
-			tags.put(Target.TAG_DEFAULT_PERCEIVED_HEIGHT, targetHeight.getText());
-		}
-		tags.put(Target.TAG_CURRENT_PERCEIVED_DISTANCE, targetDistance.getText());
-		tags.put(Target.TAG_SHOOTER_DISTANCE, shooterDistance.getText());
+    private void persistSettings() {
+        final Map<String, String> tags = target.getAllTags();
+        if (!targetWidth.getText().isEmpty()) {
+            tags.put(Target.TAG_DEFAULT_PERCEIVED_WIDTH, targetWidth.getText());
+        }
+        if (!targetHeight.getText().isEmpty()) {
+            tags.put(Target.TAG_DEFAULT_PERCEIVED_HEIGHT, targetHeight.getText());
+        }
+        tags.put(Target.TAG_CURRENT_PERCEIVED_DISTANCE, targetDistance.getText());
+        tags.put(Target.TAG_SHOOTER_DISTANCE, shooterDistance.getText());
 
-		if (!originalCameraDistance.equals(cameraDistance.getText())) {
-			config.setCameraDistance(cameraName, Integer.parseInt(cameraDistance.getText()));
-			try {
-				config.writeConfigurationFile();
-			} catch (ConfigurationException | IOException e) {
-				logger.error("Failed to persist user-defined camera distance", e);
-			}
-		}
+        if (!originalCameraDistance.equals(cameraDistance.getText())) {
+            config.setCameraDistance(cameraName, Integer.parseInt(cameraDistance.getText()));
+            try {
+                config.writeConfigurationFile();
+            } catch (ConfigurationException | IOException e) {
+                logger.error("Failed to persist user-defined camera distance", e);
+            }
+        }
 
-		perspectiveManager.setShooterDistance(Integer.parseInt(shooterDistance.getText()));
-		perspectiveManager.setCameraDistance(Integer.parseInt(cameraDistance.getText()));
-	}
+        perspectiveManager.setShooterDistance(Integer.parseInt(shooterDistance.getText()));
+        perspectiveManager.setCameraDistance(Integer.parseInt(cameraDistance.getText()));
+    }
 }

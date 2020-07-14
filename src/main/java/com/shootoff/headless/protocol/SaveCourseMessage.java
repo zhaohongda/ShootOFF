@@ -21,15 +21,15 @@ package com.shootoff.headless.protocol;
 import java.io.File;
 
 public class SaveCourseMessage extends Message {
-	private final File file;
+    private final File file;
 
-	public SaveCourseMessage(File file) {
-		super();
-		this.file = file;
-	}
+    public SaveCourseMessage(File file) {
+        super();
+        this.file = file;
+    }
 
-	public File getFile() {
-		return file;
-	}
+    public File getFile() {
+        return file;
+    }
 
 }

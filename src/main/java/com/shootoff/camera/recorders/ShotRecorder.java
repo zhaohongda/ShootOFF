@@ -32,66 +32,66 @@ import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 
 public class ShotRecorder implements Closeable {
-	// The number of milliseconds before and after a shot to record
-	public static final long RECORD_LENGTH = 5000; // ms
+    // The number of milliseconds before and after a shot to record
+    public static final long RECORD_LENGTH = 5000; // ms
 
-	private static final Logger logger = LoggerFactory.getLogger(ShotRecorder.class);
+    private static final Logger logger = LoggerFactory.getLogger(ShotRecorder.class);
 
-	private final long startTime;
-	private final long timeOffset;
-	private final File relativeVideoFile;
-	private final File videoFile;
-	private final String cameraName;
-	private final IMediaWriter videoWriter;
-	private boolean isFirstShotFrame = true;
+    private final long startTime;
+    private final long timeOffset;
+    private final File relativeVideoFile;
+    private final File videoFile;
+    private final String cameraName;
+    private final IMediaWriter videoWriter;
+    private boolean isFirstShotFrame = true;
 
-	public ShotRecorder(File relativeVideoFile, File videoFile, long cutDuration, IMediaWriter videoWriter,
-			String cameraName) {
-		this.relativeVideoFile = relativeVideoFile;
-		this.videoFile = videoFile;
-		this.videoWriter = videoWriter;
-		this.cameraName = cameraName;
+    public ShotRecorder(File relativeVideoFile, File videoFile, long cutDuration, IMediaWriter videoWriter,
+            String cameraName) {
+        this.relativeVideoFile = relativeVideoFile;
+        this.videoFile = videoFile;
+        this.videoWriter = videoWriter;
+        this.cameraName = cameraName;
 
-		startTime = System.currentTimeMillis();
-		timeOffset = cutDuration;
+        startTime = System.currentTimeMillis();
+        timeOffset = cutDuration;
 
-		logger.debug("Started recording shot video: {}, cut duration = {} ms", videoFile.getName(), cutDuration);
-	}
+        logger.debug("Started recording shot video: {}, cut duration = {} ms", videoFile.getName(), cutDuration);
+    }
 
-	public void recordFrame(BufferedImage frame) {
-		final BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
-		final IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
+    public void recordFrame(BufferedImage frame) {
+        final BufferedImage image = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
+        final IConverter converter = ConverterFactory.createConverter(image, IPixelFormat.Type.YUV420P);
 
-		final long timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
+        final long timestamp = (System.currentTimeMillis() - startTime) + timeOffset;
 
-		final IVideoPicture f = converter.toPicture(image, timestamp * 1000);
-		f.setKeyFrame(isFirstShotFrame);
-		f.setQuality(0);
-		isFirstShotFrame = false;
+        final IVideoPicture f = converter.toPicture(image, timestamp * 1000);
+        f.setKeyFrame(isFirstShotFrame);
+        f.setQuality(0);
+        isFirstShotFrame = false;
 
-		videoWriter.encodeVideo(0, f);
-	}
+        videoWriter.encodeVideo(0, f);
+    }
 
-	public File getRelativeVideoFile() {
-		return relativeVideoFile;
-	}
+    public File getRelativeVideoFile() {
+        return relativeVideoFile;
+    }
 
-	public File getVideoFile() {
-		return videoFile;
-	}
+    public File getVideoFile() {
+        return videoFile;
+    }
 
-	public String getCameraName() {
-		return cameraName;
-	}
+    public String getCameraName() {
+        return cameraName;
+    }
 
-	public boolean isComplete() {
-		return System.currentTimeMillis() - startTime > RECORD_LENGTH;
-	}
+    public boolean isComplete() {
+        return System.currentTimeMillis() - startTime > RECORD_LENGTH;
+    }
 
-	@Override
-	public void close() {
-		videoWriter.close();
+    @Override
+    public void close() {
+        videoWriter.close();
 
-		logger.debug("Stopped recording shot video: {}, timeOffset = {}", relativeVideoFile.getPath(), timeOffset);
-	}
+        logger.debug("Stopped recording shot video: {}, timeOffset = {}", relativeVideoFile.getPath(), timeOffset);
+    }
 }

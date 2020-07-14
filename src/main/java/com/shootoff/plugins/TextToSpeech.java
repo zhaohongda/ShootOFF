@@ -39,52 +39,54 @@ import marytts.util.data.audio.AudioPlayer;
  * @author phrack
  */
 public final class TextToSpeech {
-	private static final Logger logger = LoggerFactory.getLogger(TextToSpeech.class);
+    private static final Logger logger = LoggerFactory.getLogger(TextToSpeech.class);
 
-	private static boolean inited = false;
-	private static boolean isSilenced = false;
-	private static MaryInterface marytts = null;
+    private static boolean inited = false;
+    private static boolean isSilenced = false;
+    private static MaryInterface marytts = null;
 
-	protected TextToSpeech() {}
+    protected TextToSpeech() {
+    }
 
-	private static void init() throws MaryConfigurationException {
-		marytts = new LocalMaryInterface();
-		final Set<String> voices = marytts.getAvailableVoices();
-		marytts.setVoice(voices.iterator().next());
-		inited = true;
-	}
+    private static void init() throws MaryConfigurationException {
+        marytts = new LocalMaryInterface();
+        final Set<String> voices = marytts.getAvailableVoices();
+        marytts.setVoice(voices.iterator().next());
+        inited = true;
+    }
 
-	public static void say(String comment) {
-		if (isSilenced) {
-			System.out.println(comment);
-			return;
-		}
+    public static void say(String comment) {
+        if (isSilenced) {
+            System.out.println(comment);
+            return;
+        }
 
-		try {
-			if (!inited) {
-				init();
-			}
+        try {
+            if (!inited) {
+                init();
+            }
 
-			if (comment.isEmpty()) return;
+            if (comment.isEmpty())
+                return;
 
-			final AudioInputStream audio = marytts.generateAudio(comment);
-			final AudioPlayer player = new AudioPlayer(audio);
-			player.start();
-		} catch (MaryConfigurationException | SynthesisException e) {
-			logger.error("Error sythesizing text to voice", e);
-		}
-	}
+            final AudioInputStream audio = marytts.generateAudio(comment);
+            final AudioPlayer player = new AudioPlayer(audio);
+            player.start();
+        } catch (MaryConfigurationException | SynthesisException e) {
+            logger.error("Error sythesizing text to voice", e);
+        }
+    }
 
-	/**
-	 * Allows TTS to be silenced or on. If silenced, instead of saying a comment
-	 * the desired comment will be printed to stdout. This exists so that
-	 * components can be easily tested even if they are reliant on TTS.
-	 * 
-	 * @param isSilenced
-	 *            set to <tt>true</tt> if spoken phrases should instead be
-	 *            printed to stdout, <tt>false</tt> for normal operation.
-	 */
-	public static void silence(final boolean isSilenced) {
-		TextToSpeech.isSilenced = isSilenced;
-	}
+    /**
+     * Allows TTS to be silenced or on. If silenced, instead of saying a comment
+     * the desired comment will be printed to stdout. This exists so that
+     * components can be easily tested even if they are reliant on TTS.
+     * 
+     * @param isSilenced
+     *            set to <tt>true</tt> if spoken phrases should instead be
+     *            printed to stdout, <tt>false</tt> for normal operation.
+     */
+    public static void silence(final boolean isSilenced) {
+        TextToSpeech.isSilenced = isSilenced;
+    }
 }

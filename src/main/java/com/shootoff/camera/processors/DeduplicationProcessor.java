@@ -27,98 +27,98 @@ import com.shootoff.camera.CameraManager;
 import com.shootoff.camera.Shot;
 
 public class DeduplicationProcessor implements ShotProcessor {
-	private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
+    private final static Logger logger = LoggerFactory.getLogger(DeduplicationProcessor.class);
 
-	private Optional<Shot> lastShot = Optional.empty();
+    private Optional<Shot> lastShot = Optional.empty();
 
-	// About 30 pixels at 640x480
-	private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 8000.0;
-	private double distanceThreshold;
+    // About 30 pixels at 640x480
+    private final static double DISTANCE_THRESHOLD_DIVISION_FACTOR = 8000.0;
+    private double distanceThreshold;
 
-	// frames
-	public static final int DEDUPE_THRESHOLD_MINIMUM = 2;
+    // frames
+    public static final int DEDUPE_THRESHOLD_MINIMUM = 2;
 
-	// ms
-	private static final int timestampThreshold = 60;
+    // ms
+    private static final int timestampThreshold = 60;
 
-	private final CameraManager cameraManager;
+    private final CameraManager cameraManager;
 
-	public DeduplicationProcessor(final CameraManager cameraManager) {
-		this.cameraManager = cameraManager;
-		setDistanceThreshold();
-	}
+    public DeduplicationProcessor(final CameraManager cameraManager) {
+        this.cameraManager = cameraManager;
+        setDistanceThreshold();
+    }
 
-	private void setDistanceThreshold() {
-		distanceThreshold = (cameraManager.getFeedWidth() * cameraManager.getFeedHeight())
-				/ DISTANCE_THRESHOLD_DIVISION_FACTOR;
-	}
+    private void setDistanceThreshold() {
+        distanceThreshold = (cameraManager.getFeedWidth() * cameraManager.getFeedHeight())
+                / DISTANCE_THRESHOLD_DIVISION_FACTOR;
+    }
 
-	public Optional<Shot> getLastShot() {
-		return lastShot;
-	}
+    public Optional<Shot> getLastShot() {
+        return lastShot;
+    }
 
-	public boolean processShot(Shot shot, boolean updateLastShot) {
-		if (lastShot.isPresent()) {
-			long timeDiff = shot.getTimestamp() - lastShot.get().getTimestamp();
+    public boolean processShot(Shot shot, boolean updateLastShot) {
+        if (lastShot.isPresent()) {
+            long timeDiff = shot.getTimestamp() - lastShot.get().getTimestamp();
 
-			if (timeDiff > timestampThreshold
-					&& (shot.getFrame() - lastShot.get().getFrame()) > DEDUPE_THRESHOLD_MINIMUM) {
-				if (updateLastShot)
-					lastShot = Optional.of(shot);
-				return true;
-			}
+            if (timeDiff > timestampThreshold
+                    && (shot.getFrame() - lastShot.get().getFrame()) > DEDUPE_THRESHOLD_MINIMUM) {
+                if (updateLastShot)
+                    lastShot = Optional.of(shot);
+                return true;
+            }
 
-			timeDiff = Math.min(timeDiff, timestampThreshold);
+            timeDiff = Math.min(timeDiff, timestampThreshold);
 
-			// The Size area for a dupe decreases from 1 * distanceThreshold to
-			// .5 distanceThreshold
-			// over the time period
-			final double dynamicDistancePercentage = (int) ((1 - ((.5 * timeDiff) / timestampThreshold))
-					* distanceThreshold);
+            // The Size area for a dupe decreases from 1 * distanceThreshold to
+            // .5 distanceThreshold
+            // over the time period
+            final double dynamicDistancePercentage = (int) ((1 - ((.5 * timeDiff) / timestampThreshold))
+                    * distanceThreshold);
 
-			if (logger.isTraceEnabled()) {
-				logger.trace("processShot {} {}", shot.getX(), shot.getY());
-				logger.trace("processShot ts {} - {}", shot.getTimestamp(), lastShot.get().getTimestamp());
+            if (logger.isTraceEnabled()) {
+                logger.trace("processShot {} {}", shot.getX(), shot.getY());
+                logger.trace("processShot ts {} - {}", shot.getTimestamp(), lastShot.get().getTimestamp());
 
-				logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(),
-						DEDUPE_THRESHOLD_MINIMUM);
+                logger.trace("processShot {} {} - {}", shot.getFrame(), lastShot.get().getFrame(),
+                        DEDUPE_THRESHOLD_MINIMUM);
 
-				logger.trace("processShot distance {} - thresh {}", euclideanDistance(lastShot.get(), shot),
-						dynamicDistancePercentage);
-			}
+                logger.trace("processShot distance {} - thresh {}", euclideanDistance(lastShot.get(), shot),
+                        dynamicDistancePercentage);
+            }
 
-			if (euclideanDistance(lastShot.get(), shot) <= dynamicDistancePercentage) {
+            if (euclideanDistance(lastShot.get(), shot) <= dynamicDistancePercentage) {
 
-				if (logger.isTraceEnabled())
-					logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
-				if (updateLastShot)
-					lastShot = Optional.of(shot);
-				return false;
-			}
-		}
+                if (logger.isTraceEnabled())
+                    logger.trace("processShot DUPE {} {}", shot.getX(), shot.getY());
+                if (updateLastShot)
+                    lastShot = Optional.of(shot);
+                return false;
+            }
+        }
 
-		if (updateLastShot)
-			lastShot = Optional.of(shot);
+        if (updateLastShot)
+            lastShot = Optional.of(shot);
 
-		return true;
-	}
+        return true;
+    }
 
-	private double euclideanDistance(final Shot shot1, final Shot shot2) {
-		return Math.sqrt(Math.pow(shot1.getX() - shot2.getX(), 2) + Math.pow(shot1.getY() - shot2.getY(), 2));
-	}
+    private double euclideanDistance(final Shot shot1, final Shot shot2) {
+        return Math.sqrt(Math.pow(shot1.getX() - shot2.getX(), 2) + Math.pow(shot1.getY() - shot2.getY(), 2));
+    }
 
-	@Override
-	public boolean processShot(final Shot shot) {
-		return processShot(shot, true);
-	}
+    @Override
+    public boolean processShot(final Shot shot) {
+        return processShot(shot, true);
+    }
 
-	public boolean processShotLookahead(final Shot shot) {
-		return processShot(shot, false);
-	}
+    public boolean processShotLookahead(final Shot shot) {
+        return processShot(shot, false);
+    }
 
-	@Override
-	public void reset() {
-		lastShot = Optional.empty();
-	}
+    @Override
+    public void reset() {
+        lastShot = Optional.empty();
+    }
 
 }

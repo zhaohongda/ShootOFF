@@ -35,132 +35,135 @@ import com.shootoff.targets.io.TargetIO;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 public class TestRandomShoot {
-	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+    @Rule
+    public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private PrintStream originalOut;
-	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream;
-	private Random rng;
+    private PrintStream originalOut;
+    private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
+    private PrintStream stringOutStream;
+    private Random rng;
 
-	@Before
-	public void setUp() throws UnsupportedEncodingException {
-		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
-		TextToSpeech.silence(true);
-		TrainingExerciseBase.silence(true);
-		originalOut = System.out;
-		System.setOut(stringOutStream);
-		rng = new Random(15); // Changing this seed will cause tests to fail
-	}
+    @Before
+    public void setUp() throws UnsupportedEncodingException {
+        stringOutStream = new PrintStream(stringOut, false, "UTF-8");
+        TextToSpeech.silence(true);
+        TrainingExerciseBase.silence(true);
+        originalOut = System.out;
+        System.setOut(stringOutStream);
+        rng = new Random(15); // Changing this seed will cause tests to fail
+    }
 
-	@After
-	public void tearDown() {
-		TextToSpeech.silence(false);
-		TrainingExerciseBase.silence(false);
-		System.setOut(originalOut);
-	}
+    @After
+    public void tearDown() {
+        TextToSpeech.silence(false);
+        TrainingExerciseBase.silence(false);
+        System.setOut(originalOut);
+    }
 
-	@Test
-	public void testNoTarget() throws IOException {
-		List<Target> targets = new ArrayList<Target>();
+    @Test
+    public void testNoTarget() throws IOException {
+        List<Target> targets = new ArrayList<Target>();
 
-		RandomShoot rs = new RandomShoot(targets, rng);
+        RandomShoot rs = new RandomShoot(targets, rng);
 
-		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"),
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-		stringOut.reset();
+        assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"),
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+        stringOut.reset();
 
-		rs.reset(targets);
+        rs.reset(targets);
 
-		assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"),
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-	}
+        assertEquals(String.format("sounds/voice/shootoff-subtargets-warning.wav%n"),
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+    }
 
-	@Test
-	public void testFiveSmallTarget() throws IOException {
-		List<Target> targets = new ArrayList<Target>();
-		TargetComponents tc = TargetIO
-				.loadTarget(new File("targets" + File.separator + "SimpleBullseye_five_small.target")).get();
-		TargetView bullseyeFiveTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), new ArrayList<Target>());
-		targets.add(bullseyeFiveTarget);
+    @Test
+    public void testFiveSmallTarget() throws IOException {
+        List<Target> targets = new ArrayList<Target>();
+        TargetComponents tc = TargetIO
+                .loadTarget(new File("targets" + File.separator + "SimpleBullseye_five_small.target")).get();
+        TargetView bullseyeFiveTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(),
+                new ArrayList<Target>());
+        targets.add(bullseyeFiveTarget);
 
-		RandomShoot rs = new RandomShoot(targets, rng);
+        RandomShoot rs = new RandomShoot(targets, rng);
 
-		// Make sure initial state makes sense
+        // Make sure initial state makes sense
 
-		assertEquals(5, rs.getSubtargets().size());
+        assertEquals(5, rs.getSubtargets().size());
 
-		assertTrue(rs.getSubtargets().contains("1"));
-		assertTrue(rs.getSubtargets().contains("2"));
-		assertTrue(rs.getSubtargets().contains("3"));
-		assertTrue(rs.getSubtargets().contains("4"));
-		assertTrue(rs.getSubtargets().contains("5"));
+        assertTrue(rs.getSubtargets().contains("1"));
+        assertTrue(rs.getSubtargets().contains("2"));
+        assertTrue(rs.getSubtargets().contains("3"));
+        assertTrue(rs.getSubtargets().contains("4"));
+        assertTrue(rs.getSubtargets().contains("5"));
 
-		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
+        String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
 
-		assertEquals("sounds/voice/shootoff-shoot.wav",
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/').split(String.format("%n"))[0]);
-		stringOut.reset();
+        assertEquals("sounds/voice/shootoff-shoot.wav",
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/').split(String.format("%n"))[0]);
+        stringOut.reset();
 
-		// Simulate missing a shot
+        // Simulate missing a shot
 
-		rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty());
+        rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty());
 
-		assertEquals(String.format("sounds/voice/shootoff-shoot.wav%nsounds/voice/shootoff-%s.wav%n", firstSubtarget),
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-		stringOut.reset();
+        assertEquals(String.format("sounds/voice/shootoff-shoot.wav%nsounds/voice/shootoff-%s.wav%n", firstSubtarget),
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+        stringOut.reset();
 
-		// Simulate a hit
+        // Simulate a hit
 
-		TargetRegion expectedRegion = null;
+        TargetRegion expectedRegion = null;
 
-		for (TargetRegion r : targets.get(0).getRegions()) {
-			expectedRegion = r;
+        for (TargetRegion r : targets.get(0).getRegions()) {
+            expectedRegion = r;
 
-			if (expectedRegion.getTag("subtarget").equals(firstSubtarget)) break;
-		}
+            if (expectedRegion.getTag("subtarget").equals(firstSubtarget))
+                break;
+        }
 
-		int oldSize = rs.getCurrentSubtargets().size();
-		Hit expectedHit = new MockHit(bullseyeFiveTarget, expectedRegion, 0, 0);
+        int oldSize = rs.getCurrentSubtargets().size();
+        Hit expectedHit = new MockHit(bullseyeFiveTarget, expectedRegion, 0, 0);
 
-		rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(expectedHit));
+        rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(expectedHit));
 
-		if (oldSize > 1) {
-			assertEquals(oldSize - 1, rs.getCurrentSubtargets().size());
-		} else {
-			String nextSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
-			assertTrue(stringOut.toString("UTF-8").startsWith("shoot subtarget " + nextSubtarget));
-			stringOut.reset();
-		}
-	}
+        if (oldSize > 1) {
+            assertEquals(oldSize - 1, rs.getCurrentSubtargets().size());
+        } else {
+            String nextSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
+            assertTrue(stringOut.toString("UTF-8").startsWith("shoot subtarget " + nextSubtarget));
+            stringOut.reset();
+        }
+    }
 
-	@Test
-	public void testNoSoundFilesForSubtargetNames() throws IOException {
-		List<Target> targets = new ArrayList<Target>();
-		
-		TargetComponents tc = TargetIO
-				.loadTarget(new File(TestRandomShoot.class.getResource("/test_missing_sound_files.target").getFile()))
-				.get();
-		
-		TargetView missingSoundTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
-		targets.add(missingSoundTarget);
+    @Test
+    public void testNoSoundFilesForSubtargetNames() throws IOException {
+        List<Target> targets = new ArrayList<Target>();
 
-		RandomShoot rs = new RandomShoot(targets, rng);
+        TargetComponents tc = TargetIO
+                .loadTarget(new File(TestRandomShoot.class.getResource("/test_missing_sound_files.target").getFile()))
+                .get();
 
-		// Make sure initial state makes sense
+        TargetView missingSoundTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
+        targets.add(missingSoundTarget);
 
-		assertEquals(5, rs.getSubtargets().size());
+        RandomShoot rs = new RandomShoot(targets, rng);
 
-		String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
+        // Make sure initial state makes sense
 
-		assertEquals("shoot subtarget undefined_region_name_5 then undefined_region_name_3",
-				stringOut.toString("UTF-8").replace(String.format("%n"), ""));
-		stringOut.reset();
+        assertEquals(5, rs.getSubtargets().size());
 
-		// Simulate missing a shot
+        String firstSubtarget = rs.getSubtargets().get(rs.getCurrentSubtargets().peek());
 
-		rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty());
+        assertEquals("shoot subtarget undefined_region_name_5 then undefined_region_name_3",
+                stringOut.toString("UTF-8").replace(String.format("%n"), ""));
+        stringOut.reset();
 
-		assertEquals(String.format("shoot %s%n", firstSubtarget), stringOut.toString("UTF-8"));
-		stringOut.reset();
-	}
+        // Simulate missing a shot
+
+        rs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.empty());
+
+        assertEquals(String.format("shoot %s%n", firstSubtarget), stringOut.toString("UTF-8"));
+        stringOut.reset();
+    }
 }

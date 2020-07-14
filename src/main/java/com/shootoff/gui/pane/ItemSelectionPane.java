@@ -41,161 +41,166 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.text.TextAlignment;
 
 public class ItemSelectionPane<T> extends ScrollPane {
-	private static final Logger logger = LoggerFactory.getLogger(ItemSelectionPane.class);
-	private static final int DEFAULT_COLUMNS = 6;
-	// Above MAX_COLUMNS and you end up having to move your mouse side to side
-	// too much
-	private static final int MAX_COLUMNS = 8;
-	private static final int ITEM_DIMS = 150;
+    private static final Logger logger = LoggerFactory.getLogger(ItemSelectionPane.class);
+    private static final int DEFAULT_COLUMNS = 6;
+    // Above MAX_COLUMNS and you end up having to move your mouse side to side
+    // too much
+    private static final int MAX_COLUMNS = 8;
+    private static final int ITEM_DIMS = 150;
 
-	private final Map<Object, ButtonBase> items = new HashMap<>();
-	private final TilePane subContainer = new TilePane(30, 30);
-	private boolean toggleable;
+    private final Map<Object, ButtonBase> items = new HashMap<>();
+    private final TilePane subContainer = new TilePane(30, 30);
+    private boolean toggleable;
 
-	private ToggleGroup toggleGroup = null;
-	private T defaultSelection = null;
-	private T currentSelection = null;
+    private ToggleGroup toggleGroup = null;
+    private T defaultSelection = null;
+    private T currentSelection = null;
 
-	private ItemSelectionListener<T> itemListener = null;
+    private ItemSelectionListener<T> itemListener = null;
 
-	public ItemSelectionPane(boolean toggleItems, ItemSelectionListener<T> itemListener) {
-		super();
+    public ItemSelectionPane(boolean toggleItems, ItemSelectionListener<T> itemListener) {
+        super();
 
-		this.itemListener = itemListener;
-		this.toggleable = toggleItems;
+        this.itemListener = itemListener;
+        this.toggleable = toggleItems;
 
-		if (toggleable) {
-			toggleGroup = new ToggleGroup();
-		}
+        if (toggleable) {
+            toggleGroup = new ToggleGroup();
+        }
 
-		subContainer.setPrefColumns(DEFAULT_COLUMNS);
-		subContainer.setPadding(new Insets(0, 65, 65, 65));
+        subContainer.setPrefColumns(DEFAULT_COLUMNS);
+        subContainer.setPadding(new Insets(0, 65, 65, 65));
 
-		widthProperty().addListener((observable, oldValue, newValue) -> {
-			final Insets padding = subContainer.getPadding();
-			final int hgap = (int) subContainer.getHgap();
-			final int columnCount = (newValue.intValue() - (int) (padding.getLeft() + padding.getRight()) + hgap)
-					/ (ITEM_DIMS + hgap);
+        widthProperty().addListener((observable, oldValue, newValue) -> {
+            final Insets padding = subContainer.getPadding();
+            final int hgap = (int) subContainer.getHgap();
+            final int columnCount = (newValue.intValue() - (int) (padding.getLeft() + padding.getRight()) + hgap)
+                    / (ITEM_DIMS + hgap);
 
-			if (columnCount <= MAX_COLUMNS) subContainer.setPrefColumns(columnCount);
-		});
+            if (columnCount <= MAX_COLUMNS)
+                subContainer.setPrefColumns(columnCount);
+        });
 
-		setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
-		setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
-		setHbarPolicy(ScrollBarPolicy.NEVER);
-		setFitToHeight(true);
-		setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		setContent(subContainer);
-	}
+        setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-background-color:transparent;");
+        setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+        setHbarPolicy(ScrollBarPolicy.NEVER);
+        setFitToHeight(true);
+        setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        setContent(subContainer);
+    }
 
-	public ItemSelectionPane(ToggleGroup toggleGroup, ItemSelectionListener<T> itemListener) {
-		this(true, itemListener);
+    public ItemSelectionPane(ToggleGroup toggleGroup, ItemSelectionListener<T> itemListener) {
+        this(true, itemListener);
 
-		this.toggleGroup = toggleGroup;
-	}
+        this.toggleGroup = toggleGroup;
+    }
 
-	public ButtonBase addButton(T ref, String text, Optional<Node> graphic, Optional<Tooltip> tooltip) {
-		final ButtonBase button;
-		if (toggleable) {
-			if (defaultSelection == null) defaultSelection = ref;
+    public ButtonBase addButton(T ref, String text, Optional<Node> graphic, Optional<Tooltip> tooltip) {
+        final ButtonBase button;
+        if (toggleable) {
+            if (defaultSelection == null)
+                defaultSelection = ref;
 
-			button = new ToggleButton(text);
+            button = new ToggleButton(text);
 
-			((ToggleButton) button).setToggleGroup(toggleGroup);
-		} else {
-			button = new Button(text);
-		}
+            ((ToggleButton) button).setToggleGroup(toggleGroup);
+        } else {
+            button = new Button(text);
+        }
 
-		button.setContentDisplay(ContentDisplay.TOP);
-		button.setTextAlignment(TextAlignment.CENTER);
-		button.setPrefSize(ITEM_DIMS, ITEM_DIMS);
-		button.setWrapText(true);
+        button.setContentDisplay(ContentDisplay.TOP);
+        button.setTextAlignment(TextAlignment.CENTER);
+        button.setPrefSize(ITEM_DIMS, ITEM_DIMS);
+        button.setWrapText(true);
 
-		if (graphic.isPresent()) button.setGraphic(graphic.get());
-		if (tooltip.isPresent()) {
-			button.setOnMouseEntered((event) -> {
-				final Point2D p = button.localToScreen(button.getLayoutBounds().getMaxX(),
-						button.getLayoutBounds().getMaxY());
-				tooltip.get().show(button, p.getX(), p.getY());
-			});
+        if (graphic.isPresent())
+            button.setGraphic(graphic.get());
+        if (tooltip.isPresent()) {
+            button.setOnMouseEntered((event) -> {
+                final Point2D p = button.localToScreen(button.getLayoutBounds().getMaxX(),
+                        button.getLayoutBounds().getMaxY());
+                tooltip.get().show(button, p.getX(), p.getY());
+            });
 
-			button.setOnMouseExited((event) -> {
-				tooltip.get().hide();
-			});
-		}
+            button.setOnMouseExited((event) -> {
+                tooltip.get().hide();
+            });
+        }
 
-		button.setOnAction((event) -> {
-			itemListener.onItemClicked(ref);
+        button.setOnAction((event) -> {
+            itemListener.onItemClicked(ref);
 
-			if (toggleable) toggleGroup.selectToggle((Toggle) button);
-		});
+            if (toggleable)
+                toggleGroup.selectToggle((Toggle) button);
+        });
 
-		subContainer.getChildren().add(button);
+        subContainer.getChildren().add(button);
 
-		items.put(ref, button);
+        items.put(ref, button);
 
-		return button;
-	}
+        return button;
+    }
 
-	public ButtonBase addButton(T ref, String text) {
-		return this.addButton(ref, text, Optional.empty(), Optional.empty());
-	}
+    public ButtonBase addButton(T ref, String text) {
+        return this.addButton(ref, text, Optional.empty(), Optional.empty());
+    }
 
-	public void setDefault(T ref) {
-		if (!toggleable) {
-			logger.error("setDefault only applies to toggleable item selection");
-			return;
-		}
+    public void setDefault(T ref) {
+        if (!toggleable) {
+            logger.error("setDefault only applies to toggleable item selection");
+            return;
+        }
 
-		if (items.containsKey(ref)) {
-			if (defaultSelection == null && currentSelection == null) {
-				currentSelection = ref;
-				toggleGroup.selectToggle((Toggle) items.get(ref));
-			}
-			defaultSelection = ref;
-		} else
-			logger.error("setDefault on non-existing ref - {}", ref);
-	}
+        if (items.containsKey(ref)) {
+            if (defaultSelection == null && currentSelection == null) {
+                currentSelection = ref;
+                toggleGroup.selectToggle((Toggle) items.get(ref));
+            }
+            defaultSelection = ref;
+        } else
+            logger.error("setDefault on non-existing ref - {}", ref);
+    }
 
-	public void removeButton(T ref) {
-		if (!items.containsKey(ref)) {
-			logger.error("removeButton on non-existing ref - {}", ref);
-			return;
-		}
+    public void removeButton(T ref) {
+        if (!items.containsKey(ref)) {
+            logger.error("removeButton on non-existing ref - {}", ref);
+            return;
+        }
 
-		final Node item = items.remove(ref);
+        final Node item = items.remove(ref);
 
-		if (Platform.isFxApplicationThread()) {
-			subContainer.getChildren().remove(item);
-		} else {
-			Platform.runLater(() -> subContainer.getChildren().remove(item));
-		}
+        if (Platform.isFxApplicationThread()) {
+            subContainer.getChildren().remove(item);
+        } else {
+            Platform.runLater(() -> subContainer.getChildren().remove(item));
+        }
 
-		if (toggleable && ref == defaultSelection) {
-			defaultSelection = null;
-		}
+        if (toggleable && ref == defaultSelection) {
+            defaultSelection = null;
+        }
 
-		if (toggleable && ref == currentSelection && defaultSelection != null) {
-			currentSelection = defaultSelection;
-			itemListener.onItemClicked(currentSelection);
-			toggleGroup.selectToggle((Toggle) items.get(currentSelection));
-		}
-	}
+        if (toggleable && ref == currentSelection && defaultSelection != null) {
+            currentSelection = defaultSelection;
+            itemListener.onItemClicked(currentSelection);
+            toggleGroup.selectToggle((Toggle) items.get(currentSelection));
+        }
+    }
 
-	public Object getCurrentSelection() {
-		return currentSelection;
-	}
+    public Object getCurrentSelection() {
+        return currentSelection;
+    }
 
-	public ToggleGroup getToggleGroup() {
-		return toggleGroup;
-	}
+    public ToggleGroup getToggleGroup() {
+        return toggleGroup;
+    }
 
-	public void setSelection(T ref) {
-		if (items.containsKey(ref)) {
-			currentSelection = ref;
-			toggleGroup.selectToggle((Toggle) items.get(currentSelection));
-		} else {
-			if (logger.isWarnEnabled()) logger.warn("setSelection on non-existing ref - {}", ref);
-		}
-	}
+    public void setSelection(T ref) {
+        if (items.containsKey(ref)) {
+            currentSelection = ref;
+            toggleGroup.selectToggle((Toggle) items.get(currentSelection));
+        } else {
+            if (logger.isWarnEnabled())
+                logger.warn("setSelection on non-existing ref - {}", ref);
+        }
+    }
 }

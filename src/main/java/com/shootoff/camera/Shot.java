@@ -37,98 +37,91 @@ import javafx.scene.paint.Color;
  * @author phrack, cbdmaul
  */
 public class Shot {
-	static public final Map<ShotColor, Color> colorMap = new HashMap<ShotColor, Color>();
-	static {
-		colorMap.put(ShotColor.RED, Color.RED);
-		colorMap.put(ShotColor.GREEN, Color.GREEN);
-		colorMap.put(ShotColor.INFRARED, Color.ORANGE);
-	}
+    static public final Map<ShotColor, Color> colorMap = new HashMap<ShotColor, Color>();
+    static {
+        colorMap.put(ShotColor.RED, Color.RED);
+        colorMap.put(ShotColor.GREEN, Color.GREEN);
+        colorMap.put(ShotColor.INFRARED, Color.ORANGE);
+    }
 
-	protected final ShotColor color;
+    protected final ShotColor color;
 
-	private double x;
-	private double y;
-	
-	protected final long timestamp;
-	protected final int frame;
-	
-	public Shot(Shot shot)
-	{
-		this.color = shot.color;
-		this.x = shot.getX();
-		this.y = shot.getY();
-		this.timestamp = shot.timestamp;
-		this.frame = shot.frame;
-	}
+    private double x;
+    private double y;
 
-	public Shot(ShotColor color, double x, double y, long timestamp, int frame) {
-		this.color = color;
-		this.x = x;
-		this.y = y;
-		this.timestamp = timestamp;
-		this.frame = frame;
+    protected final long timestamp;
+    protected final int frame;
 
-	}
+    public Shot(Shot shot) {
+        this.color = shot.color;
+        this.x = shot.getX();
+        this.y = shot.getY();
+        this.timestamp = shot.timestamp;
+        this.frame = shot.frame;
+    }
 
-	public Shot(ShotColor color, double x, double y, long timestamp) {
-		this.color = color;
-		this.x = x;
-		this.y = y;
-		this.timestamp = timestamp;
-		frame = 0;
-	}
-	public ShotColor getColor() {
-		return color;
-	}
+    public Shot(ShotColor color, double x, double y, long timestamp, int frame) {
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.timestamp = timestamp;
+        this.frame = frame;
 
-	public Color getPaintColor() {
-		return colorMap.get(color);
-	}
-	
-	public double getOrigX() {
-		return x;
-	}
+    }
 
-	public double getOrigY() {
-		return y;
-	}
+    public Shot(ShotColor color, double x, double y, long timestamp) {
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.timestamp = timestamp;
+        frame = 0;
+    }
 
-	public double getX() {
-		return x;
-	}
+    public ShotColor getColor() {
+        return color;
+    }
 
-	public double getY() {
-		return y;
-	}
-	
+    public Color getPaintColor() {
+        return colorMap.get(color);
+    }
 
-	public long getTimestamp() {
-		return timestamp;
-	}
+    public double getOrigX() {
+        return x;
+    }
 
-	public int getFrame() {
-		return frame;
-	}
+    public double getOrigY() {
+        return y;
+    }
 
-	
-	public void adjustPOI(double adjX, double adjY)
-	{
-		x = x + adjX;
-		y = y + adjY;
-	}
-	
-	
+    public double getX() {
+        return x;
+    }
 
-	private Optional<Shot> mirroredShot = Optional.empty();
+    public double getY() {
+        return y;
+    }
 
-	
-	public Optional<Shot> getMirroredShot() {
-		return mirroredShot;
-	}
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-	public void setMirroredShot(Shot mirroredShot) {
-		this.mirroredShot = Optional.of(mirroredShot);
-	}
+    public int getFrame() {
+        return frame;
+    }
+
+    public void adjustPOI(double adjX, double adjY) {
+        x = x + adjX;
+        y = y + adjY;
+    }
+
+    private Optional<Shot> mirroredShot = Optional.empty();
+
+    public Optional<Shot> getMirroredShot() {
+        return mirroredShot;
+    }
+
+    public void setMirroredShot(Shot mirroredShot) {
+        this.mirroredShot = Optional.of(mirroredShot);
+    }
 
 }
-

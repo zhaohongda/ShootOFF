@@ -33,102 +33,103 @@ import com.shootoff.targets.TargetRegion;
 import ch.qos.logback.classic.Logger;
 
 public class TestBouncingTargets {
-	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+    @Rule
+    public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private PrintStream originalOut;
-	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream;
-	private BouncingTargets bt;
-	private Hit shootRegionHit;
-	private Hit dontShootRegionHit;
+    private PrintStream originalOut;
+    private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
+    private PrintStream stringOutStream;
+    private BouncingTargets bt;
+    private Hit shootRegionHit;
+    private Hit dontShootRegionHit;
 
-	@Before
-	public void setUp() throws ConfigurationException, IOException {
-		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
-		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+    @Before
+    public void setUp() throws ConfigurationException, IOException {
+        stringOutStream = new PrintStream(stringOut, false, "UTF-8");
+        System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
-		TextToSpeech.silence(true);
-		TrainingExerciseBase.silence(true);
-		originalOut = System.out;
-		System.setOut(stringOutStream);
+        TextToSpeech.silence(true);
+        TrainingExerciseBase.silence(true);
+        originalOut = System.out;
+        System.setOut(stringOutStream);
 
-		bt = new BouncingTargets();
-		Configuration config = new Configuration(new String[0]);
-		config.setDebugMode(true);
+        bt = new BouncingTargets();
+        Configuration config = new Configuration(new String[0]);
+        config.setDebugMode(true);
 
-		CamerasSupervisor cs = new CamerasSupervisor(config);
+        CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
+        MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
 
-		bt.init(config, cs, null, null, pac);
-		bt.init(6, 5, 0);
+        bt.init(config, cs, null, null, pac);
+        bt.init(6, 5, 0);
 
-		shootRegionHit = new MockHit(bt.getShootTargets().get(0).getTarget(),
-				(TargetRegion) ((TargetView) bt.getShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
-						.get(0),
-				0, 0);
+        shootRegionHit = new MockHit(bt.getShootTargets().get(0).getTarget(),
+                (TargetRegion) ((TargetView) bt.getShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
+                        .get(0),
+                0, 0);
 
-		dontShootRegionHit = new MockHit(bt.getDontShootTargets().get(0).getTarget(),
-				(TargetRegion) ((TargetView) bt.getDontShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
-						.get(0),
-				0, 0);
-	}
+        dontShootRegionHit = new MockHit(bt.getDontShootTargets().get(0).getTarget(),
+                (TargetRegion) ((TargetView) bt.getDontShootTargets().get(0).getTarget()).getTargetGroup().getChildren()
+                        .get(0),
+                0, 0);
+    }
 
-	@After
-	public void tearDown() {
-		TextToSpeech.silence(false);
-		TrainingExerciseBase.silence(false);
-		System.setOut(originalOut);
+    @After
+    public void tearDown() {
+        TextToSpeech.silence(false);
+        TrainingExerciseBase.silence(false);
+        System.setOut(originalOut);
 
-		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		rootLogger.detachAndStopAllAppenders();
-	}
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        rootLogger.detachAndStopAllAppenders();
+    }
 
-	@Test
-	public void testShootFourThenDontShoot() throws UnsupportedEncodingException {
-		assertEquals(6, bt.getShootTargets().size());
-		assertEquals(5, bt.getDontShootTargets().size());
+    @Test
+    public void testShootFourThenDontShoot() throws UnsupportedEncodingException {
+        assertEquals(6, bt.getShootTargets().size());
+        assertEquals(5, bt.getDontShootTargets().size());
 
-		assertEquals("Score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
+        assertEquals("Score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
 
-		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
-		assertEquals("Score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
+        bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+        assertEquals("Score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
 
-		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
-		assertEquals("Score: 2\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
+        bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+        assertEquals("Score: 2\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
 
-		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
-		assertEquals("Score: 3\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
+        bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+        assertEquals("Score: 3\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
 
-		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
-		assertEquals("Score: 4\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
+        bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+        assertEquals("Score: 4\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
 
-		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(dontShootRegionHit));
-		assertEquals("sounds/beep.wav\nYour score was 4\nScore: 0\n",
-				stringOut.toString("UTF-8").replace("\r\n", "\n").replace(File.separatorChar, '/'));
-		stringOut.reset();
-	}
+        bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(dontShootRegionHit));
+        assertEquals("sounds/beep.wav\nYour score was 4\nScore: 0\n",
+                stringOut.toString("UTF-8").replace("\r\n", "\n").replace(File.separatorChar, '/'));
+        stringOut.reset();
+    }
 
-	@Test
-	public void testShootThenReset() throws UnsupportedEncodingException {
-		assertEquals(6, bt.getShootTargets().size());
-		assertEquals(5, bt.getDontShootTargets().size());
+    @Test
+    public void testShootThenReset() throws UnsupportedEncodingException {
+        assertEquals(6, bt.getShootTargets().size());
+        assertEquals(5, bt.getDontShootTargets().size());
 
-		assertEquals("Score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
+        assertEquals("Score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
 
-		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
-		assertEquals("Score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
+        bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+        assertEquals("Score: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
 
-		bt.reset(new ArrayList<Target>());
-		bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
-		assertEquals("Score: 0\nScore: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
-		stringOut.reset();
-	}
+        bt.reset(new ArrayList<Target>());
+        bt.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(shootRegionHit));
+        assertEquals("Score: 0\nScore: 1\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        stringOut.reset();
+    }
 }

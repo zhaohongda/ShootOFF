@@ -20,195 +20,194 @@ import com.xuggle.mediatool.event.ICloseEvent;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 
 public class MockCamera extends MediaListenerAdapter implements Camera {
-	protected static final Logger logger = LoggerFactory.getLogger(MockCamera.class);
+    protected static final Logger logger = LoggerFactory.getLogger(MockCamera.class);
 
-	
-	protected File videoFile;
-	protected long lastVideoTimestamp = -1;
-	protected static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
-	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
+    protected File videoFile;
+    protected long lastVideoTimestamp = -1;
+    protected static final int SECOND_IN_MICROSECONDS = 1000 * 1000;
+    protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
 
-	public MockCamera() {
-		super();
-	}
-	
-	public MockCamera(File videoFile) {
-		super();
-		this.videoFile = videoFile;
-	}
+    public MockCamera() {
+        super();
+    }
 
-	@Override
-	public boolean isOpen() {
-		return true;
-	}
-	
-	@Override
-	public String getName()
-	{
-		return "MockCamera";
-	}
-	
-	public void run() {
-		if (videoFile == null)
-			return;
-		
-		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
-		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
-		reader.addListener(this);
+    public MockCamera(File videoFile) {
+        super();
+        this.videoFile = videoFile;
+    }
 
-		logger.trace("opening {}", videoFile.getAbsolutePath());
+    @Override
+    public boolean isOpen() {
+        return true;
+    }
 
-		while (reader.readPacket() == null)
-			do {} while (false);
-	}
+    @Override
+    public String getName() {
+        return "MockCamera";
+    }
 
-	public void processVideo(IMediaListener listener) {
-		IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
-		reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
-		reader.addListener(listener);
+    public void run() {
+        if (videoFile == null)
+            return;
 
-		logger.trace("opening {}", videoFile.getAbsolutePath());
+        IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
+        reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
+        reader.addListener(this);
 
-		while (reader.readPacket() == null)
-			do {} while (false);
-	}
+        logger.trace("opening {}", videoFile.getAbsolutePath());
 
-	private long initialSystemTimeAtVideoStart = -1;
-	protected long currentFrameTimestamp = -1;
-	private int frameCount = 0;
-	public static final int DEFAULT_FPS = 30;
-	private double webcamFPS = 0.0;
+        while (reader.readPacket() == null)
+            do {
+            } while (false);
+    }
 
-	@Override
-	public void onVideoPicture(IVideoPictureEvent event) {
-		BufferedImage currentFrame = event.getImage();
+    public void processVideo(IMediaListener listener) {
+        IMediaReader reader = ToolFactory.makeReader(videoFile.getAbsolutePath());
+        reader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
+        reader.addListener(listener);
 
-		if (initialSystemTimeAtVideoStart == -1) initialSystemTimeAtVideoStart = System.currentTimeMillis();
+        logger.trace("opening {}", videoFile.getAbsolutePath());
 
-		currentFrameTimestamp = (event.getTimeStamp() / 1000) + initialSystemTimeAtVideoStart;
+        while (reader.readPacket() == null)
+            do {
+            } while (false);
+    }
 
-		if (frameCount == 0) {
-			if (cameraEventListener.isPresent())
-				setViewSize(new Dimension(currentFrame.getWidth(), currentFrame.getHeight()));
-				cameraEventListener.get().setFeedResolution(currentFrame.getWidth(), currentFrame.getHeight());
-		}
+    private long initialSystemTimeAtVideoStart = -1;
+    protected long currentFrameTimestamp = -1;
+    private int frameCount = 0;
+    public static final int DEFAULT_FPS = 30;
+    private double webcamFPS = 0.0;
 
-		if (lastVideoTimestamp > -1 && (frameCount % 30) == 0) {
+    @Override
+    public void onVideoPicture(IVideoPictureEvent event) {
+        BufferedImage currentFrame = event.getImage();
 
-			double estimateFPS = (double) SECOND_IN_MICROSECONDS
-					/ (double) (event.getTimeStamp() - lastVideoTimestamp);
+        if (initialSystemTimeAtVideoStart == -1)
+            initialSystemTimeAtVideoStart = System.currentTimeMillis();
 
-			setFPS(estimateFPS);
-		}
-		lastVideoTimestamp = event.getTimeStamp();
+        currentFrameTimestamp = (event.getTimeStamp() / 1000) + initialSystemTimeAtVideoStart;
 
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().newFrame(new Frame(Camera.bufferedImageToMat(currentFrame), currentFrameTimestamp));
-		
-		frameCount++;
-	}
-	protected void setFPS(double newFPS) {
-		// This just tells us if it's the first FPS estimate
-		if (getFrameCount() > DEFAULT_FPS)
-			webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
-		else
-			webcamFPS = newFPS;
-	}
-	
+        if (frameCount == 0) {
+            if (cameraEventListener.isPresent())
+                setViewSize(new Dimension(currentFrame.getWidth(), currentFrame.getHeight()));
+            cameraEventListener.get().setFeedResolution(currentFrame.getWidth(), currentFrame.getHeight());
+        }
 
-	@Override
-	public void onClose(ICloseEvent event) {
-		if (cameraEventListener.isPresent())
-			cameraEventListener.get().cameraClosed();
-	}
+        if (lastVideoTimestamp > -1 && (frameCount % 30) == 0) {
 
-	@Override
-	public Frame getFrame() {
-		return null;
-	}
+            double estimateFPS = (double) SECOND_IN_MICROSECONDS / (double) (event.getTimeStamp() - lastVideoTimestamp);
 
-	@Override
-	public BufferedImage getBufferedImage() {
-		return null;
-	}
+            setFPS(estimateFPS);
+        }
+        lastVideoTimestamp = event.getTimeStamp();
 
-	@Override
-	public boolean open() {
-		return false;
-	}
+        if (cameraEventListener.isPresent())
+            cameraEventListener.get()
+                    .newFrame(new Frame(Camera.bufferedImageToMat(currentFrame), currentFrameTimestamp));
 
-	@Override
-	public void close() {
-		return;
-	}
+        frameCount++;
+    }
 
-	@Override
-	public void setCameraEventListener(CameraEventListener cameraEventListener) {
-		this.cameraEventListener = Optional.of(cameraEventListener);
-	}
+    protected void setFPS(double newFPS) {
+        // This just tells us if it's the first FPS estimate
+        if (getFrameCount() > DEFAULT_FPS)
+            webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
+        else
+            webcamFPS = newFPS;
+    }
 
-	@Override
-	public int getFrameCount() {
-		return frameCount;
-	}
+    @Override
+    public void onClose(ICloseEvent event) {
+        if (cameraEventListener.isPresent())
+            cameraEventListener.get().cameraClosed();
+    }
 
-	@Override
-	public ShotDetector getPreferredShotDetector(CameraManager cameraManager, CameraView cameraView) {
-		if (JavaShotDetector.isSystemSupported())
-			return new JavaShotDetector(cameraManager, cameraView);
-		else
-			return null;
-	}
+    @Override
+    public Frame getFrame() {
+        return null;
+    }
 
-	@Override
-	public boolean isLocked() {
-		return false;
-	}
-	
-	private Dimension size = null;
+    @Override
+    public BufferedImage getBufferedImage() {
+        return null;
+    }
 
-	@Override
-	public void setViewSize(Dimension size) {
-		this.size = size;
-	}
+    @Override
+    public boolean open() {
+        return false;
+    }
 
-	@Override
-	public Dimension getViewSize() {
-		return size;
-	}
+    @Override
+    public void close() {
+        return;
+    }
 
-	@Override
-	public double getFPS() {
-		return webcamFPS;
-	}
+    @Override
+    public void setCameraEventListener(CameraEventListener cameraEventListener) {
+        this.cameraEventListener = Optional.of(cameraEventListener);
+    }
 
-	@Override
-	public boolean setState(CameraState state) {
-		return true;
-	}
-	public CameraState getState()
-	{
-		return CameraState.DETECTING;
-	}
+    @Override
+    public int getFrameCount() {
+        return frameCount;
+    }
 
-	@Override
-	public boolean supportsExposureAdjustment() {
+    @Override
+    public ShotDetector getPreferredShotDetector(CameraManager cameraManager, CameraView cameraView) {
+        if (JavaShotDetector.isSystemSupported())
+            return new JavaShotDetector(cameraManager, cameraView);
+        else
+            return null;
+    }
 
-		return false;
-	}
+    @Override
+    public boolean isLocked() {
+        return false;
+    }
 
-	public boolean decreaseExposure() {
-		return false;
-	}
-	
-	public void resetExposure()
-	{
-		return;
-	}
-	
-	@Override
-	public boolean limitsFrames()
-	{
-		return false;
-	}
+    private Dimension size = null;
+
+    @Override
+    public void setViewSize(Dimension size) {
+        this.size = size;
+    }
+
+    @Override
+    public Dimension getViewSize() {
+        return size;
+    }
+
+    @Override
+    public double getFPS() {
+        return webcamFPS;
+    }
+
+    @Override
+    public boolean setState(CameraState state) {
+        return true;
+    }
+
+    public CameraState getState() {
+        return CameraState.DETECTING;
+    }
+
+    @Override
+    public boolean supportsExposureAdjustment() {
+
+        return false;
+    }
+
+    public boolean decreaseExposure() {
+        return false;
+    }
+
+    public void resetExposure() {
+        return;
+    }
+
+    @Override
+    public boolean limitsFrames() {
+        return false;
+    }
 }

@@ -21,101 +21,106 @@ package com.shootoff.camera.cameratypes;
 import java.util.Optional;
 
 public abstract class CalculatedFPSCamera implements Camera {
-	public static final int DEFAULT_FPS = 30;
-	private double webcamFPS = DEFAULT_FPS;
+    public static final int DEFAULT_FPS = 30;
+    private double webcamFPS = DEFAULT_FPS;
 
-	protected CameraState cameraState;
+    protected CameraState cameraState;
 
-	protected int frameCount = 0;
-	protected long currentFrameTimestamp = -1;
-	private long lastCameraTimestamp = -1;
-	private long lastFrameCount = 0;
+    protected int frameCount = 0;
+    protected long currentFrameTimestamp = -1;
+    private long lastCameraTimestamp = -1;
+    private long lastFrameCount = 0;
 
-	protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
+    protected Optional<CameraEventListener> cameraEventListener = Optional.empty();
 
-	@Override
-	public void setCameraEventListener(CameraEventListener cameraEventListener) {
-		this.cameraEventListener = Optional.ofNullable(cameraEventListener);
-	}
+    @Override
+    public void setCameraEventListener(CameraEventListener cameraEventListener) {
+        this.cameraEventListener = Optional.ofNullable(cameraEventListener);
+    }
 
-	@Override
-	public boolean setState(CameraState cameraState) {
+    @Override
+    public boolean setState(CameraState cameraState) {
 
-		switch (cameraState) {
-		case CLOSED:
-			if (this.cameraState != CameraState.CLOSED) {
-				this.cameraState = cameraState;
-				close();
-			}
-			break;
-		case CALIBRATING:
-			resetExposure();
-		default:
-			this.cameraState = cameraState;
-			break;
-		}
+        switch (cameraState) {
+        case CLOSED:
+            if (this.cameraState != CameraState.CLOSED) {
+                this.cameraState = cameraState;
+                close();
+            }
+            break;
+        case CALIBRATING:
+            resetExposure();
+        default:
+            this.cameraState = cameraState;
+            break;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public CameraState getState() {
-		return cameraState;
-	}
+    @Override
+    public CameraState getState() {
+        return cameraState;
+    }
 
-	public long getCurrentFrameTimestamp() {
-		return currentFrameTimestamp;
-	}
+    public long getCurrentFrameTimestamp() {
+        return currentFrameTimestamp;
+    }
 
-	@Override
-	public int getFrameCount() {
-		return frameCount;
-	}
+    @Override
+    public int getFrameCount() {
+        return frameCount;
+    }
 
-	@Override
-	public double getFPS() {
-		return webcamFPS;
-	}
+    @Override
+    public double getFPS() {
+        return webcamFPS;
+    }
 
-	protected void setFPS(double newFPS) {
-		// This just tells us if it's the first FPS estimate
-		if (getFrameCount() > DEFAULT_FPS)
-			webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
-		else
-			webcamFPS = newFPS;
-	}
+    protected void setFPS(double newFPS) {
+        // This just tells us if it's the first FPS estimate
+        if (getFrameCount() > DEFAULT_FPS)
+            webcamFPS = ((webcamFPS * 4.0) + newFPS) / 5.0;
+        else
+            webcamFPS = newFPS;
+    }
 
-	protected void estimateCameraFPS() {
-		if (lastCameraTimestamp > -1) {
-			final double estimateFPS = ((double) getFrameCount() - (double) lastFrameCount)
-					/ (((double) System.currentTimeMillis() - (double) lastCameraTimestamp) / 1000.0);
+    protected void estimateCameraFPS() {
+        if (lastCameraTimestamp > -1) {
+            final double estimateFPS = ((double) getFrameCount() - (double) lastFrameCount)
+                    / (((double) System.currentTimeMillis() - (double) lastCameraTimestamp) / 1000.0);
 
-			setFPS(estimateFPS);
+            setFPS(estimateFPS);
 
-			if (cameraEventListener.isPresent()) cameraEventListener.get().newFPS(webcamFPS);
-		}
+            if (cameraEventListener.isPresent())
+                cameraEventListener.get().newFPS(webcamFPS);
+        }
 
-		lastCameraTimestamp = System.currentTimeMillis();
-		lastFrameCount = getFrameCount();
+        lastCameraTimestamp = System.currentTimeMillis();
+        lastFrameCount = getFrameCount();
 
-	}
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = getName().hashCode();
-		result = prime * result;
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = getName().hashCode();
+        result = prime * result;
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		final Camera other = (Camera) obj;
-		if (!getName().equals(other.getName())) return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Camera other = (Camera) obj;
+        if (!getName().equals(other.getName()))
+            return false;
+        return true;
+    }
 
 }

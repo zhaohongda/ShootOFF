@@ -22,15 +22,15 @@ import java.io.File;
 import java.util.UUID;
 
 public class AddTargetMessage extends TargetMessage {
-	private final File targetFile;
+    private final File targetFile;
 
-	public AddTargetMessage(UUID uuid, File targetFile) {
-		super(uuid);
+    public AddTargetMessage(UUID uuid, File targetFile) {
+        super(uuid);
 
-		this.targetFile = targetFile;
-	}
+        this.targetFile = targetFile;
+    }
 
-	public File getTargetFile() {
-		return targetFile;
-	}
+    public File getTargetFile() {
+        return targetFile;
+    }
 }

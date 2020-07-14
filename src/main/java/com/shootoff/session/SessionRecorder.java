@@ -39,153 +39,157 @@ import javafx.geometry.Dimension2D;
 import javafx.geometry.Point2D;
 
 public class SessionRecorder {
-	private final long startTime;
-	private final String sessionName;
-	private final Map<String, List<Event>> events = new HashMap<>();
-	private final Map<String, Set<Target>> seenTargets = new HashMap<>();
+    private final long startTime;
+    private final String sessionName;
+    private final Map<String, List<Event>> events = new HashMap<>();
+    private final Map<String, Set<Target>> seenTargets = new HashMap<>();
 
-	private final AtomicBoolean ignoreTargetCheck = new AtomicBoolean(false);
+    private final AtomicBoolean ignoreTargetCheck = new AtomicBoolean(false);
 
-	public SessionRecorder() {
-		final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
-		sessionName = dateFormat.format(new Date());
-		startTime = System.currentTimeMillis();
-	}
+    public SessionRecorder() {
+        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH.mm.ss");
+        sessionName = dateFormat.format(new Date());
+        startTime = System.currentTimeMillis();
+    }
 
-	public void addEvents(Map<String, List<Event>> events) {
-		this.events.putAll(events);
-	}
+    public void addEvents(Map<String, List<Event>> events) {
+        this.events.putAll(events);
+    }
 
-	public Map<String, List<Event>> getEvents() {
-		return events;
-	}
+    public Map<String, List<Event>> getEvents() {
+        return events;
+    }
 
-	public String getSessionName() {
-		return sessionName;
-	}
+    public String getSessionName() {
+        return sessionName;
+    }
 
-	public List<Event> getCameraEvents(String cameraName) {
-		if (events.containsKey(cameraName)) {
-			return events.get(cameraName);
-		} else {
-			final List<Event> eventList = new ArrayList<>();
-			events.put(cameraName, eventList);
-			return eventList;
-		}
-	}
+    public List<Event> getCameraEvents(String cameraName) {
+        if (events.containsKey(cameraName)) {
+            return events.get(cameraName);
+        } else {
+            final List<Event> eventList = new ArrayList<>();
+            events.put(cameraName, eventList);
+            return eventList;
+        }
+    }
 
-	// This method ensures we have an add event for a target that is being used,
-	// if not the user started recording after adding the target so we should
-	// artificially add the target add event then ensure it gets moved and
-	// resized
-	// to wherever it already is and to however big it already is.
-	private void checkTarget(String cameraName, Target target) {
-		if (!seenTargets.containsKey(cameraName)) {
-			seenTargets.put(cameraName, new HashSet<Target>());
-		}
+    // This method ensures we have an add event for a target that is being used,
+    // if not the user started recording after adding the target so we should
+    // artificially add the target add event then ensure it gets moved and
+    // resized
+    // to wherever it already is and to however big it already is.
+    private void checkTarget(String cameraName, Target target) {
+        if (!seenTargets.containsKey(cameraName)) {
+            seenTargets.put(cameraName, new HashSet<Target>());
+        }
 
-		if (!seenTargets.get(cameraName).contains(target)) {
-			ignoreTargetCheck.set(true);
+        if (!seenTargets.get(cameraName).contains(target)) {
+            ignoreTargetCheck.set(true);
 
-			recordTargetAdded(cameraName, target);
-			final Point2D p = target.getPosition();
-			recordTargetMoved(cameraName, target, (int) p.getX(), (int) p.getY());
-			final Dimension2D d = target.getDimension();
-			recordTargetResized(cameraName, target, d.getWidth(), d.getHeight());
+            recordTargetAdded(cameraName, target);
+            final Point2D p = target.getPosition();
+            recordTargetMoved(cameraName, target, (int) p.getX(), (int) p.getY());
+            final Dimension2D d = target.getDimension();
+            recordTargetResized(cameraName, target, d.getWidth(), d.getHeight());
 
-			ignoreTargetCheck.set(false);
-		}
-	}
+            ignoreTargetCheck.set(false);
+        }
+    }
 
-	public void recordShot(String cameraName, DisplayShot shot, boolean isMalfunction, boolean isReload,
-			Optional<Target> target, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
-		Optional<Integer> targetIndex = Optional.empty();
+    public void recordShot(String cameraName, DisplayShot shot, boolean isMalfunction, boolean isReload,
+            Optional<Target> target, Optional<Integer> hitRegionIndex, Optional<String> videoString) {
+        Optional<Integer> targetIndex = Optional.empty();
 
-		if (target.isPresent()) {
-			targetIndex = Optional.of(target.get().getTargetIndex());
-			if (!ignoreTargetCheck.get()) checkTarget(cameraName, target.get());
-		}
+        if (target.isPresent()) {
+            targetIndex = Optional.of(target.get().getTargetIndex());
+            if (!ignoreTargetCheck.get())
+                checkTarget(cameraName, target.get());
+        }
 
-		final long timestamp = System.currentTimeMillis() - startTime;
+        final long timestamp = System.currentTimeMillis() - startTime;
 
-		getCameraEvents(cameraName).add(new ShotEvent(cameraName, timestamp, shot, isMalfunction, isReload, targetIndex,
-				hitRegionIndex, videoString));
-	}
+        getCameraEvents(cameraName).add(new ShotEvent(cameraName, timestamp, shot, isMalfunction, isReload, targetIndex,
+                hitRegionIndex, videoString));
+    }
 
-	public void recordTargetAdded(String cameraName, Target target) {
-		if (!seenTargets.containsKey(cameraName)) {
-			seenTargets.put(cameraName, new HashSet<Target>());
-		}
+    public void recordTargetAdded(String cameraName, Target target) {
+        if (!seenTargets.containsKey(cameraName)) {
+            seenTargets.put(cameraName, new HashSet<Target>());
+        }
 
-		seenTargets.get(cameraName).add(target);
+        seenTargets.get(cameraName).add(target);
 
-		String targetName;
+        String targetName;
 
-		if (target.getTargetFile().isAbsolute()) {
-			targetName = target.getTargetFile().getPath()
-					.replace(System.getProperty("shootoff.home") + File.separator + "targets" + File.separator, "");
-		} else {
-			targetName = target.getTargetFile().getPath().replace("targets" + File.separator, "");
-		}
+        if (target.getTargetFile().isAbsolute()) {
+            targetName = target.getTargetFile().getPath()
+                    .replace(System.getProperty("shootoff.home") + File.separator + "targets" + File.separator, "");
+        } else {
+            targetName = target.getTargetFile().getPath().replace("targets" + File.separator, "");
+        }
 
-		getCameraEvents(cameraName)
-		.add(new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
-	}
+        getCameraEvents(cameraName)
+                .add(new TargetAddedEvent(cameraName, System.currentTimeMillis() - startTime, targetName));
+    }
 
-	public void recordTargetRemoved(String cameraName, Target target) {
-		if (!ignoreTargetCheck.get()) checkTarget(cameraName, target);
+    public void recordTargetRemoved(String cameraName, Target target) {
+        if (!ignoreTargetCheck.get())
+            checkTarget(cameraName, target);
 
-		getCameraEvents(cameraName).add(
-				new TargetRemovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex()));
-	}
+        getCameraEvents(cameraName).add(
+                new TargetRemovedEvent(cameraName, System.currentTimeMillis() - startTime, target.getTargetIndex()));
+    }
 
-	private void collapseTargetEvents(String cameraName, EventType type, Target target) {
-		final ListIterator<Event> it = getCameraEvents(cameraName).listIterator(getCameraEvents(cameraName).size());
+    private void collapseTargetEvents(String cameraName, EventType type, Target target) {
+        final ListIterator<Event> it = getCameraEvents(cameraName).listIterator(getCameraEvents(cameraName).size());
 
-		while (it.hasPrevious()) {
-			final Event e = it.previous();
+        while (it.hasPrevious()) {
+            final Event e = it.previous();
 
-			if (e.getType() != EventType.TARGET_RESIZED && e.getType() != EventType.TARGET_MOVED) {
-				break;
-			}
+            if (e.getType() != EventType.TARGET_RESIZED && e.getType() != EventType.TARGET_MOVED) {
+                break;
+            }
 
-			if (e.getType() == type) {
-				if (type == EventType.TARGET_RESIZED
-						&& ((TargetResizedEvent) e).getTargetIndex() == target.getTargetIndex()) {
-					it.remove();
-				} else if (type == EventType.TARGET_MOVED
-						&& ((TargetMovedEvent) e).getTargetIndex() == target.getTargetIndex()) {
-					it.remove();
-				}
-			}
-		}
-	}
+            if (e.getType() == type) {
+                if (type == EventType.TARGET_RESIZED
+                        && ((TargetResizedEvent) e).getTargetIndex() == target.getTargetIndex()) {
+                    it.remove();
+                } else if (type == EventType.TARGET_MOVED
+                        && ((TargetMovedEvent) e).getTargetIndex() == target.getTargetIndex()) {
+                    it.remove();
+                }
+            }
+        }
+    }
 
-	public void recordTargetResized(String cameraName, Target target, double newWidth, double newHeight) {
-		if (!ignoreTargetCheck.get()) checkTarget(cameraName, target);
+    public void recordTargetResized(String cameraName, Target target, double newWidth, double newHeight) {
+        if (!ignoreTargetCheck.get())
+            checkTarget(cameraName, target);
 
-		// Remove all resize events immediately before this one
-		collapseTargetEvents(cameraName, EventType.TARGET_RESIZED, target);
+        // Remove all resize events immediately before this one
+        collapseTargetEvents(cameraName, EventType.TARGET_RESIZED, target);
 
-		getCameraEvents(cameraName).add(new TargetResizedEvent(cameraName, System.currentTimeMillis() - startTime,
-				target.getTargetIndex(), newWidth, newHeight));
-	}
+        getCameraEvents(cameraName).add(new TargetResizedEvent(cameraName, System.currentTimeMillis() - startTime,
+                target.getTargetIndex(), newWidth, newHeight));
+    }
 
-	public void recordTargetMoved(String cameraName, Target target, int newX, int newY) {
-		if (!ignoreTargetCheck.get()) checkTarget(cameraName, target);
+    public void recordTargetMoved(String cameraName, Target target, int newX, int newY) {
+        if (!ignoreTargetCheck.get())
+            checkTarget(cameraName, target);
 
-		// Remove all move events immediately before this one
-		collapseTargetEvents(cameraName, EventType.TARGET_MOVED, target);
+        // Remove all move events immediately before this one
+        collapseTargetEvents(cameraName, EventType.TARGET_MOVED, target);
 
-		getCameraEvents(cameraName).add(new TargetMovedEvent(cameraName, System.currentTimeMillis() - startTime,
-				target.getTargetIndex(), newX, newY));
-	}
+        getCameraEvents(cameraName).add(new TargetMovedEvent(cameraName, System.currentTimeMillis() - startTime,
+                target.getTargetIndex(), newX, newY));
+    }
 
-	public void recordExerciseFeedMessage(String message) {
-		// Add an event for this message to each camera
-		for (final String cameraName : seenTargets.keySet()) {
-			getCameraEvents(cameraName)
-			.add(new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
-		}
-	}
+    public void recordExerciseFeedMessage(String message) {
+        // Add an event for this message to each camera
+        for (final String cameraName : seenTargets.keySet()) {
+            getCameraEvents(cameraName)
+                    .add(new ExerciseFeedMessageEvent(cameraName, System.currentTimeMillis() - startTime, message));
+        }
+    }
 }

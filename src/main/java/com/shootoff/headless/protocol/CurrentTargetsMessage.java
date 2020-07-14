@@ -22,13 +22,13 @@ import java.io.File;
 import java.util.List;
 
 public class CurrentTargetsMessage extends Message {
-	private final List<File> targets;
+    private final List<File> targets;
 
-	public CurrentTargetsMessage(List<File> targets) {
-		this.targets = targets;
-	}
+    public CurrentTargetsMessage(List<File> targets) {
+        this.targets = targets;
+    }
 
-	public List<File> getTargets() {
-		return targets;
-	}	
+    public List<File> getTargets() {
+        return targets;
+    }
 }

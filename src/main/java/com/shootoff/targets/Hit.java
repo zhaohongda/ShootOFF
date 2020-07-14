@@ -26,57 +26,56 @@ import com.shootoff.camera.Shot;
  * @author phrack
  */
 public class Hit {
-	private final Target target;
-	private final TargetRegion hitRegion;
-	private final int impactX, impactY;
-	private Shot shot;
+    private final Target target;
+    private final TargetRegion hitRegion;
+    private final int impactX, impactY;
+    private Shot shot;
 
-	/**
-	 * Create a new Hit with coordinates for the shot adjusted to the hit region
-	 * 
-	 * @param target
-	 *            the target that owns the <tt>TargetRegion</tt> that was hit
-	 * @param hitRegion
-	 *            the <tt>TargetRegion</tt> that was shot
-	 * @param impactX
-	 *            the x coordinate of the shot adjusted to be relative to the
-	 *            hit region (i.e. the origin for the impact is the top left
-	 *            corner of the region instead of the top left corner of the
-	 *            canvas)
-	 * @param impactY
-	 *            the y coordinate of the shot adjusted to be relative to the
-	 *            hit region
-	 */
-	public Hit(final Target target, final TargetRegion hitRegion, final int impactX, final int impactY) {
-		this.target = target;
-		this.hitRegion = hitRegion;
-		this.impactX = impactX;
-		this.impactY = impactY;
+    /**
+     * Create a new Hit with coordinates for the shot adjusted to the hit region
+     * 
+     * @param target
+     *            the target that owns the <tt>TargetRegion</tt> that was hit
+     * @param hitRegion
+     *            the <tt>TargetRegion</tt> that was shot
+     * @param impactX
+     *            the x coordinate of the shot adjusted to be relative to the
+     *            hit region (i.e. the origin for the impact is the top left
+     *            corner of the region instead of the top left corner of the
+     *            canvas)
+     * @param impactY
+     *            the y coordinate of the shot adjusted to be relative to the
+     *            hit region
+     */
+    public Hit(final Target target, final TargetRegion hitRegion, final int impactX, final int impactY) {
+        this.target = target;
+        this.hitRegion = hitRegion;
+        this.impactX = impactX;
+        this.impactY = impactY;
 
-	}
+    }
 
-	public Target getTarget() {
-		return target;
-	}
+    public Target getTarget() {
+        return target;
+    }
 
-	public TargetRegion getHitRegion() {
-		return hitRegion;
-	}
+    public TargetRegion getHitRegion() {
+        return hitRegion;
+    }
 
-	public int getImpactX() {
-		return impactX;
-	}
+    public int getImpactX() {
+        return impactX;
+    }
 
-	public int getImpactY() {
-		return impactY;
-	}
-	
-	public void setShot(Shot shot) {
-		this.shot = shot;
-	}
-	
-	public Shot getShot()
-	{
-		return shot;
-	}
+    public int getImpactY() {
+        return impactY;
+    }
+
+    public void setShot(Shot shot) {
+        this.shot = shot;
+    }
+
+    public Shot getShot() {
+        return shot;
+    }
 }

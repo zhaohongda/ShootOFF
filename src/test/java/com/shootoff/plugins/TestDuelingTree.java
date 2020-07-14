@@ -40,147 +40,145 @@ import com.shootoff.targets.io.TargetIO.TargetComponents;
 import ch.qos.logback.classic.Logger;
 
 public class TestDuelingTree {
-	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
-	
-	private PrintStream originalOut;
-	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream;
-	private List<Target> targets;
-	private List<Hit> leftPaddlesHits;
-	private List<Hit> rightPaddlesHits;
-	private DuelingTree dt;
+    @Rule
+    public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	@Before
-	public void setUp() throws ConfigurationException, NoSuchFieldException, SecurityException,
-			IllegalArgumentException, IllegalAccessException, IOException {
-		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
-		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+    private PrintStream originalOut;
+    private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
+    private PrintStream stringOutStream;
+    private List<Target> targets;
+    private List<Hit> leftPaddlesHits;
+    private List<Hit> rightPaddlesHits;
+    private DuelingTree dt;
 
-		TextToSpeech.silence(true);
-		TrainingExerciseBase.silence(true);
-		originalOut = System.out;
-		System.setOut(stringOutStream);
+    @Before
+    public void setUp() throws ConfigurationException, NoSuchFieldException, SecurityException,
+            IllegalArgumentException, IllegalAccessException, IOException {
+        stringOutStream = new PrintStream(stringOut, false, "UTF-8");
+        System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
-		targets = new ArrayList<Target>();
-		TargetComponents tc = TargetIO.loadTarget(new File("targets" + File.separator + "Duel_Tree.target")).get();
-		TargetView duelTreeTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), new ArrayList<Target>());
-		targets.add(duelTreeTarget);
+        TextToSpeech.silence(true);
+        TrainingExerciseBase.silence(true);
+        originalOut = System.out;
+        System.setOut(stringOutStream);
 
-		leftPaddlesHits = new ArrayList<Hit>();
-		rightPaddlesHits = new ArrayList<Hit>();
+        targets = new ArrayList<Target>();
+        TargetComponents tc = TargetIO.loadTarget(new File("targets" + File.separator + "Duel_Tree.target")).get();
+        TargetView duelTreeTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), new ArrayList<Target>());
+        targets.add(duelTreeTarget);
 
-		for (Node node : tc.getTargetGroup().getChildren()) {
-			TargetRegion region = (TargetRegion) node;
+        leftPaddlesHits = new ArrayList<Hit>();
+        rightPaddlesHits = new ArrayList<Hit>();
 
-			if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("left_paddle")) {
-				leftPaddlesHits.add(new MockHit(duelTreeTarget, region, 0, 0));
-			} else if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("right_paddle")) {
-				rightPaddlesHits.add(new MockHit(duelTreeTarget, region, 0, 0));
-			}
-		}
+        for (Node node : tc.getTargetGroup().getChildren()) {
+            TargetRegion region = (TargetRegion) node;
 
-		Configuration config = new Configuration(new String[0]);
-		config.setDebugMode(true);
+            if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("left_paddle")) {
+                leftPaddlesHits.add(new MockHit(duelTreeTarget, region, 0, 0));
+            } else if (region.tagExists("subtarget") && region.getTag("subtarget").startsWith("right_paddle")) {
+                rightPaddlesHits.add(new MockHit(duelTreeTarget, region, 0, 0));
+            }
+        }
 
-		dt = new DuelingTree(targets);
-		CanvasManager arenaCanvas = new CanvasManager(new Group(), null, "arena", null);
-		arenaCanvas.addTarget(duelTreeTarget);
-		dt.init(config, new CamerasSupervisor(config), null, null, new ProjectorArenaPane(config, arenaCanvas));
+        Configuration config = new Configuration(new String[0]);
+        config.setDebugMode(true);
 
-		config.setExercise(dt);
+        dt = new DuelingTree(targets);
+        CanvasManager arenaCanvas = new CanvasManager(new Group(), null, "arena", null);
+        arenaCanvas.addTarget(duelTreeTarget);
+        dt.init(config, new CamerasSupervisor(config), null, null, new ProjectorArenaPane(config, arenaCanvas));
 
-		// Set the wait to zero
-		Field delayConstant = dt.getClass().getDeclaredField("NEW_ROUND_DELAY");
-		delayConstant.setAccessible(true);
-		Field modifiersField = Field.class.getDeclaredField("modifiers");
-		modifiersField.setAccessible(true);
-		modifiersField.setInt(delayConstant, delayConstant.getModifiers() & ~Modifier.FINAL);
-		delayConstant.setInt(dt, 0);
-	}
+        config.setExercise(dt);
 
-	@After
-	public void tearDown() {
-		TextToSpeech.silence(false);
-		TrainingExerciseBase.silence(false);
-		System.setOut(originalOut);
+        // Set the wait to zero
+        Field delayConstant = dt.getClass().getDeclaredField("NEW_ROUND_DELAY");
+        delayConstant.setAccessible(true);
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(delayConstant, delayConstant.getModifiers() & ~Modifier.FINAL);
+        delayConstant.setInt(dt, 0);
+    }
 
-		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		rootLogger.detachAndStopAllAppenders();
-	}
+    @After
+    public void tearDown() {
+        TextToSpeech.silence(false);
+        TrainingExerciseBase.silence(false);
+        System.setOut(originalOut);
 
-	@Test
-	public void testNoTarget() throws IOException, ConfigurationException {
-		List<Target> targets = new ArrayList<Target>();
-		Configuration config = new Configuration(new String[0]);
-		config.setDebugMode(true);
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        rootLogger.detachAndStopAllAppenders();
+    }
 
-		DuelingTree dt = new DuelingTree(targets);
-		dt.init(config, new CamerasSupervisor(config), null, null, null);
+    @Test
+    public void testNoTarget() throws IOException, ConfigurationException {
+        List<Target> targets = new ArrayList<Target>();
+        Configuration config = new Configuration(new String[0]);
+        config.setDebugMode(true);
 
-		assertEquals(String.format("sounds/voice/shootoff-duelingtree-warning.wav%n"),
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-		stringOut.reset();
+        DuelingTree dt = new DuelingTree(targets);
+        dt.init(config, new CamerasSupervisor(config), null, null, null);
 
-		dt.reset(targets);
+        assertEquals(String.format("sounds/voice/shootoff-duelingtree-warning.wav%n"),
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+        stringOut.reset();
 
-		assertEquals(
-				String.format("left score: 0%n") + String.format("right score: 0%n")
-						+ String.format("sounds/voice/shootoff-duelingtree-warning.wav%n"),
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-		stringOut.reset();
-	}
+        dt.reset(targets);
 
-	@Test
-	public void testOneRoundsLeftWins() throws UnsupportedEncodingException {
-		for (Hit leftPaddleHit : leftPaddlesHits) {
-			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
-		}
+        assertEquals(
+                String.format("left score: 0%n") + String.format("right score: 0%n")
+                        + String.format("sounds/voice/shootoff-duelingtree-warning.wav%n"),
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+        stringOut.reset();
+    }
 
-		assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + 
-				String.format("left score: 1%n") + 
-				String.format("right score: 0%n"), stringOut.toString("UTF-8"));
-		stringOut.reset();
+    @Test
+    public void testOneRoundsLeftWins() throws UnsupportedEncodingException {
+        for (Hit leftPaddleHit : leftPaddlesHits) {
+            dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
+        }
 
-		dt.destroy();
-		assertEquals("", stringOut.toString("UTF-8"));
-		stringOut.reset();
-	}
+        assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + String.format("left score: 1%n")
+                + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
+        stringOut.reset();
 
-	@Test
-	public void testTwoSeparateRoundsEachSideWinsOnce() throws UnsupportedEncodingException {
-		// Let right shoot two paddles then have left come in for the win
-		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
-		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
+        dt.destroy();
+        assertEquals("", stringOut.toString("UTF-8"));
+        stringOut.reset();
+    }
 
-		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
-		dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
+    @Test
+    public void testTwoSeparateRoundsEachSideWinsOnce() throws UnsupportedEncodingException {
+        // Let right shoot two paddles then have left come in for the win
+        dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
+        dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
 
-		for (Hit leftPaddleHit : leftPaddlesHits) {
-			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
-		}
+        dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(0)));
+        dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddlesHits.get(1)));
 
-		assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + 
-				String.format("left score: 1%n") + 
-				String.format("right score: 0%n"), stringOut.toString("UTF-8"));
-		stringOut.reset();
+        for (Hit leftPaddleHit : leftPaddlesHits) {
+            dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(leftPaddleHit));
+        }
 
-		dt.reset(targets);
+        assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + String.format("left score: 1%n")
+                + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
+        stringOut.reset();
 
-		assertEquals(String.format("left score: 0%n") + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
-		stringOut.reset();
+        dt.reset(targets);
 
-		// Right pulls out the win with no competition
-		for (Hit rightPaddleHit : rightPaddlesHits) {
-			dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddleHit));
-		}
+        assertEquals(String.format("left score: 0%n") + String.format("right score: 0%n"), stringOut.toString("UTF-8"));
+        stringOut.reset();
 
-		assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + 
-				String.format("left score: 0%n") + 
-				String.format("right score: 1%n"), stringOut.toString("UTF-8"));
-		stringOut.reset();
+        // Right pulls out the win with no competition
+        for (Hit rightPaddleHit : rightPaddlesHits) {
+            dt.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(rightPaddleHit));
+        }
 
-		dt.destroy();
-		assertEquals("", stringOut.toString("UTF-8"));
-		stringOut.reset();
-	}
+        assertEquals(String.format("sounds/beep.wav%n").replace("/", File.separator) + String.format("left score: 0%n")
+                + String.format("right score: 1%n"), stringOut.toString("UTF-8"));
+        stringOut.reset();
+
+        dt.destroy();
+        assertEquals("", stringOut.toString("UTF-8"));
+        stringOut.reset();
+    }
 }

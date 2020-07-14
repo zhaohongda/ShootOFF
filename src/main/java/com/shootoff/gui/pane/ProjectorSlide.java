@@ -40,223 +40,226 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class ProjectorSlide extends Slide implements CalibrationConfigurator {
-	private final Pane parentControls;
-	private final Pane parentBody;
-	private final Configuration config;
-	private final CameraViews cameraViews;
-	private final Stage shootOffStage;
-	private final Pane trainingExerciseContainer;
-	private final Resetter resetter;
-	private final ExerciseSlide exerciseSlide;
-	private final Button calibrateButton;
+    private final Pane parentControls;
+    private final Pane parentBody;
+    private final Configuration config;
+    private final CameraViews cameraViews;
+    private final Stage shootOffStage;
+    private final Pane trainingExerciseContainer;
+    private final Resetter resetter;
+    private final ExerciseSlide exerciseSlide;
+    private final Button calibrateButton;
 
-	private ArenaBackgroundsSlide backgroundsSlide;
+    private ArenaBackgroundsSlide backgroundsSlide;
 
-	private ProjectorArenaPane arenaPane;
-	private Optional<CalibrationManager> calibrationManager = Optional.empty();
+    private ProjectorArenaPane arenaPane;
+    private Optional<CalibrationManager> calibrationManager = Optional.empty();
 
-	public ProjectorSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews, Stage shootOffStage,
-			Pane trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
-		super(parentControls, parentBody);
+    public ProjectorSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews, Stage shootOffStage,
+            Pane trainingExerciseContainer, Resetter resetter, ExerciseSlide exerciseSlide) {
+        super(parentControls, parentBody);
 
-		this.parentControls = parentControls;
-		this.parentBody = parentBody;
-		config = Configuration.getConfig();
-		this.cameraViews = cameraViews;
-		this.shootOffStage = shootOffStage;
-		this.trainingExerciseContainer = trainingExerciseContainer;
-		this.resetter = resetter;
-		this.exerciseSlide = exerciseSlide;
+        this.parentControls = parentControls;
+        this.parentBody = parentBody;
+        config = Configuration.getConfig();
+        this.cameraViews = cameraViews;
+        this.shootOffStage = shootOffStage;
+        this.trainingExerciseContainer = trainingExerciseContainer;
+        this.resetter = resetter;
+        this.exerciseSlide = exerciseSlide;
 
-		calibrateButton = addSlideControlButton("Calibrate", (event) -> {
-			if (!calibrationManager.isPresent()) return;
+        calibrateButton = addSlideControlButton("Calibrate", (event) -> {
+            if (!calibrationManager.isPresent())
+                return;
 
-			final CalibrationManager calibrator = calibrationManager.get();
+            final CalibrationManager calibrator = calibrationManager.get();
 
-			if (!calibrator.isCalibrating()) {
-				calibrator.enableCalibration();
-			} else {
-				calibrator.stopCalibration();
-			}
-		});
+            if (!calibrator.isCalibrating()) {
+                calibrator.enableCalibration();
+            } else {
+                calibrator.stopCalibration();
+            }
+        });
 
-		addSlideControlButton("Background", (event) -> {
-			backgroundsSlide.showControls();
-			backgroundsSlide.showBody();
-		});
+        addSlideControlButton("Background", (event) -> {
+            backgroundsSlide.showControls();
+            backgroundsSlide.showBody();
+        });
 
-		addSlideControlButton("Courses", (event) -> {
-			final ArenaCoursesSlide coursesSlide = new ArenaCoursesSlide(parentControls, parentBody, arenaPane,
-					shootOffStage);
-			coursesSlide.setOnSlideHidden(() -> {
-				if (coursesSlide.choseCourse()) {
-					hide();
-				}
-			});
-			coursesSlide.showControls();
-			coursesSlide.showBody();
-		});
-	}
+        addSlideControlButton("Courses", (event) -> {
+            final ArenaCoursesSlide coursesSlide = new ArenaCoursesSlide(parentControls, parentBody, arenaPane,
+                    shootOffStage);
+            coursesSlide.setOnSlideHidden(() -> {
+                if (coursesSlide.choseCourse()) {
+                    hide();
+                }
+            });
+            coursesSlide.showControls();
+            coursesSlide.showBody();
+        });
+    }
 
-	@Override
-	public CalibrationOption getCalibratedFeedBehavior() {
-		return config.getCalibratedFeedBehavior();
-	}
+    @Override
+    public CalibrationOption getCalibratedFeedBehavior() {
+        return config.getCalibratedFeedBehavior();
+    }
 
-	@Override
-	public void calibratedFeedBehaviorsChanged() {
-		if (calibrationManager.isPresent())
-			calibrationManager.get().configureArenaCamera(config.getCalibratedFeedBehavior());
+    @Override
+    public void calibratedFeedBehaviorsChanged() {
+        if (calibrationManager.isPresent())
+            calibrationManager.get().configureArenaCamera(config.getCalibratedFeedBehavior());
 
-		if (arenaPane != null) arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
-	}
+        if (arenaPane != null)
+            arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
+    }
 
-	@Override
-	public void toggleCalibrating(boolean isCalibrating) {
-		final Runnable toggleCalibrationAction = () -> {
-			if (isCalibrating)
-				calibrateButton.setText("Stop Calibrating");
-			else
-				calibrateButton.setText("Calibrate");
-		};
+    @Override
+    public void toggleCalibrating(boolean isCalibrating) {
+        final Runnable toggleCalibrationAction = () -> {
+            if (isCalibrating)
+                calibrateButton.setText("Stop Calibrating");
+            else
+                calibrateButton.setText("Calibrate");
+        };
 
-		if (Platform.isFxApplicationThread()) {
-			toggleCalibrationAction.run();
-		} else {
-			Platform.runLater(toggleCalibrationAction);
-		}
-	}
+        if (Platform.isFxApplicationThread()) {
+            toggleCalibrationAction.run();
+        } else {
+            Platform.runLater(toggleCalibrationAction);
+        }
+    }
 
-	public ProjectorArenaPane getArenaPane() {
-		return arenaPane;
-	}
+    public ProjectorArenaPane getArenaPane() {
+        return arenaPane;
+    }
 
-	public Optional<CalibrationManager> getCalibrationManager() {
-		return calibrationManager;
-	}
+    public Optional<CalibrationManager> getCalibrationManager() {
+        return calibrationManager;
+    }
 
-	public void startArena() {
-		if (arenaPane != null) {
-			// Already started
-			return;
-		}
+    public void startArena() {
+        if (arenaPane != null) {
+            // Already started
+            return;
+        }
 
-		final Stage arenaStage = new Stage();
+        final Stage arenaStage = new Stage();
 
-		arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, resetter, null);
+        arenaPane = new ProjectorArenaPane(arenaStage, shootOffStage, trainingExerciseContainer, resetter, null);
 
-		// Prepare calibrating manager up front so that we can switch
-		// to the arena tab when it's ready (otherwise
-		// getSelectedCameraManager() will fail)
-		final CameraManager calibratingCameraManager = cameraViews.getSelectedCameraManager();
+        // Prepare calibrating manager up front so that we can switch
+        // to the arena tab when it's ready (otherwise
+        // getSelectedCameraManager() will fail)
+        final CameraManager calibratingCameraManager = cameraViews.getSelectedCameraManager();
 
-		// Mirror panes so that anything that happens to one also
-		// happens to the other
-		final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage,
-				trainingExerciseContainer, resetter, cameraViews.getShotTimerModel());
+        // Mirror panes so that anything that happens to one also
+        // happens to the other
+        final ProjectorArenaPane arenaTabPane = new ProjectorArenaPane(arenaStage, shootOffStage,
+                trainingExerciseContainer, resetter, cameraViews.getShotTimerModel());
 
-		arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
-		arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
+        arenaTabPane.prefWidthProperty().bind(arenaPane.prefWidthProperty());
+        arenaTabPane.prefHeightProperty().bind(arenaPane.prefHeightProperty());
 
-		cameraViews.addNonCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager(), true, true);
+        cameraViews.addNonCameraView("Arena", arenaTabPane, arenaTabPane.getCanvasManager(), true, true);
 
-		arenaPane.setArenaPaneMirror(arenaTabPane);
+        arenaPane.setArenaPaneMirror(arenaTabPane);
 
-		final CanvasManager arenaCanvasManager = arenaPane.getCanvasManager();
+        final CanvasManager arenaCanvasManager = arenaPane.getCanvasManager();
 
-		arenaCanvasManager.setCameraManager(calibratingCameraManager);
+        arenaCanvasManager.setCameraManager(calibratingCameraManager);
 
-		if (!(arenaCanvasManager instanceof MirroredCanvasManager)) {
-			throw new AssertionError("Arena canvas manager is not of type MirroredCanvasManager");
-		}
+        if (!(arenaCanvasManager instanceof MirroredCanvasManager)) {
+            throw new AssertionError("Arena canvas manager is not of type MirroredCanvasManager");
+        }
 
-		final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaCanvasManager;
+        final MirroredCanvasManager projectorCanvasManager = (MirroredCanvasManager) arenaCanvasManager;
 
-		final CanvasManager tabArenaCanvasManager = arenaTabPane.getCanvasManager();
+        final CanvasManager tabArenaCanvasManager = arenaTabPane.getCanvasManager();
 
-		if (!(tabArenaCanvasManager instanceof MirroredCanvasManager)) {
-			throw new AssertionError("Tab arena canvas manager is not of type MirroredCanvasManager");
-		}
+        if (!(tabArenaCanvasManager instanceof MirroredCanvasManager)) {
+            throw new AssertionError("Tab arena canvas manager is not of type MirroredCanvasManager");
+        }
 
-		final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) tabArenaCanvasManager;
+        final MirroredCanvasManager tabCanvasManager = (MirroredCanvasManager) tabArenaCanvasManager;
 
-		projectorCanvasManager.setMirroredManager(tabCanvasManager);
-		tabCanvasManager.setMirroredManager(projectorCanvasManager);
-		projectorCanvasManager.updateBackground(null, Optional.empty());
-		// This camera manager must be set to enable click-to-shoot for
-		// the arena tab
-		tabCanvasManager.setCameraManager(calibratingCameraManager);
+        projectorCanvasManager.setMirroredManager(tabCanvasManager);
+        tabCanvasManager.setMirroredManager(projectorCanvasManager);
+        projectorCanvasManager.updateBackground(null, Optional.empty());
+        // This camera manager must be set to enable click-to-shoot for
+        // the arena tab
+        tabCanvasManager.setCameraManager(calibratingCameraManager);
 
-		// Final preparation to display
-		arenaStage.setTitle("Projector Arena");
-		arenaStage.setScene(new Scene(arenaPane));
-		arenaStage.setFullScreenExitHint("");
+        // Final preparation to display
+        arenaStage.setTitle("Projector Arena");
+        arenaStage.setScene(new Scene(arenaPane));
+        arenaStage.setFullScreenExitHint("");
 
-		calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane, cameraViews,
-				null, exerciseSlide.getExerciseListener()));
+        calibrationManager = Optional.of(new CalibrationManager(this, calibratingCameraManager, arenaPane, cameraViews,
+                null, exerciseSlide.getExerciseListener()));
 
-		calibrationManager.get().addCalibrationListener(new CalibrationListener() {
-			@Override
-			public void startCalibration() {}
+        calibrationManager.get().addCalibrationListener(new CalibrationListener() {
+            @Override
+            public void startCalibration() {
+            }
 
-			@Override
-			public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
-				if (Platform.isFxApplicationThread()) {
-					hide();
-				} else {
-					Platform.runLater(() -> hide());
-				}
-			}
-		});
+            @Override
+            public void calibrated(Optional<PerspectiveManager> perspectiveManager) {
+                if (Platform.isFxApplicationThread()) {
+                    hide();
+                } else {
+                    Platform.runLater(() -> hide());
+                }
+            }
+        });
 
-		arenaPane.setCalibrationManager(calibrationManager.get());
+        arenaPane.setCalibrationManager(calibrationManager.get());
 
-		exerciseSlide.toggleProjectorExercises(false);
-		arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
+        exerciseSlide.toggleProjectorExercises(false);
+        arenaPane.getCanvasManager().setShowShots(config.showArenaShotMarkers());
 
-		backgroundsSlide = new ArenaBackgroundsSlide(parentControls, parentBody, arenaPane, shootOffStage);
-		backgroundsSlide.setOnSlideHidden(() -> {
-			if (backgroundsSlide.choseBackground()) {
-				backgroundsSlide.setChoseBackground(false);
-				hide();
-			}
-		});
+        backgroundsSlide = new ArenaBackgroundsSlide(parentControls, parentBody, arenaPane, shootOffStage);
+        backgroundsSlide.setOnSlideHidden(() -> {
+            if (backgroundsSlide.choseBackground()) {
+                backgroundsSlide.setChoseBackground(false);
+                hide();
+            }
+        });
 
-		// Display the arena
-		calibrateButton.fire();
-		arenaPane.toggleArena();
-		arenaPane.autoPlaceArena();
+        // Display the arena
+        calibrateButton.fire();
+        arenaPane.toggleArena();
+        arenaPane.autoPlaceArena();
 
-		arenaStage.setOnCloseRequest((e) -> {
-			arenaStage.setOnCloseRequest(null);
+        arenaStage.setOnCloseRequest((e) -> {
+            arenaStage.setOnCloseRequest(null);
 
-			arenaPane.close();
-			arenaPane.setFeedCanvasManager(null);
-			arenaPane = null;
+            arenaPane.close();
+            arenaPane.setFeedCanvasManager(null);
+            arenaPane = null;
 
-			cameraViews.removeCameraView("Arena");
+            cameraViews.removeCameraView("Arena");
 
-			if (config.getExercise().isPresent()
-					&& config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
-				exerciseSlide.toggleProjectorExercises(true);
-			}
+            if (config.getExercise().isPresent()
+                    && config.getExercise().get() instanceof ProjectorTrainingExerciseBase) {
+                exerciseSlide.toggleProjectorExercises(true);
+            }
 
-			if (calibrationManager.isPresent()) {
-				if (calibrationManager.get().isCalibrating()) {
-					calibrationManager.get().stopCalibration();
-				} else {
-					calibrationManager.get().arenaClosing();
-				}
-			}
+            if (calibrationManager.isPresent()) {
+                if (calibrationManager.get().isCalibrating()) {
+                    calibrationManager.get().stopCalibration();
+                } else {
+                    calibrationManager.get().arenaClosing();
+                }
+            }
 
-			exerciseSlide.toggleProjectorExercises(true);
-		});
-	}
+            exerciseSlide.toggleProjectorExercises(true);
+        });
+    }
 
-	public void closeArena() {
-		if (arenaPane != null) {
-			arenaPane.getCanvasManager().close();
-			arenaPane.close();
-		}
-	}
+    public void closeArena() {
+        if (arenaPane != null) {
+            arenaPane.getCanvasManager().close();
+            arenaPane.close();
+        }
+    }
 }

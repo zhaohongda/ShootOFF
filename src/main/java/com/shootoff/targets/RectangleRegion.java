@@ -26,54 +26,54 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class RectangleRegion extends Rectangle implements TargetRegion {
-	private final Map<String, String> tags = new HashMap<>();
+    private final Map<String, String> tags = new HashMap<>();
 
-	public RectangleRegion(final double x, final double y, final double width, final double height) {
-		super(x, y, width, height);
-	}
+    public RectangleRegion(final double x, final double y, final double width, final double height) {
+        super(x, y, width, height);
+    }
 
-	@Override
-	public void changeWidth(final double widthDelta) {
-		setWidth(getWidth() + widthDelta);
-	}
+    @Override
+    public void changeWidth(final double widthDelta) {
+        setWidth(getWidth() + widthDelta);
+    }
 
-	@Override
-	public void changeHeight(final double heightDelta) {
-		setHeight(getHeight() + heightDelta);
-	}
+    @Override
+    public void changeHeight(final double heightDelta) {
+        setHeight(getHeight() + heightDelta);
+    }
 
-	@Override
-	public RegionType getType() {
-		return RegionType.RECTANGLE;
-	}
-	
-	@Override
-	public void setFill(Color fill) {
-		if (Platform.isFxApplicationThread()) {
-			super.setFill(fill);
-		} else {
-			Platform.runLater(() -> super.setFill(fill));
-		}
-	}
+    @Override
+    public RegionType getType() {
+        return RegionType.RECTANGLE;
+    }
 
-	@Override
-	public boolean tagExists(final String name) {
-		return tags.containsKey(name);
-	}
+    @Override
+    public void setFill(Color fill) {
+        if (Platform.isFxApplicationThread()) {
+            super.setFill(fill);
+        } else {
+            Platform.runLater(() -> super.setFill(fill));
+        }
+    }
 
-	@Override
-	public String getTag(final String name) {
-		return tags.get(name);
-	}
+    @Override
+    public boolean tagExists(final String name) {
+        return tags.containsKey(name);
+    }
 
-	@Override
-	public Map<String, String> getAllTags() {
-		return tags;
-	}
+    @Override
+    public String getTag(final String name) {
+        return tags.get(name);
+    }
 
-	@Override
-	public void setTags(final Map<String, String> newTags) {
-		tags.clear();
-		tags.putAll(newTags);
-	}
+    @Override
+    public Map<String, String> getAllTags() {
+        return tags;
+    }
+
+    @Override
+    public void setTags(final Map<String, String> newTags) {
+        tags.clear();
+        tags.putAll(newTags);
+    }
 }

@@ -23,7 +23,7 @@ import java.util.Optional;
 import com.shootoff.camera.perspective.PerspectiveManager;
 
 public interface CalibrationListener {
-	public void startCalibration();
+    public void startCalibration();
 
-	public void calibrated(Optional<PerspectiveManager> perspectiveManager);
+    public void calibrated(Optional<PerspectiveManager> perspectiveManager);
 }

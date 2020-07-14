@@ -29,102 +29,102 @@ import com.shootoff.camera.shot.ShotColor;
 import javafx.scene.paint.Color;
 
 public class ShotEntry {
-	private final DisplayShot shot;
-	private final String timestamp;
-	private final String color;
-	private final Optional<Color> rowColor;
-	private final SplitData split;
-	private final Map<String, String> exerciseData = new HashMap<>();
+    private final DisplayShot shot;
+    private final String timestamp;
+    private final String color;
+    private final Optional<Color> rowColor;
+    private final SplitData split;
+    private final Map<String, String> exerciseData = new HashMap<>();
 
-	public ShotEntry(DisplayShot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction,
-			boolean hadReload) {
-		this.shot = shot;
+    public ShotEntry(DisplayShot shot, Optional<Shot> lastShot, Optional<Color> rowColor, boolean hadMalfunction,
+            boolean hadReload) {
+        this.shot = shot;
 
-		if (ShotColor.RED.equals(shot.getColor())) {
-			color = "red";
-		} else if (ShotColor.GREEN.equals(shot.getColor())) {
-			color = "green";
-		} else {
-			color = "infrared";
-		}
+        if (ShotColor.RED.equals(shot.getColor())) {
+            color = "red";
+        } else if (ShotColor.GREEN.equals(shot.getColor())) {
+            color = "green";
+        } else {
+            color = "infrared";
+        }
 
-		this.rowColor = rowColor;
+        this.rowColor = rowColor;
 
-		final float timestampS = ((float) shot.getTimestamp()) / 1000f;
-		timestamp = String.format("%.2f", timestampS);
+        final float timestampS = ((float) shot.getTimestamp()) / 1000f;
+        timestamp = String.format("%.2f", timestampS);
 
-		String split;
-		if (lastShot.isPresent()) {
-			split = String.format("%.2f", timestampS - ((float) lastShot.get().getTimestamp() / 1000f));
-		} else {
-			split = "-";
-		}
+        String split;
+        if (lastShot.isPresent()) {
+            split = String.format("%.2f", timestampS - ((float) lastShot.get().getTimestamp() / 1000f));
+        } else {
+            split = "-";
+        }
 
-		this.split = new SplitData(split, rowColor, hadMalfunction, hadReload);
-	}
+        this.split = new SplitData(split, rowColor, hadMalfunction, hadReload);
+    }
 
-	public static class SplitData {
-		private final String split;
-		private final Optional<Color> rowColor;
-		private final boolean hadMalfunction;
-		private final boolean hadReload;
+    public static class SplitData {
+        private final String split;
+        private final Optional<Color> rowColor;
+        private final boolean hadMalfunction;
+        private final boolean hadReload;
 
-		public SplitData(String split, Optional<Color> rowColor, boolean hadMalfunction, boolean hadReload) {
-			this.split = split;
-			this.rowColor = rowColor;
-			this.hadMalfunction = hadMalfunction;
-			this.hadReload = hadReload;
-		}
+        public SplitData(String split, Optional<Color> rowColor, boolean hadMalfunction, boolean hadReload) {
+            this.split = split;
+            this.rowColor = rowColor;
+            this.hadMalfunction = hadMalfunction;
+            this.hadReload = hadReload;
+        }
 
-		public String getSplit() {
-			return split;
-		}
+        public String getSplit() {
+            return split;
+        }
 
-		public Optional<Color> getRowColor() {
-			return rowColor;
-		}
+        public Optional<Color> getRowColor() {
+            return rowColor;
+        }
 
-		public boolean hadMalfunction() {
-			return hadMalfunction;
-		}
+        public boolean hadMalfunction() {
+            return hadMalfunction;
+        }
 
-		public boolean hadReload() {
-			return hadReload;
-		}
-	}
+        public boolean hadReload() {
+            return hadReload;
+        }
+    }
 
-	public String getColor() {
-		return color;
-	}
+    public String getColor() {
+        return color;
+    }
 
-	public Optional<Color> getRowColor() {
-		return rowColor;
-	}
+    public Optional<Color> getRowColor() {
+        return rowColor;
+    }
 
-	public String getTimestamp() {
-		return timestamp;
-	}
+    public String getTimestamp() {
+        return timestamp;
+    }
 
-	public SplitData getSplit() {
-		return split;
-	}
+    public SplitData getSplit() {
+        return split;
+    }
 
-	public DisplayShot getShot() {
-		return shot;
-	}
+    public DisplayShot getShot() {
+        return shot;
+    }
 
-	public void setExerciseValue(String name, String value) {
-		exerciseData.put(name, value);
-	}
+    public void setExerciseValue(String name, String value) {
+        exerciseData.put(name, value);
+    }
 
-	public String getExerciseValue(String name) {
-		if (exerciseData.containsKey(name))
-			return exerciseData.get(name);
-		else
-			return "";
-	}
+    public String getExerciseValue(String name) {
+        if (exerciseData.containsKey(name))
+            return exerciseData.get(name);
+        else
+            return "";
+    }
 
-	public void clearExerciseData() {
-		exerciseData.clear();
-	}
+    public void clearExerciseData() {
+        exerciseData.clear();
+    }
 }

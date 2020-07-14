@@ -36,86 +36,89 @@ import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 
 public class ImageRegion extends ImageView implements TargetRegion {
-	private static final Logger logger = LoggerFactory.getLogger(ImageRegion.class);
-	
-	private final Map<String, String> tags = new HashMap<>();
-	private final File imageFile;
+    private static final Logger logger = LoggerFactory.getLogger(ImageRegion.class);
 
-	private Optional<SpriteAnimation> animation = Optional.empty();
+    private final Map<String, String> tags = new HashMap<>();
+    private final File imageFile;
 
-	public ImageRegion(final double x, final double y, final File imageFile) throws FileNotFoundException {
-		this(x, y, imageFile, new FileInputStream(imageFile));
-	}
+    private Optional<SpriteAnimation> animation = Optional.empty();
 
-	public ImageRegion(final double x, final double y, final File imageFile, final InputStream imageStream) {
-		super();
+    public ImageRegion(final double x, final double y, final File imageFile) throws FileNotFoundException {
+        this(x, y, imageFile, new FileInputStream(imageFile));
+    }
 
-		setLayoutX(x);
-		setLayoutY(y);
-		this.imageFile = imageFile;
+    public ImageRegion(final double x, final double y, final File imageFile, final InputStream imageStream) {
+        super();
 
-		setImage(new Image(imageStream));
-	}
-	
-	public ImageRegion(Image image) {
-		super(image);
-		this.imageFile = null;
-	}
+        setLayoutX(x);
+        setLayoutY(y);
+        this.imageFile = imageFile;
 
-	public boolean onFirstFrame() {
-		return animation.isPresent() ? getImage().equals(animation.get().getFirstFrame()) : true;
-	}
+        setImage(new Image(imageStream));
+    }
 
-	public File getImageFile() {
-		return imageFile;
-	}
+    public ImageRegion(Image image) {
+        super(image);
+        this.imageFile = null;
+    }
 
-	public void setAnimation(SpriteAnimation animation) {
-		this.animation = Optional.of(animation);
-	}
+    public boolean onFirstFrame() {
+        return animation.isPresent() ? getImage().equals(animation.get().getFirstFrame()) : true;
+    }
 
-	public Optional<SpriteAnimation> getAnimation() {
-		return animation;
-	}
+    public File getImageFile() {
+        return imageFile;
+    }
 
-	public void reset() {
-		if (animation.isPresent()) animation.get().reset();
-	}
+    public void setAnimation(SpriteAnimation animation) {
+        this.animation = Optional.of(animation);
+    }
 
-	@Override
-	public void changeWidth(final double widthDelta) {}
+    public Optional<SpriteAnimation> getAnimation() {
+        return animation;
+    }
 
-	@Override
-	public void changeHeight(final double heightDelta) {}
+    public void reset() {
+        if (animation.isPresent())
+            animation.get().reset();
+    }
 
-	@Override
-	public RegionType getType() {
-		return RegionType.IMAGE;
-	}
+    @Override
+    public void changeWidth(final double widthDelta) {
+    }
 
-	@Override
-	public void setFill(Color fill) {
-		logger.warn("setFill on ImageRegion ignored");
-	}
+    @Override
+    public void changeHeight(final double heightDelta) {
+    }
 
-	@Override
-	public boolean tagExists(final String name) {
-		return tags.containsKey(name);
-	}
+    @Override
+    public RegionType getType() {
+        return RegionType.IMAGE;
+    }
 
-	@Override
-	public String getTag(final String name) {
-		return tags.get(name);
-	}
+    @Override
+    public void setFill(Color fill) {
+        logger.warn("setFill on ImageRegion ignored");
+    }
 
-	@Override
-	public Map<String, String> getAllTags() {
-		return tags;
-	}
+    @Override
+    public boolean tagExists(final String name) {
+        return tags.containsKey(name);
+    }
 
-	@Override
-	public void setTags(final Map<String, String> newTags) {
-		tags.clear();
-		tags.putAll(newTags);
-	}
+    @Override
+    public String getTag(final String name) {
+        return tags.get(name);
+    }
+
+    @Override
+    public Map<String, String> getAllTags() {
+        return tags;
+    }
+
+    @Override
+    public void setTags(final Map<String, String> newTags) {
+        tags.clear();
+        tags.putAll(newTags);
+    }
 }

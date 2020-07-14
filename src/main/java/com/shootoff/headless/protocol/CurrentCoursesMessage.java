@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 public class CurrentCoursesMessage extends Message {
-	private final Map<String, List<String>> courses;
+    private final Map<String, List<String>> courses;
 
-	public CurrentCoursesMessage(Map<String, List<String>> courses) {
-		this.courses = courses;
-	}
+    public CurrentCoursesMessage(Map<String, List<String>> courses) {
+        this.courses = courses;
+    }
 
-	public Map<String, List<String>> getCourses() {
-		return courses;
-	}
+    public Map<String, List<String>> getCourses() {
+        return courses;
+    }
 }

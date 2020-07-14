@@ -36,108 +36,108 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class ArenaBackgroundsSlide extends Slide implements ItemSelectionListener<LocatedImage> {
-	public static final Map<String, String> DEFAULT_BACKGROUNDS;
-	
-	static {
-		final Map<String, String> defaultBackgrounds = new HashMap<>();
-		defaultBackgrounds.put("Hickok45 Autumn", "/arena/backgrounds/hickok45_autumn.gif");
-		defaultBackgrounds.put("Hickok45 Summer", "/arena/backgrounds/hickok45_summer.gif");
-		defaultBackgrounds.put("Indoor Range", "/arena/backgrounds/indoor_range.gif");
-		defaultBackgrounds.put("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
-		defaultBackgrounds.put("Oradour-sur-Glane", "/arena/backgrounds/oradour-sur-glane.gif");
-		defaultBackgrounds.put("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
-		defaultBackgrounds.put("Steel Range Bay", "/arena/backgrounds/steel_range_bay.gif");
-		defaultBackgrounds.put("Subterranean Parking Lot", "/arena/backgrounds/subterranean_parking_lot.gif");
-		
-		DEFAULT_BACKGROUNDS = Collections.unmodifiableMap(defaultBackgrounds);
-	}
-	
-	private final ItemSelectionPane<LocatedImage> itemPane = new ItemSelectionPane<>(true, this);
-	private final ProjectorArenaPane arenaPane;
-	private final Stage shootOffStage;
+    public static final Map<String, String> DEFAULT_BACKGROUNDS;
 
-	private boolean choseBackground = false;
+    static {
+        final Map<String, String> defaultBackgrounds = new HashMap<>();
+        defaultBackgrounds.put("Hickok45 Autumn", "/arena/backgrounds/hickok45_autumn.gif");
+        defaultBackgrounds.put("Hickok45 Summer", "/arena/backgrounds/hickok45_summer.gif");
+        defaultBackgrounds.put("Indoor Range", "/arena/backgrounds/indoor_range.gif");
+        defaultBackgrounds.put("Kiang West Savanna", "/arena/backgrounds/kiang_west_savanna.gif");
+        defaultBackgrounds.put("Oradour-sur-Glane", "/arena/backgrounds/oradour-sur-glane.gif");
+        defaultBackgrounds.put("Outdoor Range", "/arena/backgrounds/outdoor_range.gif");
+        defaultBackgrounds.put("Steel Range Bay", "/arena/backgrounds/steel_range_bay.gif");
+        defaultBackgrounds.put("Subterranean Parking Lot", "/arena/backgrounds/subterranean_parking_lot.gif");
 
-	public ArenaBackgroundsSlide(Pane parentControls, Pane parentBody, ProjectorArenaPane arenaPane,
-			Stage shootOffStage) {
-		super(parentControls, parentBody);
+        DEFAULT_BACKGROUNDS = Collections.unmodifiableMap(defaultBackgrounds);
+    }
 
-		this.arenaPane = arenaPane;
-		this.shootOffStage = shootOffStage;
+    private final ItemSelectionPane<LocatedImage> itemPane = new ItemSelectionPane<>(true, this);
+    private final ProjectorArenaPane arenaPane;
+    private final Stage shootOffStage;
 
-		addNoneButton();
-		initDefaultBackgrounds();
+    private boolean choseBackground = false;
 
-		addBodyNode(itemPane);
-	}
+    public ArenaBackgroundsSlide(Pane parentControls, Pane parentBody, ProjectorArenaPane arenaPane,
+            Stage shootOffStage) {
+        super(parentControls, parentBody);
 
-	private ButtonBase addNoneButton() {
-		final LocatedImage none = new LocatedImage("/images/blank_page.png");
+        this.arenaPane = arenaPane;
+        this.shootOffStage = shootOffStage;
 
-		final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream("/images/blank_page.png");
-		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
+        addNoneButton();
+        initDefaultBackgrounds();
 
-		final ToggleButton noneButton = (ToggleButton) itemPane.addButton(none, "None", Optional.of(thumbnailView),
-				Optional.empty());
-		noneButton.setSelected(true);
-		itemPane.setDefault(none);
+        addBodyNode(itemPane);
+    }
 
-		return noneButton;
-	}
+    private ButtonBase addNoneButton() {
+        final LocatedImage none = new LocatedImage("/images/blank_page.png");
 
-	private void initDefaultBackgrounds() {
-		new Thread(() -> {
-			addDefaultBackground("Select Local Image...", "/images/normal_folder.png");
-			
-			for (Map.Entry<String, String> background : DEFAULT_BACKGROUNDS.entrySet())
-				addDefaultBackground(background.getKey(), background.getValue());
-		}).start();
-	}
+        final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream("/images/blank_page.png");
+        final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
 
-	private void addDefaultBackground(String buttonName, String resourceName) {
-		final InputStream is = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
-		final LocatedImage img = new LocatedImage(is, resourceName);
-		final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
-		final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
+        final ToggleButton noneButton = (ToggleButton) itemPane.addButton(none, "None", Optional.of(thumbnailView),
+                Optional.empty());
+        noneButton.setSelected(true);
+        itemPane.setDefault(none);
 
-		itemPane.addButton(img, buttonName, Optional.of(thumbnailView), Optional.empty());
-	}
+        return noneButton;
+    }
 
-	public void selectedLocalImage() {
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("Select Arena Background");
-		fileChooser.getExtensionFilters().addAll(
-				new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"),
-				new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"));
+    private void initDefaultBackgrounds() {
+        new Thread(() -> {
+            addDefaultBackground("Select Local Image...", "/images/normal_folder.png");
 
-		final File backgroundFile = fileChooser.showOpenDialog(shootOffStage);
+            for (Map.Entry<String, String> background : DEFAULT_BACKGROUNDS.entrySet())
+                addDefaultBackground(background.getKey(), background.getValue());
+        }).start();
+    }
 
-		if (backgroundFile != null) {
-			final LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
-			arenaPane.setArenaBackground(img);
-		}
-	}
+    private void addDefaultBackground(String buttonName, String resourceName) {
+        final InputStream is = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
+        final LocatedImage img = new LocatedImage(is, resourceName);
+        final InputStream isThumbnail = ArenaBackgroundsSlide.class.getResourceAsStream(resourceName);
+        final ImageView thumbnailView = new ImageView(new Image(isThumbnail, 60, 60, true, true));
 
-	@Override
-	public void onItemClicked(LocatedImage selectedImage) {
-		if (selectedImage.getURL().equals("/images/blank_page.png")) {
-			arenaPane.setArenaBackground(null);
-		} else if (selectedImage.getURL().equals("/images/normal_folder.png")) {
-			selectedLocalImage();
-		} else {
-			arenaPane.setArenaBackground(selectedImage);
-		}
+        itemPane.addButton(img, buttonName, Optional.of(thumbnailView), Optional.empty());
+    }
 
-		choseBackground = true;
+    public void selectedLocalImage() {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Arena Background");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Portable Network Graphic (*.png)", "*.png"),
+                new FileChooser.ExtensionFilter("Graphics Interchange Format (*.gif)", "*.gif"));
 
-		hide();
-	}
+        final File backgroundFile = fileChooser.showOpenDialog(shootOffStage);
 
-	public void setChoseBackground(boolean choseBackground) {
-		this.choseBackground = choseBackground;
-	}
+        if (backgroundFile != null) {
+            final LocatedImage img = new LocatedImage(backgroundFile.toURI().toString());
+            arenaPane.setArenaBackground(img);
+        }
+    }
 
-	public boolean choseBackground() {
-		return choseBackground;
-	}
+    @Override
+    public void onItemClicked(LocatedImage selectedImage) {
+        if (selectedImage.getURL().equals("/images/blank_page.png")) {
+            arenaPane.setArenaBackground(null);
+        } else if (selectedImage.getURL().equals("/images/normal_folder.png")) {
+            selectedLocalImage();
+        } else {
+            arenaPane.setArenaBackground(selectedImage);
+        }
+
+        choseBackground = true;
+
+        hide();
+    }
+
+    public void setChoseBackground(boolean choseBackground) {
+        this.choseBackground = choseBackground;
+    }
+
+    public boolean choseBackground() {
+        return choseBackground;
+    }
 }

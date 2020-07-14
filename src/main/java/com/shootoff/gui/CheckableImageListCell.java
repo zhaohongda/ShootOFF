@@ -46,240 +46,244 @@ import javafx.scene.layout.Pane;
 import javafx.util.converter.DefaultStringConverter;
 
 public class CheckableImageListCell extends TextFieldListCell<String> {
-	private static final Logger logger = LoggerFactory.getLogger(CheckableImageListCell.class);
+    private static final Logger logger = LoggerFactory.getLogger(CheckableImageListCell.class);
 
-	private static final Map<Camera, Pane> containerCache = new HashMap<>();
-	private static final Map<Camera, CheckBox> checkCache = new HashMap<>();
-	private final List<Camera> webcams;
-	private final List<String> configuredNames;
-	private final List<Camera> configuredCameras;
-	private final Optional<Set<Camera>> recordingCameras;
+    private static final Map<Camera, Pane> containerCache = new HashMap<>();
+    private static final Map<Camera, CheckBox> checkCache = new HashMap<>();
+    private final List<Camera> webcams;
+    private final List<String> configuredNames;
+    private final List<Camera> configuredCameras;
+    private final Optional<Set<Camera>> recordingCameras;
 
-	public CheckableImageListCell(List<Camera> webcams, List<String> configuredNames, List<Camera> configuredCameras,
-			CameraRenamedListener cameraRenamedListener, final DesignateShotRecorderListener designatedListener,
-			final Optional<Set<Camera>> recordingCameras) {
-		this.webcams = new ArrayList<>(webcams);
-		this.configuredNames = configuredNames;
-		this.configuredCameras = configuredCameras;
-		this.recordingCameras = recordingCameras;
+    public CheckableImageListCell(List<Camera> webcams, List<String> configuredNames, List<Camera> configuredCameras,
+            CameraRenamedListener cameraRenamedListener, final DesignateShotRecorderListener designatedListener,
+            final Optional<Set<Camera>> recordingCameras) {
+        this.webcams = new ArrayList<>(webcams);
+        this.configuredNames = configuredNames;
+        this.configuredCameras = configuredCameras;
+        this.recordingCameras = recordingCameras;
 
-		setConverter(new DefaultStringConverter());
+        setConverter(new DefaultStringConverter());
 
-		itemProperty().addListener(new ChangeListener<String>() {
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if (oldValue == null || newValue == null) return;
+        itemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (oldValue == null || newValue == null)
+                    return;
 
-				final Optional<Pane> webcamContainer = fetchWebcamControls(oldValue);
+                final Optional<Pane> webcamContainer = fetchWebcamControls(oldValue);
 
-				if (webcamContainer.isPresent()) {
-					setGraphic(webcamContainer.get());
-				}
+                if (webcamContainer.isPresent()) {
+                    setGraphic(webcamContainer.get());
+                }
 
-				cameraRenamedListener.cameraRenamed(oldValue, newValue);
-			}
-		});
+                cameraRenamedListener.cameraRenamed(oldValue, newValue);
+            }
+        });
 
-		if (designatedListener != null) {
-			setOnMouseClicked((event) -> {
-				if (!fetchWebcamChecked(getText())) {
-					setEditable(false);
-					return;
-				}
+        if (designatedListener != null) {
+            setOnMouseClicked((event) -> {
+                if (!fetchWebcamChecked(getText())) {
+                    setEditable(false);
+                    return;
+                }
 
-				if (event.getClickCount() > 1 && fetchWebcamChecked(getText())) {
-					setEditable(true);
-					startEdit();
-				}
+                if (event.getClickCount() > 1 && fetchWebcamChecked(getText())) {
+                    setEditable(true);
+                    startEdit();
+                }
 
-				if (!event.isAltDown()) return;
+                if (!event.isAltDown())
+                    return;
 
-				cancelEdit();
+                cancelEdit();
 
-				// If camera is not checked, don't designate it and start
-				// editing
-				if (!fetchWebcamChecked(getText())) {
-					startEdit();
-					return;
-				}
+                // If camera is not checked, don't designate it and start
+                // editing
+                if (!fetchWebcamChecked(getText())) {
+                    startEdit();
+                    return;
+                }
 
-				if (getStyle().isEmpty()) {
-					setStyle("-fx-background-color: green");
-					designatedListener.registerShotRecorder(getText());
-				} else {
-					setStyle("");
-					designatedListener.unregisterShotRecorder(getText());
-				}
+                if (getStyle().isEmpty()) {
+                    setStyle("-fx-background-color: green");
+                    designatedListener.registerShotRecorder(getText());
+                } else {
+                    setStyle("");
+                    designatedListener.unregisterShotRecorder(getText());
+                }
 
-				final Optional<Pane> webcamContainer = fetchWebcamControls(CheckableImageListCell.this.getText());
+                final Optional<Pane> webcamContainer = fetchWebcamControls(CheckableImageListCell.this.getText());
 
-				if (webcamContainer.isPresent()) {
-					setGraphic(webcamContainer.get());
-				}
-			});
-		}
-	}
+                if (webcamContainer.isPresent()) {
+                    setGraphic(webcamContainer.get());
+                }
+            });
+        }
+    }
 
-	public static void createImageCache(List<Camera> webcams, CameraSelectionListener listener) {
-		for (final Camera c : webcams) {
-			if (containerCache.containsKey(c)) continue;
+    public static void createImageCache(List<Camera> webcams, CameraSelectionListener listener) {
+        for (final Camera c : webcams) {
+            if (containerCache.containsKey(c))
+                continue;
 
-			cacheCamera(c, listener);
-		}
-	}
+            cacheCamera(c, listener);
+        }
+    }
 
-	@Override
-	public void updateItem(String item, boolean empty) {
-		super.updateItem(item, empty);
+    @Override
+    public void updateItem(String item, boolean empty) {
+        super.updateItem(item, empty);
 
-		if (empty || item == null) {
-			setGraphic(null);
-			setText(null);
-			return;
-		}
+        if (empty || item == null) {
+            setGraphic(null);
+            setText(null);
+            return;
+        }
 
-		if (recordingCameras.isPresent()) {
-			for (final Camera recordingCamera : recordingCameras.get()) {
-				if (recordingCamera.getName().equals(item)) {
-					setStyle("-fx-background-color: green");
-					break;
-				}
-			}
-		}
+        if (recordingCameras.isPresent()) {
+            for (final Camera recordingCamera : recordingCameras.get()) {
+                if (recordingCamera.getName().equals(item)) {
+                    setStyle("-fx-background-color: green");
+                    break;
+                }
+            }
+        }
 
-		final Optional<Pane> webcamContainer = fetchWebcamControls(item);
+        final Optional<Pane> webcamContainer = fetchWebcamControls(item);
 
-		if (webcamContainer.isPresent()) {
-			setGraphic(webcamContainer.get());
-		}
+        if (webcamContainer.isPresent()) {
+            setGraphic(webcamContainer.get());
+        }
 
-		setText(item);
-	}
+        setText(item);
+    }
 
-	public static void cacheCamera(Camera c, CameraSelectionListener listener) {
-		final ImageView iv = new ImageView();
-		iv.setFitWidth(100);
-		iv.setFitHeight(75);
+    public static void cacheCamera(Camera c, CameraSelectionListener listener) {
+        final ImageView iv = new ImageView();
+        iv.setFitWidth(100);
+        iv.setFitHeight(75);
 
-		new Thread(() -> {
-			final Optional<Image> img = fetchWebcamImage(c);
+        new Thread(() -> {
+            final Optional<Image> img = fetchWebcamImage(c);
 
-			if (img.isPresent()) {
-				iv.setImage(img.get());
-			}
-		}, "FetchImageCellWebcamImages").start();
+            if (img.isPresent()) {
+                iv.setImage(img.get());
+            }
+        }, "FetchImageCellWebcamImages").start();
 
-		final CheckBox cb = new CheckBox();
-		cb.setOnAction((event) -> {
-			if (listener != null) listener.cameraSelectionChanged(c, cb.isSelected());
-		});
-		checkCache.put(c, cb);
+        final CheckBox cb = new CheckBox();
+        cb.setOnAction((event) -> {
+            if (listener != null)
+                listener.cameraSelectionChanged(c, cb.isSelected());
+        });
+        checkCache.put(c, cb);
 
-		final HBox webcamContainer = new HBox(cb, iv);
-		webcamContainer.setAlignment(Pos.CENTER);
-		containerCache.put(c, webcamContainer);
-	}
+        final HBox webcamContainer = new HBox(cb, iv);
+        webcamContainer.setAlignment(Pos.CENTER);
+        containerCache.put(c, webcamContainer);
+    }
 
-	public interface CameraRenamedListener {
-		void cameraRenamed(String oldName, String newName);
-	}
+    public interface CameraRenamedListener {
+        void cameraRenamed(String oldName, String newName);
+    }
 
-	public interface CameraSelectionListener {
-		void cameraSelectionChanged(Camera camera, boolean isSelected);
-	}
+    public interface CameraSelectionListener {
+        void cameraSelectionChanged(Camera camera, boolean isSelected);
+    }
 
-	public static Map<Camera, CheckBox> getCameraCheckBoxes() {
-		return checkCache;
-	}
+    public static Map<Camera, CheckBox> getCameraCheckBoxes() {
+        return checkCache;
+    }
 
-	private Optional<Pane> fetchWebcamControls(String webcamName) {
-		Optional<Pane> webcamContainer = Optional.empty();
+    private Optional<Pane> fetchWebcamControls(String webcamName) {
+        Optional<Pane> webcamContainer = Optional.empty();
 
-		if (configuredNames == null) {
-			webcamContainer = fetchUnrenamedWebcamControls(webcamName);
-		} else {
-			try {
-				final int cameraIndex = configuredNames.indexOf(webcamName);
-				if (cameraIndex >= 0) {
-					webcamContainer = Optional.of(containerCache.get(configuredCameras.get(cameraIndex)));
-				} else {
-					webcamContainer = fetchUnrenamedWebcamControls(webcamName);
-				}
-			} catch (final NullPointerException e) {
-				logger.error("Error fetching cached controls for configured camera: " + webcamName, e);
-				throw e;
-			}
-		}
+        if (configuredNames == null) {
+            webcamContainer = fetchUnrenamedWebcamControls(webcamName);
+        } else {
+            try {
+                final int cameraIndex = configuredNames.indexOf(webcamName);
+                if (cameraIndex >= 0) {
+                    webcamContainer = Optional.of(containerCache.get(configuredCameras.get(cameraIndex)));
+                } else {
+                    webcamContainer = fetchUnrenamedWebcamControls(webcamName);
+                }
+            } catch (final NullPointerException e) {
+                logger.error("Error fetching cached controls for configured camera: " + webcamName, e);
+                throw e;
+            }
+        }
 
-		return webcamContainer;
-	}
+        return webcamContainer;
+    }
 
-	private Optional<Pane> fetchUnrenamedWebcamControls(String webcamName) {
-		for (final Camera webcam : webcams) {
-			if (webcam.getName().equals(webcamName)) {
-				return Optional.of(containerCache.get(webcam));
-			}
-		}
+    private Optional<Pane> fetchUnrenamedWebcamControls(String webcamName) {
+        for (final Camera webcam : webcams) {
+            if (webcam.getName().equals(webcamName)) {
+                return Optional.of(containerCache.get(webcam));
+            }
+        }
 
-		return Optional.empty();
-	}
+        return Optional.empty();
+    }
 
-	private boolean fetchWebcamChecked(String webcamName) {
-		boolean isChecked = false;
+    private boolean fetchWebcamChecked(String webcamName) {
+        boolean isChecked = false;
 
-		if (configuredNames == null) {
-			isChecked = fetchUnrenamedWebcamChecked(webcamName);
-		} else {
-			try {
-				final int cameraIndex = configuredNames.indexOf(webcamName);
-				if (cameraIndex >= 0) {
-					isChecked = checkCache.get(configuredCameras.get(cameraIndex)).isSelected();
-				} else {
-					isChecked = fetchUnrenamedWebcamChecked(webcamName);
-				}
-			} catch (final NullPointerException e) {
-				logger.error("Error fetching cached check state for configured camera: " + webcamName, e);
-				throw e;
-			}
-		}
+        if (configuredNames == null) {
+            isChecked = fetchUnrenamedWebcamChecked(webcamName);
+        } else {
+            try {
+                final int cameraIndex = configuredNames.indexOf(webcamName);
+                if (cameraIndex >= 0) {
+                    isChecked = checkCache.get(configuredCameras.get(cameraIndex)).isSelected();
+                } else {
+                    isChecked = fetchUnrenamedWebcamChecked(webcamName);
+                }
+            } catch (final NullPointerException e) {
+                logger.error("Error fetching cached check state for configured camera: " + webcamName, e);
+                throw e;
+            }
+        }
 
-		return isChecked;
-	}
+        return isChecked;
+    }
 
-	private boolean fetchUnrenamedWebcamChecked(String webcamName) {
-		for (final Camera webcam : webcams) {
-			if (webcam.getName().equals(webcamName)) {
-				return checkCache.get(webcam).isSelected();
-			}
-		}
+    private boolean fetchUnrenamedWebcamChecked(String webcamName) {
+        for (final Camera webcam : webcams) {
+            if (webcam.getName().equals(webcamName)) {
+                return checkCache.get(webcam).isSelected();
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private static Optional<Image> fetchWebcamImage(Camera webcam) {
-		boolean cameraOpened = false;
+    private static Optional<Image> fetchWebcamImage(Camera webcam) {
+        boolean cameraOpened = false;
 
-		synchronized (webcam) {
-			if (!webcam.isOpen()) {
-				webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
-				webcam.open();
-				cameraOpened = true;
-			}
+        synchronized (webcam) {
+            if (!webcam.isOpen()) {
+                webcam.setViewSize(new Dimension(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT));
+                webcam.open();
+                cameraOpened = true;
+            }
 
-			Image webcamImg = null;
-			if (webcam.isOpen()) {
-				final BufferedImage img = webcam.getBufferedImage();
+            Image webcamImg = null;
+            if (webcam.isOpen()) {
+                final BufferedImage img = webcam.getBufferedImage();
 
-				if (img != null) {
-					webcamImg = SwingFXUtils.toFXImage(img, null);
-				}
-			}
+                if (img != null) {
+                    webcamImg = SwingFXUtils.toFXImage(img, null);
+                }
+            }
 
-			if (cameraOpened == true) {
-				webcam.close();
-			}
+            if (cameraOpened == true) {
+                webcam.close();
+            }
 
-			return Optional.ofNullable(webcamImg);
-		}
-	}
+            return Optional.ofNullable(webcamImg);
+        }
+    }
 }

@@ -26,63 +26,63 @@ import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 
 public interface TrainingExercise {
-	/**
-	 * Any exercise specific initialization that needs to use exercise API
-	 * methods should call them in this method instead of the constructor,
-	 * otherwise the API may not be initialized yet.
-	 */
-	public void init();
+    /**
+     * Any exercise specific initialization that needs to use exercise API
+     * methods should call them in this method instead of the constructor,
+     * otherwise the API may not be initialized yet.
+     */
+    public void init();
 
-	public enum TargetChange {
-		ADDED, REMOVED
-	};
+    public enum TargetChange {
+        ADDED, REMOVED
+    };
 
-	/**
-	 * Called when a target is added or removed from any webcam feed or arena.
-	 * 
-	 * @param target
-	 *            the target that was changed in some way
-	 * @param change
-	 *            what happened to <code>target</code>
-	 */
-	public void targetUpdate(Target target, TargetChange change);
+    /**
+     * Called when a target is added or removed from any webcam feed or arena.
+     * 
+     * @param target
+     *            the target that was changed in some way
+     * @param change
+     *            what happened to <code>target</code>
+     */
+    public void targetUpdate(Target target, TargetChange change);
 
-	/**
-	 * Called when a training exercise is first loaded to retrive information
-	 * about the plugin that is displayable to the user.
-	 * 
-	 * @return a <tt>ExerciseMetadata</tt> object initialized with the data for
-	 *         the loaded training exercise
-	 */
-	public ExerciseMetadata getInfo();
+    /**
+     * Called when a training exercise is first loaded to retrive information
+     * about the plugin that is displayable to the user.
+     * 
+     * @return a <tt>ExerciseMetadata</tt> object initialized with the data for
+     *         the loaded training exercise
+     */
+    public ExerciseMetadata getInfo();
 
-	/**
-	 * Called whenever a shot is detected. If the shot hit a target, hitRegion
-	 * will be set.
-	 * 
-	 * @param shot
-	 *            the detect shot
-	 * @param hit
-	 *            empty if no target was hit, otherwise contains the specific
-	 *            target and region in the target that was hit as well as shot
-	 *            coordinates adjusted to be relative to the top left corner of
-	 *            the region that was shot.
-	 */
-	public void shotListener(Shot shot, Optional<Hit> hit);
+    /**
+     * Called whenever a shot is detected. If the shot hit a target, hitRegion
+     * will be set.
+     * 
+     * @param shot
+     *            the detect shot
+     * @param hit
+     *            empty if no target was hit, otherwise contains the specific
+     *            target and region in the target that was hit as well as shot
+     *            coordinates adjusted to be relative to the top left corner of
+     *            the region that was shot.
+     */
+    public void shotListener(Shot shot, Optional<Hit> hit);
 
-	/**
-	 * Called when the reset button is hit or a reset target is shot. The
-	 * training exercise should reset to its initial state here.
-	 * 
-	 * @param targets
-	 *            a list of all of the targets currently added to webcam feeds
-	 */
-	public void reset(List<Target> targets);
+    /**
+     * Called when the reset button is hit or a reset target is shot. The
+     * training exercise should reset to its initial state here.
+     * 
+     * @param targets
+     *            a list of all of the targets currently added to webcam feeds
+     */
+    public void reset(List<Target> targets);
 
-	/**
-	 * Called when a training exercise is being unloaded by the framework. This
-	 * method must call super.destroy() otherwise an exception will occur when
-	 * exercises are switched.
-	 */
-	public void destroy();
+    /**
+     * Called when a training exercise is being unloaded by the framework. This
+     * method must call super.destroy() otherwise an exception will occur when
+     * exercises are switched.
+     */
+    public void destroy();
 }

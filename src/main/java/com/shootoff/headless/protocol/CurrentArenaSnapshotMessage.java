@@ -19,25 +19,25 @@
 package com.shootoff.headless.protocol;
 
 public class CurrentArenaSnapshotMessage extends Message {
-	private final int[] arenaSnapshotPixels;
-	private final int width;
-	private final int height;
+    private final int[] arenaSnapshotPixels;
+    private final int width;
+    private final int height;
 
-	public CurrentArenaSnapshotMessage(int[] arenaSnapshotPixels, int width, int height) {
-		this.arenaSnapshotPixels = arenaSnapshotPixels;
-		this.width = width;
-		this.height = height;
-	}
+    public CurrentArenaSnapshotMessage(int[] arenaSnapshotPixels, int width, int height) {
+        this.arenaSnapshotPixels = arenaSnapshotPixels;
+        this.width = width;
+        this.height = height;
+    }
 
-	public int[] getArenaSnapshotPixels() {
-		return arenaSnapshotPixels;
-	}
+    public int[] getArenaSnapshotPixels() {
+        return arenaSnapshotPixels;
+    }
 
-	public int getWidth() {
-		return width;
-	}
+    public int getWidth() {
+        return width;
+    }
 
-	public int getHeight() {
-		return height;
-	}
+    public int getHeight() {
+        return height;
+    }
 }

@@ -33,42 +33,46 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 public class StreamDebuggerController implements CameraDebuggerListener {
-	private Stage streamDebuggerStage;
-	@FXML private ImageView thresholdImageView;
-	@FXML private Slider centerBorderSlider;
-	@FXML private Slider minDimSlider;
+    private Stage streamDebuggerStage;
+    @FXML
+    private ImageView thresholdImageView;
+    @FXML
+    private Slider centerBorderSlider;
+    @FXML
+    private Slider minDimSlider;
 
-	private String defaultWindowTitle = "";
+    private String defaultWindowTitle = "";
 
-	public void init(CameraManager cameraManager) {
-		streamDebuggerStage = (Stage) thresholdImageView.getScene().getWindow();
-		defaultWindowTitle = streamDebuggerStage.getTitle();
+    public void init(CameraManager cameraManager) {
+        streamDebuggerStage = (Stage) thresholdImageView.getScene().getWindow();
+        defaultWindowTitle = streamDebuggerStage.getTitle();
 
-		cameraManager.setThresholdListener(this);
+        cameraManager.setThresholdListener(this);
 
-		minDimSlider.valueProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-				if (newValue == null) return;
+        minDimSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+                if (newValue == null)
+                    return;
 
-				cameraManager.setMinimumShotDimension(newValue.intValue());
-			}
-		});
-	}
+                cameraManager.setMinimumShotDimension(newValue.intValue());
+            }
+        });
+    }
 
-	public ImageView getThresholdImageView() {
-		return thresholdImageView;
-	}
+    public ImageView getThresholdImageView() {
+        return thresholdImageView;
+    }
 
-	@Override
-	public void updateDebugView(BufferedImage debugImg) {
-		thresholdImageView.setImage(SwingFXUtils.toFXImage(debugImg, null));
-	}
+    @Override
+    public void updateDebugView(BufferedImage debugImg) {
+        thresholdImageView.setImage(SwingFXUtils.toFXImage(debugImg, null));
+    }
 
-	@Override
-	public void updateFeedData(double fps) {
-		Platform.runLater(() -> {
-			streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", fps));
-		});
-	}
+    @Override
+    public void updateFeedData(double fps) {
+        Platform.runLater(() -> {
+            streamDebuggerStage.setTitle(String.format(defaultWindowTitle + " %.2f FPS", fps));
+        });
+    }
 }

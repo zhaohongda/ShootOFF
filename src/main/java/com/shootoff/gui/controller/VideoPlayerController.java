@@ -55,197 +55,202 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 public class VideoPlayerController implements PlaybackListener {
-	@FXML private TabPane videoTabPane;
-	@FXML private Slider timeSlider;
-	@FXML private Label timeLabel;
-	@FXML private Button togglePlaybackButton;
+    @FXML
+    private TabPane videoTabPane;
+    @FXML
+    private Slider timeSlider;
+    @FXML
+    private Label timeLabel;
+    @FXML
+    private Button togglePlaybackButton;
 
-	private static final Logger logger = LoggerFactory.getLogger(VideoPlayerController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VideoPlayerController.class);
 
-	private final Map<String, PlaybackContext> contexts = new HashMap<>();
-	private PlaybackContext currentContext;
+    private final Map<String, PlaybackContext> contexts = new HashMap<>();
+    private PlaybackContext currentContext;
 
-	public void init(Map<String, File> videos) {
-		togglePlaybackButton.setGraphic(new ImageView(
-				new Image(VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
-		createTabs(videos);
-		currentContext = contexts.get(videoTabPane.getSelectionModel().getSelectedItem().getText());
-		timeSlider.setMax(currentContext.getDuration());
+    public void init(Map<String, File> videos) {
+        togglePlaybackButton.setGraphic(new ImageView(
+                new Image(VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
+        createTabs(videos);
+        currentContext = contexts.get(videoTabPane.getSelectionModel().getSelectedItem().getText());
+        timeSlider.setMax(currentContext.getDuration());
 
-		timeSlider.valueProperty().addListener(new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-				if (newValue == null) {
-					timeLabel.setText("");
-					return;
-				}
+        timeSlider.valueProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
+                if (newValue == null) {
+                    timeLabel.setText("");
+                    return;
+                }
 
-				setTime(newValue.longValue());
-			}
-		});
+                setTime(newValue.longValue());
+            }
+        });
 
-		videoTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
-			@Override
-			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-				togglePlaybackButton.setGraphic(new ImageView(new Image(
-						VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
+        videoTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+            @Override
+            public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+                togglePlaybackButton.setGraphic(new ImageView(new Image(
+                        VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
 
-				currentContext.pausePlayback();
-				currentContext = contexts.get(newValue.getText());
+                currentContext.pausePlayback();
+                currentContext = contexts.get(newValue.getText());
 
-				timeSlider.setMax(currentContext.getDuration());
-				timeSlider.setValue(currentContext.getTimestamp());
-			}
-		});
-	}
+                timeSlider.setMax(currentContext.getDuration());
+                timeSlider.setValue(currentContext.getTimestamp());
+            }
+        });
+    }
 
-	private void setTime(long timestamp /* ms */) {
-		final Date date = new Date(timestamp);
-		final DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
-		timeLabel.setText(formatter.format(date));
-	}
+    private void setTime(long timestamp /* ms */) {
+        final Date date = new Date(timestamp);
+        final DateFormat formatter = new SimpleDateFormat("mm:ss:SSS");
+        timeLabel.setText(formatter.format(date));
+    }
 
-	@Override
-	public void frameUpdated(long timestamp) {
-		timeSlider.setValue(timestamp);
+    @Override
+    public void frameUpdated(long timestamp) {
+        timeSlider.setValue(timestamp);
 
-		if (timestamp == currentContext.getDuration()) {
-			togglePlaybackButton.setGraphic(new ImageView(new Image(
-					VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
-		}
-	}
+        if (timestamp == currentContext.getDuration()) {
+            togglePlaybackButton.setGraphic(new ImageView(new Image(
+                    VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
+        }
+    }
 
-	private static class PlaybackContext extends MediaListenerAdapter {
-		private final IMediaReader mediaReader;
-		private final PlaybackListener listener;
-		private final long duration;
-		private boolean isPlaying = false;
-		private final ImageView imageView = new ImageView();
-		private boolean doDelay = true;
-		private long lastTimestamp = 0;
+    private static class PlaybackContext extends MediaListenerAdapter {
+        private final IMediaReader mediaReader;
+        private final PlaybackListener listener;
+        private final long duration;
+        private boolean isPlaying = false;
+        private final ImageView imageView = new ImageView();
+        private boolean doDelay = true;
+        private long lastTimestamp = 0;
 
-		public PlaybackContext(File videoFile, PlaybackListener listener) {
-			this.listener = listener;
+        public PlaybackContext(File videoFile, PlaybackListener listener) {
+            this.listener = listener;
 
-			mediaReader = ToolFactory.makeReader(videoFile.getPath());
-			mediaReader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
-			mediaReader.open();
-			duration = mediaReader.getContainer().getDuration() / 1000; // microseconds
-			// to
-			// milliseconds
-			mediaReader.addListener(this);
-		}
+            mediaReader = ToolFactory.makeReader(videoFile.getPath());
+            mediaReader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
+            mediaReader.open();
+            duration = mediaReader.getContainer().getDuration() / 1000; // microseconds
+            // to
+            // milliseconds
+            mediaReader.addListener(this);
+        }
 
-		public long getDuration() {
-			return duration;
-		}
+        public long getDuration() {
+            return duration;
+        }
 
-		public long getTimestamp() {
-			return lastTimestamp;
-		}
+        public long getTimestamp() {
+            return lastTimestamp;
+        }
 
-		@Override
-		public void onVideoPicture(IVideoPictureEvent event) {
-			final long currentTimestamp = event.getTimeStamp(TimeUnit.MILLISECONDS);
+        @Override
+        public void onVideoPicture(IVideoPictureEvent event) {
+            final long currentTimestamp = event.getTimeStamp(TimeUnit.MILLISECONDS);
 
-			if (doDelay) {
-				try {
-					final long delay = currentTimestamp - lastTimestamp;
-					Thread.sleep(delay);
-				} catch (final InterruptedException e) {
-					logger.error("Error while reading video frames", e);
-				}
-			}
+            if (doDelay) {
+                try {
+                    final long delay = currentTimestamp - lastTimestamp;
+                    Thread.sleep(delay);
+                } catch (final InterruptedException e) {
+                    logger.error("Error while reading video frames", e);
+                }
+            }
 
-			lastTimestamp = currentTimestamp;
-			imageView.setImage(SwingFXUtils.toFXImage(event.getImage(), null));
-			if (isPlaying || !doDelay) Platform.runLater(() -> listener.frameUpdated(currentTimestamp));
-		}
+            lastTimestamp = currentTimestamp;
+            imageView.setImage(SwingFXUtils.toFXImage(event.getImage(), null));
+            if (isPlaying || !doDelay)
+                Platform.runLater(() -> listener.frameUpdated(currentTimestamp));
+        }
 
-		private void playVideo() {
-			new Thread(() -> {
-				IError ret = mediaReader.readPacket();
-				while (isPlaying && ret == null) {
-					ret = mediaReader.readPacket();
-				}
+        private void playVideo() {
+            new Thread(() -> {
+                IError ret = mediaReader.readPacket();
+                while (isPlaying && ret == null) {
+                    ret = mediaReader.readPacket();
+                }
 
-				// ret is null if movie was paused
-				if (ret != null && ret.getType() == IError.Type.ERROR_EOF) {
-					isPlaying = false;
-					lastTimestamp = getDuration();
-					Platform.runLater(() -> listener.frameUpdated(getDuration()));
-				}
-			}, "PlayVideo").start();
-		}
+                // ret is null if movie was paused
+                if (ret != null && ret.getType() == IError.Type.ERROR_EOF) {
+                    isPlaying = false;
+                    lastTimestamp = getDuration();
+                    Platform.runLater(() -> listener.frameUpdated(getDuration()));
+                }
+            }, "PlayVideo").start();
+        }
 
-		private void playFromBeginning() {
-			lastTimestamp = 0;
-			mediaReader.open();
-			mediaReader.getContainer().seekKeyFrame(0, 0, 0, 0, IContainer.SEEK_FLAG_ANY);
-			playVideo();
-		}
+        private void playFromBeginning() {
+            lastTimestamp = 0;
+            mediaReader.open();
+            mediaReader.getContainer().seekKeyFrame(0, 0, 0, 0, IContainer.SEEK_FLAG_ANY);
+            playVideo();
+        }
 
-		public void nextFrame() {
-			doDelay = false;
-			mediaReader.readPacket();
-			doDelay = true;
-		}
+        public void nextFrame() {
+            doDelay = false;
+            mediaReader.readPacket();
+            doDelay = true;
+        }
 
-		public void pausePlayback() {
-			isPlaying = false;
-		}
+        public void pausePlayback() {
+            isPlaying = false;
+        }
 
-		public void togglePlayback() {
-			isPlaying = !isPlaying;
+        public void togglePlayback() {
+            isPlaying = !isPlaying;
 
-			if (isPlaying) {
-				if (lastTimestamp != getDuration()) {
-					playVideo();
-				} else {
-					playFromBeginning();
-				}
-			}
-		}
+            if (isPlaying) {
+                if (lastTimestamp != getDuration()) {
+                    playVideo();
+                } else {
+                    playFromBeginning();
+                }
+            }
+        }
 
-		public boolean isPlaying() {
-			return isPlaying;
-		}
+        public boolean isPlaying() {
+            return isPlaying;
+        }
 
-		public ImageView getImageView() {
-			return imageView;
-		}
-	}
+        public ImageView getImageView() {
+            return imageView;
+        }
+    }
 
-	private void createTabs(Map<String, File> videos) {
-		for (final Entry<String, File> video : videos.entrySet()) {
-			final Tab videoTab = new Tab(video.getKey());
-			videoTabPane.getTabs().add(videoTab);
+    private void createTabs(Map<String, File> videos) {
+        for (final Entry<String, File> video : videos.entrySet()) {
+            final Tab videoTab = new Tab(video.getKey());
+            videoTabPane.getTabs().add(videoTab);
 
-			final PlaybackContext context = new PlaybackContext(video.getValue(), this);
-			videoTab.setContent(context.getImageView());
-			contexts.put(video.getKey(), context);
-		}
-	}
+            final PlaybackContext context = new PlaybackContext(video.getValue(), this);
+            videoTab.setContent(context.getImageView());
+            contexts.put(video.getKey(), context);
+        }
+    }
 
-	@FXML
-	public void nextButtonClicked(ActionEvent event) {
-		currentContext.nextFrame();
-	}
+    @FXML
+    public void nextButtonClicked(ActionEvent event) {
+        currentContext.nextFrame();
+    }
 
-	@FXML
-	public void togglePlaybackButtonClicked(ActionEvent event) {
-		currentContext.togglePlayback();
+    @FXML
+    public void togglePlaybackButtonClicked(ActionEvent event) {
+        currentContext.togglePlayback();
 
-		if (currentContext.isPlaying()) {
-			togglePlaybackButton.setGraphic(new ImageView(new Image(
-					VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_pause.png"))));
-		} else {
-			togglePlaybackButton.setGraphic(new ImageView(new Image(
-					VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
-		}
-	}
+        if (currentContext.isPlaying()) {
+            togglePlaybackButton.setGraphic(new ImageView(new Image(
+                    VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_pause.png"))));
+        } else {
+            togglePlaybackButton.setGraphic(new ImageView(new Image(
+                    VideoPlayerController.class.getResourceAsStream("/images/gnome_media_playback_start.png"))));
+        }
+    }
 
-	public Stage getStage() {
-		return (Stage) togglePlaybackButton.getScene().getWindow();
-	}
+    public Stage getStage() {
+        return (Stage) togglePlaybackButton.getScene().getWindow();
+    }
 }

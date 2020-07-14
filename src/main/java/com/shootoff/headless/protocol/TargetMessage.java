@@ -21,13 +21,13 @@ package com.shootoff.headless.protocol;
 import java.util.UUID;
 
 public class TargetMessage extends Message {
-	private final UUID uuid;
+    private final UUID uuid;
 
-	public TargetMessage(UUID uuid) {
-		this.uuid = uuid;
-	}
+    public TargetMessage(UUID uuid) {
+        this.uuid = uuid;
+    }
 
-	public UUID getUuid() {
-		return uuid;
-	}
+    public UUID getUuid() {
+        return uuid;
+    }
 }

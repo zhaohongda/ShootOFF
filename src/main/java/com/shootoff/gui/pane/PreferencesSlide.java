@@ -29,30 +29,30 @@ import com.shootoff.gui.controller.PreferencesController;
 import javafx.scene.layout.Pane;
 
 public class PreferencesSlide extends Slide {
-	private static final Logger logger = LoggerFactory.getLogger(PreferencesSlide.class);
+    private static final Logger logger = LoggerFactory.getLogger(PreferencesSlide.class);
 
-	private boolean saved = false;
+    private boolean saved = false;
 
-	public PreferencesSlide(Pane parentControls, Pane parentBody, PreferencesController preferencesController) {
-		super(parentControls, parentBody);
+    public PreferencesSlide(Pane parentControls, Pane parentBody, PreferencesController preferencesController) {
+        super(parentControls, parentBody);
 
-		addSlideControlButton("Save", (event) -> {
-			try {
-				preferencesController.save();
-			} catch (ConfigurationException | IOException e) {
-				logger.error("Failed to save preferences", e);
-			}
+        addSlideControlButton("Save", (event) -> {
+            try {
+                preferencesController.save();
+            } catch (ConfigurationException | IOException e) {
+                logger.error("Failed to save preferences", e);
+            }
 
-			saved = true;
-			hide();
-		});
+            saved = true;
+            hide();
+        });
 
-		preferencesController.prepareToShow();
+        preferencesController.prepareToShow();
 
-		addBodyNode(preferencesController.getPane());
-	}
+        addBodyNode(preferencesController.getPane());
+    }
 
-	public boolean isSaved() {
-		return saved;
-	}
+    public boolean isSaved() {
+        return saved;
+    }
 }

@@ -21,7 +21,7 @@ package com.shootoff.headless.protocol;
 import java.util.UUID;
 
 public class RemoveTargetMessage extends TargetMessage {
-	public RemoveTargetMessage(UUID uuid) {
-		super(uuid);
-	}
+    public RemoveTargetMessage(UUID uuid) {
+        super(uuid);
+    }
 }

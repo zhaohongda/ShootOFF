@@ -21,13 +21,13 @@ package com.shootoff.headless.protocol;
 import com.shootoff.plugins.ExerciseMetadata;
 
 public class SetExerciseMessage extends Message {
-	private final ExerciseMetadata newExercise;
+    private final ExerciseMetadata newExercise;
 
-	public SetExerciseMessage(ExerciseMetadata newExercise) {
-		this.newExercise = newExercise;
-	}
+    public SetExerciseMessage(ExerciseMetadata newExercise) {
+        this.newExercise = newExercise;
+    }
 
-	public ExerciseMetadata getNewExercise() {
-		return newExercise;
-	}
+    public ExerciseMetadata getNewExercise() {
+        return newExercise;
+    }
 }

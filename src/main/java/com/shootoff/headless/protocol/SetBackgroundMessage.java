@@ -19,19 +19,19 @@
 package com.shootoff.headless.protocol;
 
 public class SetBackgroundMessage extends Message {
-	private final String name;
-	private final String resourceName;
+    private final String name;
+    private final String resourceName;
 
-	public SetBackgroundMessage(String name, String resourceName) {
-		this.name = name;
-		this.resourceName = resourceName;
-	}
+    public SetBackgroundMessage(String name, String resourceName) {
+        this.name = name;
+        this.resourceName = resourceName;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getResourceName() {
-		return resourceName;
-	}
+    public String getResourceName() {
+        return resourceName;
+    }
 }

@@ -30,41 +30,41 @@ import com.shootoff.gui.pane.ProjectorArenaPane;
 import com.shootoff.targets.Target;
 
 public class CourseIO {
-	private static final Logger logger = LoggerFactory.getLogger(CourseIO.class);
+    private static final Logger logger = LoggerFactory.getLogger(CourseIO.class);
 
-	public static void saveCourse(ProjectorArenaPane arenaPane, final File courseFile) {
-		CourseVisitor visitor;
+    public static void saveCourse(ProjectorArenaPane arenaPane, final File courseFile) {
+        CourseVisitor visitor;
 
-		if (courseFile.getName().endsWith("course")) {
-			visitor = new XMLCourseWriter(courseFile);
-		} else {
-			logger.error("Unknown course file type.");
-			return;
-		}
+        if (courseFile.getName().endsWith("course")) {
+            visitor = new XMLCourseWriter(courseFile);
+        } else {
+            logger.error("Unknown course file type.");
+            return;
+        }
 
-		if (arenaPane.getArenaBackground().isPresent()) {
-			final LocatedImage background = arenaPane.getArenaBackground().get();
-			visitor.visitBackground(background.getURL(), background.isResource());
-		}
+        if (arenaPane.getArenaBackground().isPresent()) {
+            final LocatedImage background = arenaPane.getArenaBackground().get();
+            visitor.visitBackground(background.getURL(), background.isResource());
+        }
 
-		for (final Target t : arenaPane.getCanvasManager().getTargets()) {
-			final File relativeTargetFile = new File(t.getTargetFile().getAbsolutePath()
-					.replace(System.getProperty("shootoff.home") + File.separator, ""));
-			visitor.visitTarget(relativeTargetFile, t.getPosition().getX(), t.getPosition().getY(),
-					t.getDimension().getWidth(), t.getDimension().getHeight());
-		}
+        for (final Target t : arenaPane.getCanvasManager().getTargets()) {
+            final File relativeTargetFile = new File(t.getTargetFile().getAbsolutePath()
+                    .replace(System.getProperty("shootoff.home") + File.separator, ""));
+            visitor.visitTarget(relativeTargetFile, t.getPosition().getX(), t.getPosition().getY(),
+                    t.getDimension().getWidth(), t.getDimension().getHeight());
+        }
 
-		visitor.visitResolution(arenaPane.getWidth(), arenaPane.getHeight());
+        visitor.visitResolution(arenaPane.getWidth(), arenaPane.getHeight());
 
-		visitor.visitEnd();
-	}
+        visitor.visitEnd();
+    }
 
-	public static Optional<Course> loadCourse(ProjectorArenaPane arenaPane, final File courseFile) {
-		if (!courseFile.getName().endsWith("course")) {
-			logger.error("Unknown course file type.");
-			return Optional.empty();
-		}
+    public static Optional<Course> loadCourse(ProjectorArenaPane arenaPane, final File courseFile) {
+        if (!courseFile.getName().endsWith("course")) {
+            logger.error("Unknown course file type.");
+            return Optional.empty();
+        }
 
-		return new XMLCourseReader(arenaPane, courseFile).load();
-	}
+        return new XMLCourseReader(arenaPane, courseFile).load();
+    }
 }

@@ -49,149 +49,148 @@ import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
 
 public class XMLSessionReader {
-	private final Logger logger = LoggerFactory.getLogger(XMLSessionReader.class);
+    private final Logger logger = LoggerFactory.getLogger(XMLSessionReader.class);
 
-	private final File sessionFile;
+    private final File sessionFile;
 
-	private long lastTimestamp;
-	private boolean exerciseFeedMessage = false;
+    private long lastTimestamp;
+    private boolean exerciseFeedMessage = false;
 
-	public XMLSessionReader(File sessionFile) {
-		this.sessionFile = sessionFile;
-	}
+    public XMLSessionReader(File sessionFile) {
+        this.sessionFile = sessionFile;
+    }
 
-	public Map<String, List<Event>> load() {
-		InputStream xmlInput = null;
-		try {
-			xmlInput = new FileInputStream(sessionFile);
-			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-			final SessionXMLHandler handler = new SessionXMLHandler();
-			saxParser.parse(xmlInput, handler);
+    public Map<String, List<Event>> load() {
+        InputStream xmlInput = null;
+        try {
+            xmlInput = new FileInputStream(sessionFile);
+            final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+            final SessionXMLHandler handler = new SessionXMLHandler();
+            saxParser.parse(xmlInput, handler);
 
-			return handler.getEvents();
-		} catch (IOException | ParserConfigurationException | SAXException e) {
-			logger.error("Error reading XML session", e);
-		} finally {
-			if (xmlInput != null) {
-				try {
-					xmlInput.close();
-				} catch (final IOException e) {
-					logger.error("Error closing XML session opened for reading", e);
-				}
-			}
-		}
+            return handler.getEvents();
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            logger.error("Error reading XML session", e);
+        } finally {
+            if (xmlInput != null) {
+                try {
+                    xmlInput.close();
+                } catch (final IOException e) {
+                    logger.error("Error closing XML session opened for reading", e);
+                }
+            }
+        }
 
-		return new HashMap<>();
-	}
+        return new HashMap<>();
+    }
 
-	private class SessionXMLHandler extends DefaultHandler {
-		private final Map<String, List<Event>> events = new HashMap<>();
-		private String currentCameraName = "";
+    private class SessionXMLHandler extends DefaultHandler {
+        private final Map<String, List<Event>> events = new HashMap<>();
+        private String currentCameraName = "";
 
-		public Map<String, List<Event>> getEvents() {
-			return events;
-		}
+        public Map<String, List<Event>> getEvents() {
+            return events;
+        }
 
-		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes)
-				throws SAXException {
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes)
+                throws SAXException {
 
-			switch (qName) {
-			case "camera":
-				currentCameraName = attributes.getValue("name");
-				events.put(currentCameraName, new ArrayList<Event>());
-				break;
+            switch (qName) {
+            case "camera":
+                currentCameraName = attributes.getValue("name");
+                events.put(currentCameraName, new ArrayList<Event>());
+                break;
 
-			case "shot":
-				ShotColor c;
+            case "shot":
+                ShotColor c;
 
-				if (attributes.getValue("color").equals("0xff0000ff") || attributes.getValue("color").equals("RED")) {
-					c = ShotColor.RED;
-				}
-				else if (attributes.getValue("color").equals("0xffa500ff") || attributes.getValue("color").equals("INFRARED"))
-				{
-					c = ShotColor.INFRARED;
-				} else {
-					c = ShotColor.GREEN;
-				}
+                if (attributes.getValue("color").equals("0xff0000ff") || attributes.getValue("color").equals("RED")) {
+                    c = ShotColor.RED;
+                } else if (attributes.getValue("color").equals("0xffa500ff")
+                        || attributes.getValue("color").equals("INFRARED")) {
+                    c = ShotColor.INFRARED;
+                } else {
+                    c = ShotColor.GREEN;
+                }
 
-				final DisplayShot shot = new DisplayShot(c, Double.parseDouble(attributes.getValue("x")),
-						Double.parseDouble(attributes.getValue("y")),
-						Long.parseLong(attributes.getValue("shotTimestamp")),
-						Integer.parseInt(attributes.getValue("markerRadius")));
+                final DisplayShot shot = new DisplayShot(c, Double.parseDouble(attributes.getValue("x")),
+                        Double.parseDouble(attributes.getValue("y")),
+                        Long.parseLong(attributes.getValue("shotTimestamp")),
+                        Integer.parseInt(attributes.getValue("markerRadius")));
 
-				final boolean isMalfunction = Boolean.parseBoolean(attributes.getValue("isMalfunction"));
+                final boolean isMalfunction = Boolean.parseBoolean(attributes.getValue("isMalfunction"));
 
-				final boolean isReload = Boolean.parseBoolean(attributes.getValue("isReload"));
+                final boolean isReload = Boolean.parseBoolean(attributes.getValue("isReload"));
 
-				Optional<Integer> targetIndex;
-				int index = Integer.parseInt(attributes.getValue("targetIndex"));
-				if (index == -1) {
-					targetIndex = Optional.empty();
-				} else {
-					targetIndex = Optional.of(index);
-				}
+                Optional<Integer> targetIndex;
+                int index = Integer.parseInt(attributes.getValue("targetIndex"));
+                if (index == -1) {
+                    targetIndex = Optional.empty();
+                } else {
+                    targetIndex = Optional.of(index);
+                }
 
-				Optional<Integer> hitRegionIndex;
-				index = Integer.parseInt(attributes.getValue("hitRegionIndex"));
-				if (index == -1) {
-					hitRegionIndex = Optional.empty();
-				} else {
-					hitRegionIndex = Optional.of(index);
-				}
+                Optional<Integer> hitRegionIndex;
+                index = Integer.parseInt(attributes.getValue("hitRegionIndex"));
+                if (index == -1) {
+                    hitRegionIndex = Optional.empty();
+                } else {
+                    hitRegionIndex = Optional.of(index);
+                }
 
-				final Optional<String> videoString = Optional.ofNullable(attributes.getValue("videos"));
+                final Optional<String> videoString = Optional.ofNullable(attributes.getValue("videos"));
 
-				events.get(currentCameraName)
-				.add(new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot,
-						isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
+                events.get(currentCameraName)
+                        .add(new ShotEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")), shot,
+                                isMalfunction, isReload, targetIndex, hitRegionIndex, videoString));
 
-				break;
+                break;
 
-			case "targetAdded":
-				events.get(currentCameraName).add(new TargetAddedEvent(currentCameraName,
-						Long.parseLong(attributes.getValue("timestamp")), attributes.getValue("name")));
+            case "targetAdded":
+                events.get(currentCameraName).add(new TargetAddedEvent(currentCameraName,
+                        Long.parseLong(attributes.getValue("timestamp")), attributes.getValue("name")));
 
-				break;
+                break;
 
-			case "targetRemoved":
-				events.get(currentCameraName)
-				.add(new TargetRemovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
-						Integer.parseInt(attributes.getValue("index"))));
+            case "targetRemoved":
+                events.get(currentCameraName)
+                        .add(new TargetRemovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
+                                Integer.parseInt(attributes.getValue("index"))));
 
-				break;
+                break;
 
-			case "targetResized":
-				events.get(currentCameraName)
-				.add(new TargetResizedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
-						Integer.parseInt(attributes.getValue("index")),
-						Double.parseDouble(attributes.getValue("newWidth")),
-						Double.parseDouble(attributes.getValue("newHeight"))));
+            case "targetResized":
+                events.get(currentCameraName)
+                        .add(new TargetResizedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
+                                Integer.parseInt(attributes.getValue("index")),
+                                Double.parseDouble(attributes.getValue("newWidth")),
+                                Double.parseDouble(attributes.getValue("newHeight"))));
 
-				break;
+                break;
 
-			case "targetMoved":
-				events.get(currentCameraName)
-				.add(new TargetMovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
-						Integer.parseInt(attributes.getValue("index")),
-						Integer.parseInt(attributes.getValue("newX")),
-						Integer.parseInt(attributes.getValue("newY"))));
-				break;
+            case "targetMoved":
+                events.get(currentCameraName)
+                        .add(new TargetMovedEvent(currentCameraName, Long.parseLong(attributes.getValue("timestamp")),
+                                Integer.parseInt(attributes.getValue("index")),
+                                Integer.parseInt(attributes.getValue("newX")),
+                                Integer.parseInt(attributes.getValue("newY"))));
+                break;
 
-			case "exerciseFeedMessage":
-				lastTimestamp = Long.parseLong(attributes.getValue("timestamp"));
-				exerciseFeedMessage = true;
-			}
-		}
+            case "exerciseFeedMessage":
+                lastTimestamp = Long.parseLong(attributes.getValue("timestamp"));
+                exerciseFeedMessage = true;
+            }
+        }
 
-		@Override
-		public void characters(char ch[], int start, int length) throws SAXException {
-			if (exerciseFeedMessage) {
-				events.get(currentCameraName).add(
-						new ExerciseFeedMessageEvent(currentCameraName, lastTimestamp, new String(ch, start, length)));
+        @Override
+        public void characters(char ch[], int start, int length) throws SAXException {
+            if (exerciseFeedMessage) {
+                events.get(currentCameraName).add(
+                        new ExerciseFeedMessageEvent(currentCameraName, lastTimestamp, new String(ch, start, length)));
 
-				exerciseFeedMessage = false;
-			}
-		}
-	}
+                exerciseFeedMessage = false;
+            }
+        }
+    }
 }

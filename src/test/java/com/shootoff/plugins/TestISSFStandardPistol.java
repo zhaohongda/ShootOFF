@@ -39,215 +39,217 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.control.TableView;
 
 public class TestISSFStandardPistol {
-	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+    @Rule
+    public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private PrintStream originalOut;
-	private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
-	private PrintStream stringOutStream;
-	private List<Target> targets;
-	private ISSFStandardPistol issfExercise;
-	private Hit scoredRegionHit;
-	private int regionScore;
+    private PrintStream originalOut;
+    private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
+    private PrintStream stringOutStream;
+    private List<Target> targets;
+    private ISSFStandardPistol issfExercise;
+    private Hit scoredRegionHit;
+    private int regionScore;
 
-	@Before
-	public void setUp() throws UnsupportedEncodingException, ConfigurationException {
-		new JFXPanel(); // Initialize the JFX toolkit
+    @Before
+    public void setUp() throws UnsupportedEncodingException, ConfigurationException {
+        new JFXPanel(); // Initialize the JFX toolkit
 
-		stringOutStream = new PrintStream(stringOut, false, "UTF-8");
-		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+        stringOutStream = new PrintStream(stringOut, false, "UTF-8");
+        System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
-		TextToSpeech.silence(true);
-		TrainingExerciseBase.silence(true);
-		originalOut = System.out;
-		System.setOut(stringOutStream);
+        TextToSpeech.silence(true);
+        TrainingExerciseBase.silence(true);
+        originalOut = System.out;
+        System.setOut(stringOutStream);
 
-		Configuration config = new Configuration(new String[0]);
-		config.setDebugMode(true);
+        Configuration config = new Configuration(new String[0]);
+        config.setDebugMode(true);
 
-		CamerasSupervisor cs = new CamerasSupervisor(config);
+        CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		targets = new ArrayList<Target>();
-		TargetComponents tc = TargetIO.loadTarget(new File("targets/ISSF.target")).get();
-		TargetView issfTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
-		targets.add(issfTarget);
-		scoredRegionHit = new MockHit(issfTarget, (TargetRegion) issfTarget.getTargetGroup().getChildren().get(0), 0, 0);
-		regionScore = Integer.parseInt(scoredRegionHit.getHitRegion().getTag("points"));
+        targets = new ArrayList<Target>();
+        TargetComponents tc = TargetIO.loadTarget(new File("targets/ISSF.target")).get();
+        TargetView issfTarget = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
+        targets.add(issfTarget);
+        scoredRegionHit = new MockHit(issfTarget, (TargetRegion) issfTarget.getTargetGroup().getChildren().get(0), 0,
+                0);
+        regionScore = Integer.parseInt(scoredRegionHit.getHitRegion().getTag("points"));
 
-		issfExercise = new ISSFStandardPistol(targets);
-		TableView<ShotEntry> shotTimerTable = new TableView<ShotEntry>();
-		ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
-		shotEntries
-				.add(new ShotEntry(new DisplayShot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(), false, false));
-		shotTimerTable.setItems(shotEntries);
-		issfExercise.init(config, cs, null, shotTimerTable);
-		issfExercise.init(0, 0);
-	}
+        issfExercise = new ISSFStandardPistol(targets);
+        TableView<ShotEntry> shotTimerTable = new TableView<ShotEntry>();
+        ObservableList<ShotEntry> shotEntries = FXCollections.observableArrayList();
+        shotEntries.add(new ShotEntry(new DisplayShot(ShotColor.RED, 0, 0, 0, 2), Optional.empty(), Optional.empty(),
+                false, false));
+        shotTimerTable.setItems(shotEntries);
+        issfExercise.init(config, cs, null, shotTimerTable);
+        issfExercise.init(0, 0);
+    }
 
-	@After
-	public void tearDown() {
-		TextToSpeech.silence(false);
-		TrainingExerciseBase.silence(false);
-		System.setOut(originalOut);
+    @After
+    public void tearDown() {
+        TextToSpeech.silence(false);
+        TrainingExerciseBase.silence(false);
+        System.setOut(originalOut);
 
-		issfExercise.destroy();
+        issfExercise.destroy();
 
-		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		rootLogger.detachAndStopAllAppenders();
-	}
+        Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        rootLogger.detachAndStopAllAppenders();
+    }
 
-	private String getScoreString(int roundOne, int roundTwo, int roundThree, boolean roundOver, boolean gameOver) {
-		String scoreString = String.format("150s score: %d%n20s score: %d%n10s score: %d%ntotal score: %d%n", roundOne,
-				roundTwo, roundThree, roundOne + roundTwo + roundThree);
+    private String getScoreString(int roundOne, int roundTwo, int roundThree, boolean roundOver, boolean gameOver) {
+        String scoreString = String.format("150s score: %d%n20s score: %d%n10s score: %d%ntotal score: %d%n", roundOne,
+                roundTwo, roundThree, roundOne + roundTwo + roundThree);
 
-		if (gameOver) {
-			return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nEvent over... Your score is 60%n")
-					.replace('/', File.separatorChar);
-		}
+        if (gameOver) {
+            return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nEvent over... Your score is 60%n")
+                    .replace('/', File.separatorChar);
+        }
 
-		if (roundOver) {
-			return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nsounds/beep.wav%n").replace('/',
-					File.separatorChar);
-		}
+        if (roundOver) {
+            return scoreString + String.format("sounds/voice/shootoff-roundover.wav%nsounds/beep.wav%n").replace('/',
+                    File.separatorChar);
+        }
 
-		return scoreString;
-	}
+        return scoreString;
+    }
 
-	@Test
-	public void testFullRound() throws UnsupportedEncodingException {
-		assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"),
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-		stringOut.reset();
+    @Test
+    public void testFullRound() throws UnsupportedEncodingException {
+        assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"),
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+        stringOut.reset();
 
-		// 150s round 1-4
-		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+        // 150s round 1-4
+        for (int i = 0; i < 4; i++) {
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            // (regionScore * 5 * i) = last round's score
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
+        }
 
-		// 20s round 1-4
-		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+        // 20s round 1-4
+        for (int i = 0; i < 4; i++) {
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            // (regionScore * 5 * i) = last round's score
+            assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 2, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 2, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 3, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 3, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 4, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 4, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 5, 0, true, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, (regionScore * 5 * i) + regionScore * 5, 0, true, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
+        }
 
-		// 10s round 1-4
-		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore, false,
-					false), stringOut.toString("UTF-8"));
-			stringOut.reset();
+        // 10s round 1-4
+        for (int i = 0; i < 4; i++) {
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            // (regionScore * 5 * i) = last round's score
+            assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore, false,
+                    false), stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 2,
-					false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 2,
+                    false, false), stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 3,
-					false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 3,
+                    false, false), stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 4,
-					false, false), stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 4,
+                    false, false), stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			boolean gameOver = i == 3;
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 5,
-					true, gameOver), stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
-	}
+            boolean gameOver = i == 3;
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString(regionScore * 20, regionScore * 20, (regionScore * 5 * i) + regionScore * 5,
+                    true, gameOver), stringOut.toString("UTF-8"));
+            stringOut.reset();
+        }
+    }
 
-	@Test
-	public void testFull150sThenReset() throws UnsupportedEncodingException {
-		assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"),
-				stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
-		stringOut.reset();
+    @Test
+    public void testFull150sThenReset() throws UnsupportedEncodingException {
+        assertEquals(String.format("sounds/voice/shootoff-makeready.wav%nsounds/beep.wav%n"),
+                stringOut.toString("UTF-8").replace(File.separatorChar, '/'));
+        stringOut.reset();
 
-		// 150s round 1-4
-		for (int i = 0; i < 4; i++) {
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			// (regionScore * 5 * i) = last round's score
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+        // 150s round 1-4
+        for (int i = 0; i < 4; i++) {
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            // (regionScore * 5 * i) = last round's score
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 2, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 3, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 4, 0, 0, false, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
 
-			issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-			assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false),
-					stringOut.toString("UTF-8"));
-			stringOut.reset();
-		}
+            issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+            assertEquals(getScoreString((regionScore * 5 * i) + regionScore * 5, 0, 0, true, false),
+                    stringOut.toString("UTF-8"));
+            stringOut.reset();
+        }
 
-		issfExercise.reset(targets);
+        issfExercise.reset(targets);
 
-		issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
-		// (regionScore * 5 * i) = last round's score
-		assertEquals(String.format("%n") + getScoreString(regionScore, 0, 0, false, false),
-				stringOut.toString("UTF-8"));
-		stringOut.reset();
-	}
+        issfExercise.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(scoredRegionHit));
+        // (regionScore * 5 * i) = last round's score
+        assertEquals(String.format("%n") + getScoreString(regionScore, 0, 0, false, false),
+                stringOut.toString("UTF-8"));
+        stringOut.reset();
+    }
 }

@@ -36,116 +36,118 @@ import com.shootoff.targets.TargetRegion;
  *
  */
 public class ParForScore extends TimedHolsterDrill implements ParListener {
-	protected double parTime = 2.0;
+    protected double parTime = 2.0;
 
-	private final static String POINTS_COL_NAME = "Score";
-	private final static int POINTS_COL_WIDTH = 60;
+    private final static String POINTS_COL_NAME = "Score";
+    private final static int POINTS_COL_WIDTH = 60;
 
-	private int redScore = 0;
-	private int greenScore = 0;
+    private int redScore = 0;
+    private int greenScore = 0;
 
-	protected boolean countScore = false;
+    protected boolean countScore = false;
 
-	public ParForScore() {}
+    public ParForScore() {
+    }
 
-	public ParForScore(List<Target> targets) {
-		super(targets);
-	}
+    public ParForScore(List<Target> targets) {
+        super(targets);
+    }
 
-	@Override
-	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("PAR Drill with Score", "1.0", "Edward Kort",
-				"This exercise does not require a target, but one may be used "
-						+ "to give the shooter something to shoot at. If a target with "
-						+ "score areas is used, the scores are displayed and tracked. "
-						+ "When the exercise is started you are asked to enter a range "
-						+ "for randomly delayed starts, and for the interval (PAR time) "
-						+ "in which those scores will be counted. You are then given 10 "
-						+ "seconds to position yourself. After a random wait (within "
-						+ "the entered range) a beep tells you to draw the pistol from "
-						+ "its holster and fire at your target; a chime signals the end "
-						+ "of the Par time, to finally re-holster. This process is "
-						+ "repeated as long as this exercise is on.");
-	}
+    @Override
+    public ExerciseMetadata getInfo() {
+        return new ExerciseMetadata("PAR Drill with Score", "1.0", "Edward Kort",
+                "This exercise does not require a target, but one may be used "
+                        + "to give the shooter something to shoot at. If a target with "
+                        + "score areas is used, the scores are displayed and tracked. "
+                        + "When the exercise is started you are asked to enter a range "
+                        + "for randomly delayed starts, and for the interval (PAR time) "
+                        + "in which those scores will be counted. You are then given 10 "
+                        + "seconds to position yourself. After a random wait (within "
+                        + "the entered range) a beep tells you to draw the pistol from "
+                        + "its holster and fire at your target; a chime signals the end "
+                        + "of the Par time, to finally re-holster. This process is "
+                        + "repeated as long as this exercise is on.");
+    }
 
-	@Override
-	protected void initUI() {
-		super.initUI();
-		addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
-	}
+    @Override
+    protected void initUI() {
+        super.initUI();
+        addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
+    }
 
-	@Override
-	protected int setupRound() {
-		countScore = true;
-		final int delay = super.setupRound();
+    @Override
+    protected int setupRound() {
+        countScore = true;
+        final int delay = super.setupRound();
 
-		return delay;
-	}
+        return delay;
+    }
 
-	@Override
-	protected void doRound() {
-		super.doRound();
-		try {
-			Thread.sleep((long) (parTime * 1000.));
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
-		TrainingExerciseBase.playSound("sounds/chime.wav");
-		pauseShotDetection(true);
-		countScore = false;
-	}
+    @Override
+    protected void doRound() {
+        super.doRound();
+        try {
+            Thread.sleep((long) (parTime * 1000.));
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
+        TrainingExerciseBase.playSound("sounds/chime.wav");
+        pauseShotDetection(true);
+        countScore = false;
+    }
 
-	/*
-	 * This method merges shotListener for TimedHolsterDrill and ShootForScore.
-	 */
-	@Override
-	public void shotListener(Shot shot, Optional<Hit> hit) {
-		super.shotListener(shot, hit);
+    /*
+     * This method merges shotListener for TimedHolsterDrill and ShootForScore.
+     */
+    @Override
+    public void shotListener(Shot shot, Optional<Hit> hit) {
+        super.shotListener(shot, hit);
 
-		if (!hit.isPresent() || !countScore) return;
+        if (!hit.isPresent() || !countScore)
+            return;
 
-		final TargetRegion r = hit.get().getHitRegion();
-		if (r.tagExists("points")) {
-			setPoints(shot.getColor(), r.getTag("points"));
-		}
-	}
+        final TargetRegion r = hit.get().getHitRegion();
+        if (r.tagExists("points")) {
+            setPoints(shot.getColor(), r.getTag("points"));
+        }
+    }
 
-	protected void setPoints(ShotColor shotColor, String points) {
-		setShotTimerColumnText(POINTS_COL_NAME, points);
+    protected void setPoints(ShotColor shotColor, String points) {
+        setShotTimerColumnText(POINTS_COL_NAME, points);
 
-		if (shotColor.equals(ShotColor.RED) || shotColor.equals(ShotColor.INFRARED)) {
-			redScore += Integer.parseInt(points);
-		} else if (shotColor.equals(ShotColor.GREEN)) {
-			greenScore += Integer.parseInt(points);
-		}
+        if (shotColor.equals(ShotColor.RED) || shotColor.equals(ShotColor.INFRARED)) {
+            redScore += Integer.parseInt(points);
+        } else if (shotColor.equals(ShotColor.GREEN)) {
+            greenScore += Integer.parseInt(points);
+        }
 
-		String message = "score: 0";
+        String message = "score: 0";
 
-		if (redScore > 0 && greenScore > 0) {
-			message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
-		}
+        if (redScore > 0 && greenScore > 0) {
+            message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
+        }
 
-		if (redScore > 0 && greenScore > 0) {
-			message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
-		} else if (redScore > 0) {
-			message = String.format("red score: %d", redScore);
-		} else if (greenScore > 0) {
-			message = String.format("green score: %d", greenScore);
-		}
+        if (redScore > 0 && greenScore > 0) {
+            message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
+        } else if (redScore > 0) {
+            message = String.format("red score: %d", redScore);
+        } else if (greenScore > 0) {
+            message = String.format("green score: %d", greenScore);
+        }
 
-		showTextOnFeed(message);
-	}
+        showTextOnFeed(message);
+    }
 
-	@Override
-	protected void resetValues() {
-		redScore = 0;
-		greenScore = 0;
-		showTextOnFeed("score: 0");
-		getParInterval(this);
-	}
+    @Override
+    protected void resetValues() {
+        redScore = 0;
+        greenScore = 0;
+        showTextOnFeed("score: 0");
+        getParInterval(this);
+    }
 
-	@Override
-	public void updatedParInterval(double parTime) {
-		this.parTime = parTime;
-	}
+    @Override
+    public void updatedParInterval(double parTime) {
+        this.parTime = parTime;
+    }
 }

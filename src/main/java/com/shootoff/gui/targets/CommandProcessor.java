@@ -22,5 +22,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface CommandProcessor {
-	public void process(List<String> commands, String commandName, List<String> args);
+    public void process(List<String> commands, String commandName, List<String> args);
 }

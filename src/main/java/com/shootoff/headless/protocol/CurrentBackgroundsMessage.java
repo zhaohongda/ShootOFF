@@ -22,13 +22,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CurrentBackgroundsMessage extends Message {
-	private final Map<String, String> backgrounds;
+    private final Map<String, String> backgrounds;
 
-	public CurrentBackgroundsMessage(Map<String, String> backgrounds) {
-		this.backgrounds = new HashMap<>(backgrounds);
-	}
+    public CurrentBackgroundsMessage(Map<String, String> backgrounds) {
+        this.backgrounds = new HashMap<>(backgrounds);
+    }
 
-	public Map<String, String> getBackgrounds() {
-		return backgrounds;
-	}
+    public Map<String, String> getBackgrounds() {
+        return backgrounds;
+    }
 }

@@ -60,247 +60,250 @@ import javafx.stage.Stage;
  * @author phrack
  */
 public class SessionCanvasManager {
-	private final Group canvas;
-	private final Label exerciseLabel = new Label();
-	private final Map<Event, TargetView> eventToContainer = new HashMap<>();
-	private final Map<Event, Point2D> eventToPosition = new HashMap<>();
-	private final Map<Event, String> eventToExerciseMessage = new HashMap<>();
-	private final Map<Event, Dimension2D> eventToDimension = new HashMap<>();
-	private final List<TargetView> targetViews = new ArrayList<>();
-	private final List<Target> targets = new ArrayList<>();
-	private final Configuration config;
+    private final Group canvas;
+    private final Label exerciseLabel = new Label();
+    private final Map<Event, TargetView> eventToContainer = new HashMap<>();
+    private final Map<Event, Point2D> eventToPosition = new HashMap<>();
+    private final Map<Event, String> eventToExerciseMessage = new HashMap<>();
+    private final Map<Event, Dimension2D> eventToDimension = new HashMap<>();
+    private final List<TargetView> targetViews = new ArrayList<>();
+    private final List<Target> targets = new ArrayList<>();
+    private final Configuration config;
 
-	public SessionCanvasManager(final Group canvas, final Configuration config) {
-		this.canvas = canvas;
-		this.config = config;
-		canvas.getChildren().add(exerciseLabel);
-	}
+    public SessionCanvasManager(final Group canvas, final Configuration config) {
+        this.canvas = canvas;
+        this.config = config;
+        canvas.getChildren().add(exerciseLabel);
+    }
 
-	public void doEvent(final Event e) {
-		switch (e.getType()) {
-		case SHOT:
-			if (!(e instanceof ShotEvent)) {
-				throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
-			}
+    public void doEvent(final Event e) {
+        switch (e.getType()) {
+        case SHOT:
+            if (!(e instanceof ShotEvent)) {
+                throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
+            }
 
-			final ShotEvent se = (ShotEvent) e;
-			canvas.getChildren().add(se.getShot().getMarker());
+            final ShotEvent se = (ShotEvent) e;
+            canvas.getChildren().add(se.getShot().getMarker());
 
-			if (se.isMalfunction()) {
-				se.getShot().getMarker().setFill(Color.ORANGE);
-			} else if (se.isReload()) {
-				se.getShot().getMarker().setFill(Color.LIGHTSKYBLUE);
-			}
+            if (se.isMalfunction()) {
+                se.getShot().getMarker().setFill(Color.ORANGE);
+            } else if (se.isReload()) {
+                se.getShot().getMarker().setFill(Color.LIGHTSKYBLUE);
+            }
 
-			se.getShot().getMarker().setVisible(true);
+            se.getShot().getMarker().setVisible(true);
 
-			if (se.getVideoString().isPresent()) {
-				se.getShot().getMarker().setOnMouseClicked((event) -> {
-					if (event.getClickCount() < 2) return;
+            if (se.getVideoString().isPresent()) {
+                se.getShot().getMarker().setOnMouseClicked((event) -> {
+                    if (event.getClickCount() < 2)
+                        return;
 
-					final FXMLLoader loader = new FXMLLoader(
-							getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
-					try {
-						loader.load();
-					} catch (final IOException ioe) {
-						ioe.printStackTrace();
-					}
+                    final FXMLLoader loader = new FXMLLoader(
+                            getClass().getClassLoader().getResource("com/shootoff/gui/VideoPlayer.fxml"));
+                    try {
+                        loader.load();
+                    } catch (final IOException ioe) {
+                        ioe.printStackTrace();
+                    }
 
-					final Stage videoPlayerStage = new Stage();
+                    final Stage videoPlayerStage = new Stage();
 
-					final VideoPlayerController controller = (VideoPlayerController) loader.getController();
-					controller.init(se.getVideos());
+                    final VideoPlayerController controller = (VideoPlayerController) loader.getController();
+                    controller.init(se.getVideos());
 
-					videoPlayerStage.setTitle("Video Player");
-					videoPlayerStage.setScene(new Scene(loader.getRoot()));
-					videoPlayerStage.show();
+                    videoPlayerStage.setTitle("Video Player");
+                    videoPlayerStage.setScene(new Scene(loader.getRoot()));
+                    videoPlayerStage.show();
 
-					config.registerVideoPlayer(controller);
-					controller.getStage().setOnCloseRequest((closeEvent) -> {
-						config.unregisterVideoPlayer(controller);
-					});
-				});
-			}
+                    config.registerVideoPlayer(controller);
+                    controller.getStage().setOnCloseRequest((closeEvent) -> {
+                        config.unregisterVideoPlayer(controller);
+                    });
+                });
+            }
 
-			if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
-				animateTarget(se, false);
-			}
+            if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
+                animateTarget(se, false);
+            }
 
-			break;
+            break;
 
-		case TARGET_ADDED:
-			if (!(e instanceof TargetAddedEvent)) {
-				throw new AssertionError("Expected type TargetAddedEvent but got type " + e.getClass().getName());
-			}
+        case TARGET_ADDED:
+            if (!(e instanceof TargetAddedEvent)) {
+                throw new AssertionError("Expected type TargetAddedEvent but got type " + e.getClass().getName());
+            }
 
-			addTarget((TargetAddedEvent) e);
-			break;
+            addTarget((TargetAddedEvent) e);
+            break;
 
-		case TARGET_REMOVED:
-			if (!(e instanceof TargetRemovedEvent)) {
-				throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
-			}
+        case TARGET_REMOVED:
+            if (!(e instanceof TargetRemovedEvent)) {
+                throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
+            }
 
-			final TargetRemovedEvent tre = (TargetRemovedEvent) e;
-			eventToContainer.put(e, targetViews.get(tre.getTargetIndex()));
-			canvas.getChildren().remove(targetViews.get(tre.getTargetIndex()).getTargetGroup());
-			targetViews.remove(tre.getTargetIndex());
-			targets.remove(tre.getTargetIndex());
-			break;
+            final TargetRemovedEvent tre = (TargetRemovedEvent) e;
+            eventToContainer.put(e, targetViews.get(tre.getTargetIndex()));
+            canvas.getChildren().remove(targetViews.get(tre.getTargetIndex()).getTargetGroup());
+            targetViews.remove(tre.getTargetIndex());
+            targets.remove(tre.getTargetIndex());
+            break;
 
-		case TARGET_RESIZED:
-			if (!(e instanceof TargetResizedEvent)) {
-				throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
-			}
+        case TARGET_RESIZED:
+            if (!(e instanceof TargetResizedEvent)) {
+                throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
+            }
 
-			final TargetResizedEvent trre = (TargetResizedEvent) e;
-			eventToDimension.put(e, targetViews.get(trre.getTargetIndex()).getDimension());
-			targetViews.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
-			break;
+            final TargetResizedEvent trre = (TargetResizedEvent) e;
+            eventToDimension.put(e, targetViews.get(trre.getTargetIndex()).getDimension());
+            targetViews.get(trre.getTargetIndex()).setDimensions(trre.getNewWidth(), trre.getNewHeight());
+            break;
 
-		case TARGET_MOVED:
-			if (!(e instanceof TargetMovedEvent)) {
-				throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
-			}
+        case TARGET_MOVED:
+            if (!(e instanceof TargetMovedEvent)) {
+                throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
+            }
 
-			final TargetMovedEvent tme = (TargetMovedEvent) e;
-			eventToPosition.put(e, targetViews.get(tme.getTargetIndex()).getPosition());
-			targetViews.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
-			break;
+            final TargetMovedEvent tme = (TargetMovedEvent) e;
+            eventToPosition.put(e, targetViews.get(tme.getTargetIndex()).getPosition());
+            targetViews.get(tme.getTargetIndex()).setPosition(tme.getNewX(), tme.getNewY());
+            break;
 
-		case EXERCISE_FEED_MESSAGE:
-			if (!(e instanceof ExerciseFeedMessageEvent)) {
-				throw new AssertionError(
-						"Expected type ExerciseFeedMessageEvent but got type " + e.getClass().getName());
-			}
+        case EXERCISE_FEED_MESSAGE:
+            if (!(e instanceof ExerciseFeedMessageEvent)) {
+                throw new AssertionError(
+                        "Expected type ExerciseFeedMessageEvent but got type " + e.getClass().getName());
+            }
 
-			final ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
-			eventToExerciseMessage.put(e, exerciseLabel.getText());
-			exerciseLabel.setText(pfme.getMessage());
-			break;
-		}
-	}
+            final ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
+            eventToExerciseMessage.put(e, exerciseLabel.getText());
+            exerciseLabel.setText(pfme.getMessage());
+            break;
+        }
+    }
 
-	public void undoEvent(Event e) {
-		switch (e.getType()) {
-		case SHOT:
-			if (!(e instanceof ShotEvent)) {
-				throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
-			}
+    public void undoEvent(Event e) {
+        switch (e.getType()) {
+        case SHOT:
+            if (!(e instanceof ShotEvent)) {
+                throw new AssertionError("Expected type ShotEvent but got type " + e.getClass().getName());
+            }
 
-			final ShotEvent se = (ShotEvent) e;
-			canvas.getChildren().remove(se.getShot().getMarker());
+            final ShotEvent se = (ShotEvent) e;
+            canvas.getChildren().remove(se.getShot().getMarker());
 
-			if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
-				animateTarget(se, true);
-			}
+            if (se.getTargetIndex().isPresent() && se.getHitRegionIndex().isPresent()) {
+                animateTarget(se, true);
+            }
 
-			break;
+            break;
 
-		case TARGET_ADDED:
-			canvas.getChildren().remove(eventToContainer.get(e).getTargetGroup());
-			targetViews.remove(eventToContainer.get(e));
-			targets.remove(eventToContainer.get(e));
-			break;
+        case TARGET_ADDED:
+            canvas.getChildren().remove(eventToContainer.get(e).getTargetGroup());
+            targetViews.remove(eventToContainer.get(e));
+            targets.remove(eventToContainer.get(e));
+            break;
 
-		case TARGET_REMOVED:
-			if (!(e instanceof TargetRemovedEvent)) {
-				throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
-			}
+        case TARGET_REMOVED:
+            if (!(e instanceof TargetRemovedEvent)) {
+                throw new AssertionError("Expected type TargetRemovedEvent but got type " + e.getClass().getName());
+            }
 
-			final TargetRemovedEvent tre = (TargetRemovedEvent) e;
-			final TargetView oldTarget = eventToContainer.get(e);
-			canvas.getChildren().add(oldTarget.getTargetGroup());
-			targetViews.add(tre.getTargetIndex(), oldTarget);
-			targets.add(tre.getTargetIndex(), oldTarget);
-			break;
+            final TargetRemovedEvent tre = (TargetRemovedEvent) e;
+            final TargetView oldTarget = eventToContainer.get(e);
+            canvas.getChildren().add(oldTarget.getTargetGroup());
+            targetViews.add(tre.getTargetIndex(), oldTarget);
+            targets.add(tre.getTargetIndex(), oldTarget);
+            break;
 
-		case TARGET_RESIZED:
-			if (!(e instanceof TargetResizedEvent)) {
-				throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
-			}
+        case TARGET_RESIZED:
+            if (!(e instanceof TargetResizedEvent)) {
+                throw new AssertionError("Expected type TargetResizedEvent but got type " + e.getClass().getName());
+            }
 
-			final TargetResizedEvent trre = (TargetResizedEvent) e;
-			final Dimension2D oldDimension = eventToDimension.get(e);
-			targetViews.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
-			break;
+            final TargetResizedEvent trre = (TargetResizedEvent) e;
+            final Dimension2D oldDimension = eventToDimension.get(e);
+            targetViews.get(trre.getTargetIndex()).setDimensions(oldDimension.getWidth(), oldDimension.getHeight());
+            break;
 
-		case TARGET_MOVED:
-			if (!(e instanceof TargetMovedEvent)) {
-				throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
-			}
+        case TARGET_MOVED:
+            if (!(e instanceof TargetMovedEvent)) {
+                throw new AssertionError("Expected type TargetMovedEvent but got type " + e.getClass().getName());
+            }
 
-			final TargetMovedEvent tme = (TargetMovedEvent) e;
-			final Point2D oldPosition = eventToPosition.get(e);
-			targetViews.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
-			break;
+            final TargetMovedEvent tme = (TargetMovedEvent) e;
+            final Point2D oldPosition = eventToPosition.get(e);
+            targetViews.get(tme.getTargetIndex()).setPosition(oldPosition.getX(), oldPosition.getY());
+            break;
 
-		case EXERCISE_FEED_MESSAGE:
-			exerciseLabel.setText(eventToExerciseMessage.get(e));
-			break;
-		}
-	}
+        case EXERCISE_FEED_MESSAGE:
+            exerciseLabel.setText(eventToExerciseMessage.get(e));
+            break;
+        }
+    }
 
-	private void animateTarget(ShotEvent se, boolean undo) {
-		final TargetView target = targetViews.get(se.getTargetIndex().get());
-		final TargetRegion region = (TargetRegion) target.getTargetGroup().getChildren()
-				.get(se.getHitRegionIndex().get());
+    private void animateTarget(ShotEvent se, boolean undo) {
+        final TargetView target = targetViews.get(se.getTargetIndex().get());
+        final TargetRegion region = (TargetRegion) target.getTargetGroup().getChildren()
+                .get(se.getHitRegionIndex().get());
 
-		if (!region.tagExists("command")) return;
+        if (!region.tagExists("command"))
+            return;
 
-		TargetView.parseCommandTag(region, (commands, commandName, args) -> {
-			if (!undo) {
-				switch (commandName) {
-				case "animate":
-					target.animate(region, args);
-					break;
+        TargetView.parseCommandTag(region, (commands, commandName, args) -> {
+            if (!undo) {
+                switch (commandName) {
+                case "animate":
+                    target.animate(region, args);
+                    break;
 
-				case "reverse":
-					target.reverseAnimation(region);
-					break;
-				}
-			} else {
-				// If we are undoing a reverse animation we should just play it
-				// like normal
-				if (commands.contains("reverse")) {
-					switch (commandName) {
-					case "animate":
-						target.animate(region, args);
-						break;
+                case "reverse":
+                    target.reverseAnimation(region);
+                    break;
+                }
+            } else {
+                // If we are undoing a reverse animation we should just play it
+                // like normal
+                if (commands.contains("reverse")) {
+                    switch (commandName) {
+                    case "animate":
+                        target.animate(region, args);
+                        break;
 
-					case "reverse":
-						target.reverseAnimation(region);
-						break;
-					}
-				} else {
-					// If we are undoing a non-reverse animation we need to
-					// reset the animated region
-					if ("animate".equals(commandName)) {
-						if (region.getType() == RegionType.IMAGE) {
-							((ImageRegion) region).reset();
-						} else {
-							final Optional<TargetRegion> t = TargetView
-									.getTargetRegionByName(new ArrayList<Target>(targetViews), region, args.get(0));
-							if (t.isPresent()) ((ImageRegion) t.get()).reset();
-						}
-					}
-				}
-			}
-		});
-	}
+                    case "reverse":
+                        target.reverseAnimation(region);
+                        break;
+                    }
+                } else {
+                    // If we are undoing a non-reverse animation we need to
+                    // reset the animated region
+                    if ("animate".equals(commandName)) {
+                        if (region.getType() == RegionType.IMAGE) {
+                            ((ImageRegion) region).reset();
+                        } else {
+                            final Optional<TargetRegion> t = TargetView
+                                    .getTargetRegionByName(new ArrayList<Target>(targetViews), region, args.get(0));
+                            if (t.isPresent())
+                                ((ImageRegion) t.get()).reset();
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-	private void addTarget(final TargetAddedEvent e) {
-		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(
-				new File(System.getProperty("shootoff.home") + File.separator + "targets/" + e.getTargetName()));
+    private void addTarget(final TargetAddedEvent e) {
+        final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(
+                new File(System.getProperty("shootoff.home") + File.separator + "targets/" + e.getTargetName()));
 
-		if (targetComponents.isPresent()) {
-			final TargetComponents tc = targetComponents.get();
+        if (targetComponents.isPresent()) {
+            final TargetComponents tc = targetComponents.get();
 
-			canvas.getChildren().add(tc.getTargetGroup());
-			final TargetView targetContainer = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
-			eventToContainer.put(e, targetContainer);
-			targetViews.add(targetContainer);
-			targets.add(targetContainer);
-		}
-	}
+            canvas.getChildren().add(tc.getTargetGroup());
+            final TargetView targetContainer = new TargetView(tc.getTargetGroup(), tc.getTargetTags(), targets);
+            eventToContainer.put(e, targetContainer);
+            targetViews.add(targetContainer);
+            targets.add(targetContainer);
+        }
+    }
 }

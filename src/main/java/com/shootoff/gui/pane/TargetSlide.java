@@ -41,140 +41,140 @@ import javafx.scene.layout.Pane;
 import marytts.util.io.FileFilter;
 
 public class TargetSlide extends Slide implements TargetListener, ItemSelectionListener<File> {
-	private static final Logger logger = LoggerFactory.getLogger(TargetSlide.class);
+    private static final Logger logger = LoggerFactory.getLogger(TargetSlide.class);
 
-	private final Pane parentControls;
-	private final Pane parentBody;
-	private final CameraViews cameraViews;
+    private final Pane parentControls;
+    private final Pane parentBody;
+    private final CameraViews cameraViews;
 
-	private final ItemSelectionPane<File> itemPane = new ItemSelectionPane<>(false, this);
+    private final ItemSelectionPane<File> itemPane = new ItemSelectionPane<>(false, this);
 
-	private enum Mode {
-		ADD, EDIT
-	};
+    private enum Mode {
+        ADD, EDIT
+    };
 
-	private Mode mode;
+    private Mode mode;
 
-	public TargetSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews) {
-		super(parentControls, parentBody);
+    public TargetSlide(Pane parentControls, Pane parentBody, CameraViews cameraViews) {
+        super(parentControls, parentBody);
 
-		this.parentControls = parentControls;
-		this.parentBody = parentBody;
+        this.parentControls = parentControls;
+        this.parentBody = parentBody;
 
-		addSlideControlButton("Add Target", (event) -> {
-			mode = Mode.ADD;
-			showBody();
-		});
+        addSlideControlButton("Add Target", (event) -> {
+            mode = Mode.ADD;
+            showBody();
+        });
 
-		addSlideControlButton("Create Target", (event) -> {
-			final Optional<FXMLLoader> loader = createTargetEditorStage();
+        addSlideControlButton("Create Target", (event) -> {
+            final Optional<FXMLLoader> loader = createTargetEditorStage();
 
-			if (loader.isPresent()) {
-				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
+            if (loader.isPresent()) {
+                final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
 
-				final Image currentFrame;
+                final Image currentFrame;
 
-				if (cameraViews.isArenaViewSelected()) {
-					final Pane backgroundPane = new Pane();
-					backgroundPane.setStyle("-fx-background-color: lightgray;");
-					backgroundPane.setPrefSize(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT);
-					currentFrame = backgroundPane.snapshot(new SnapshotParameters(), null);
-				} else {
-					final CameraManager currentCamera = cameraViews.getSelectedCameraManager();
-					currentFrame = currentCamera.getCurrentFrame();
-				}
+                if (cameraViews.isArenaViewSelected()) {
+                    final Pane backgroundPane = new Pane();
+                    backgroundPane.setStyle("-fx-background-color: lightgray;");
+                    backgroundPane.setPrefSize(CameraManager.DEFAULT_FEED_WIDTH, CameraManager.DEFAULT_FEED_HEIGHT);
+                    currentFrame = backgroundPane.snapshot(new SnapshotParameters(), null);
+                } else {
+                    final CameraManager currentCamera = cameraViews.getSelectedCameraManager();
+                    currentFrame = currentCamera.getCurrentFrame();
+                }
 
-				editorController.init(currentFrame, this);
+                editorController.init(currentFrame, this);
 
-				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody,
-						editorController);
-				targetEditorSlide.showControls();
-				targetEditorSlide.showBody();
-			}
-		});
+                final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody,
+                        editorController);
+                targetEditorSlide.showControls();
+                targetEditorSlide.showBody();
+            }
+        });
 
-		addSlideControlButton("Edit Target", (event) -> {
-			mode = Mode.EDIT;
-			showBody();
-		});
+        addSlideControlButton("Edit Target", (event) -> {
+            mode = Mode.EDIT;
+            showBody();
+        });
 
-		this.cameraViews = cameraViews;
+        this.cameraViews = cameraViews;
 
-		addBodyNode(itemPane);
+        addBodyNode(itemPane);
 
-		findTargets();
-	}
+        findTargets();
+    }
 
-	private void findTargets() {
-		final File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "targets");
+    private void findTargets() {
+        final File targetsFolder = new File(System.getProperty("shootoff.home") + File.separator + "targets");
 
-		final File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
+        final File[] targetFiles = targetsFolder.listFiles(new FileFilter("target"));
 
-		if (targetFiles != null) {
-			Arrays.sort(targetFiles);
-			for (final File file : targetFiles) {
-				newTarget(file);
-			}
-		} else {
-			logger.error("Failed to find target files because a list of files could not be retrieved");
-		}
-	}
+        if (targetFiles != null) {
+            Arrays.sort(targetFiles);
+            for (final File file : targetFiles) {
+                newTarget(file);
+            }
+        } else {
+            logger.error("Failed to find target files because a list of files could not be retrieved");
+        }
+    }
 
-	@Override
-	public void newTarget(File targetFile) {
-		final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
+    @Override
+    public void newTarget(File targetFile) {
+        final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
 
-		if (!targetComponents.isPresent()) {
-			logger.error("Notified of a new target that cannot be loaded: {}", targetFile.getAbsolutePath());
-			return;
-		}
+        if (!targetComponents.isPresent()) {
+            logger.error("Notified of a new target that cannot be loaded: {}", targetFile.getAbsolutePath());
+            return;
+        }
 
-		final Image targetImage = targetComponents.get().getTargetGroup().snapshot(new SnapshotParameters(), null);
-		final ImageView targetImageView = new ImageView(targetImage);
-		targetImageView.setFitWidth(60);
-		targetImageView.setFitHeight(60);
-		targetImageView.setPreserveRatio(true);
-		targetImageView.setSmooth(true);
+        final Image targetImage = targetComponents.get().getTargetGroup().snapshot(new SnapshotParameters(), null);
+        final ImageView targetImageView = new ImageView(targetImage);
+        targetImageView.setFitWidth(60);
+        targetImageView.setFitHeight(60);
+        targetImageView.setPreserveRatio(true);
+        targetImageView.setSmooth(true);
 
-		final String targetPath = targetFile.getPath();
-		final String targetName = targetPath
-				.substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
+        final String targetPath = targetFile.getPath();
+        final String targetName = targetPath
+                .substring(targetPath.lastIndexOf(File.separator) + 1, targetPath.lastIndexOf('.')).replace("_", " ");
 
-		itemPane.addButton(targetFile, targetName, Optional.of(targetImageView), Optional.empty());
-	}
+        itemPane.addButton(targetFile, targetName, Optional.of(targetImageView), Optional.empty());
+    }
 
-	private Optional<FXMLLoader> createTargetEditorStage() {
-		final FXMLLoader loader = new FXMLLoader(
-				getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
-		try {
-			loader.load();
-		} catch (final IOException e) {
-			logger.error("Cannot load TargetEditor.fxml", e);
-			return Optional.empty();
-		}
+    private Optional<FXMLLoader> createTargetEditorStage() {
+        final FXMLLoader loader = new FXMLLoader(
+                getClass().getClassLoader().getResource("com/shootoff/gui/TargetEditor.fxml"));
+        try {
+            loader.load();
+        } catch (final IOException e) {
+            logger.error("Cannot load TargetEditor.fxml", e);
+            return Optional.empty();
+        }
 
-		return Optional.of(loader);
-	}
+        return Optional.of(loader);
+    }
 
-	@Override
-	public void onItemClicked(File ref) {
-		if (Mode.ADD.equals(mode)) {
-			cameraViews.getSelectedCameraView().addTarget(ref);
-			hide();
-		} else {
-			final Optional<FXMLLoader> loader = createTargetEditorStage();
+    @Override
+    public void onItemClicked(File ref) {
+        if (Mode.ADD.equals(mode)) {
+            cameraViews.getSelectedCameraView().addTarget(ref);
+            hide();
+        } else {
+            final Optional<FXMLLoader> loader = createTargetEditorStage();
 
-			if (loader.isPresent()) {
-				final CameraManager currentCamera = cameraViews.getSelectedCameraManager();
-				final Image currentFrame = currentCamera.getCurrentFrame();
-				final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
-				editorController.init(currentFrame, this, ref);
+            if (loader.isPresent()) {
+                final CameraManager currentCamera = cameraViews.getSelectedCameraManager();
+                final Image currentFrame = currentCamera.getCurrentFrame();
+                final TargetEditorController editorController = (TargetEditorController) loader.get().getController();
+                editorController.init(currentFrame, this, ref);
 
-				final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody,
-						editorController);
-				targetEditorSlide.showControls();
-				targetEditorSlide.showBody();
-			}
-		}
-	}
+                final TargetEditorSlide targetEditorSlide = new TargetEditorSlide(parentControls, parentBody,
+                        editorController);
+                targetEditorSlide.showControls();
+                targetEditorSlide.showBody();
+            }
+        }
+    }
 }

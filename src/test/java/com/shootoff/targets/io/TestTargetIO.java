@@ -43,141 +43,143 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 
 public class TestTargetIO {
-	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+    @Rule
+    public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private Map<String, String> targetTags = new HashMap<>();
-	private List<Node> regions = new ArrayList<>();
-	private ImageRegion img;
-	private RectangleRegion rec;
-	private EllipseRegion ell;
-	private PolygonRegion pol;
-	private File tempXMLTarget;
+    private Map<String, String> targetTags = new HashMap<>();
+    private List<Node> regions = new ArrayList<>();
+    private ImageRegion img;
+    private RectangleRegion rec;
+    private EllipseRegion ell;
+    private PolygonRegion pol;
+    private File tempXMLTarget;
 
-	@Before
-	public void setUp() throws FileNotFoundException {
-		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+    @Before
+    public void setUp() throws FileNotFoundException {
+        System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
-		Map<String, String> imgTags = new HashMap<>();
-		imgTags.put("1", "2");
-		img = new ImageRegion(6, 6, new File("targets" + File.separator + "circle-plate.gif"));
-		img.setTags(imgTags);
+        Map<String, String> imgTags = new HashMap<>();
+        imgTags.put("1", "2");
+        img = new ImageRegion(6, 6, new File("targets" + File.separator + "circle-plate.gif"));
+        img.setTags(imgTags);
 
-		Map<String, String> recTags = new HashMap<>();
-		recTags.put("a", "b");
-		recTags.put("c", "d");
-		rec = new RectangleRegion(10, 40, 20, 90);
-		rec.setFill(Color.ORANGE);
-		rec.setTags(recTags);
+        Map<String, String> recTags = new HashMap<>();
+        recTags.put("a", "b");
+        recTags.put("c", "d");
+        rec = new RectangleRegion(10, 40, 20, 90);
+        rec.setFill(Color.ORANGE);
+        rec.setTags(recTags);
 
-		Map<String, String> ellTags = new HashMap<>();
-		ellTags.put("name", "value");
-		ell = new EllipseRegion(0, 20, 5, 5);
-		ell.setFill(Color.RED);
-		ell.setTags(ellTags);
+        Map<String, String> ellTags = new HashMap<>();
+        ellTags.put("name", "value");
+        ell = new EllipseRegion(0, 20, 5, 5);
+        ell.setFill(Color.RED);
+        ell.setTags(ellTags);
 
-		Map<String, String> polTags = new HashMap<>();
-		polTags.put("points", "3");
-		pol = new PolygonRegion(300, 0, 400, 30, 300, 100);
-		pol.setTags(polTags);
+        Map<String, String> polTags = new HashMap<>();
+        polTags.put("points", "3");
+        pol = new PolygonRegion(300, 0, 400, 30, 300, 100);
+        pol.setTags(polTags);
 
-		regions.add(img);
-		regions.add(rec);
-		regions.add(ell);
-		regions.add(pol);
+        regions.add(img);
+        regions.add(rec);
+        regions.add(ell);
+        regions.add(pol);
 
-		targetTags.put("A", "B");
-		targetTags.put("C", "D");
-		
-		tempXMLTarget = new File("temp.target");
-		TargetIO.saveTarget(targetTags, regions, tempXMLTarget);
-	}
+        targetTags.put("A", "B");
+        targetTags.put("C", "D");
 
-	@After
-	public void tearDown() {
-		if (!tempXMLTarget.delete()) System.err.println("Failed to delete " + tempXMLTarget.getPath());
-	}
+        tempXMLTarget = new File("temp.target");
+        TargetIO.saveTarget(targetTags, regions, tempXMLTarget);
+    }
 
-	private void checkTarget(TargetComponents targetComponents) {
-		for (Node node : targetComponents.getTargetGroup().getChildren()) {
-			TargetRegion region = (TargetRegion) node;
+    @After
+    public void tearDown() {
+        if (!tempXMLTarget.delete())
+            System.err.println("Failed to delete " + tempXMLTarget.getPath());
+    }
 
-			switch (region.getType()) {
-			case IMAGE:
-				ImageRegion img = (ImageRegion) region;
-				assertEquals(this.img.getX(), img.getX(), 0.5);
-				assertEquals(this.img.getY(), img.getY(), 0.5);
-				assertEquals(this.img.getImageFile().getAbsolutePath(), img.getImageFile().getAbsolutePath());
-				assertEquals("2", this.img.getTag("1"));
-				break;
-			case RECTANGLE:
-				RectangleRegion rec = (RectangleRegion) region;
-				assertEquals(this.rec.getX(), rec.getX(), 0.5);
-				assertEquals(this.rec.getY(), rec.getY(), 0.5);
-				assertEquals(this.rec.getWidth(), rec.getWidth(), 0.5);
-				assertEquals(this.rec.getHeight(), rec.getHeight(), 0.5);
-				assertEquals(this.rec.getFill(), rec.getFill());
-				assertEquals("b", this.rec.getTag("a"));
-				assertEquals("d", this.rec.getTag("c"));
-				break;
-			case ELLIPSE:
-				EllipseRegion ell = (EllipseRegion) region;
-				assertEquals(this.ell.getCenterX(), ell.getCenterX(), 0.5);
-				assertEquals(this.ell.getCenterY(), ell.getCenterY(), 0.5);
-				assertEquals(this.ell.getRadiusX(), ell.getRadiusX(), 0.5);
-				assertEquals(this.ell.getRadiusY(), ell.getRadiusY(), 0.5);
-				assertEquals(this.ell.getFill(), ell.getFill());
-				break;
-			case POLYGON:
-				PolygonRegion pol = (PolygonRegion) region;
-				assertEquals(this.pol.getPoints(), pol.getPoints());
-				assertEquals(this.pol.getFill(), pol.getFill());
-				break;
-			}
-		}
-		
-		for (Entry<String, String> entry : targetComponents.getTargetTags().entrySet()) {
-			assertTrue(targetTags.containsKey(entry.getKey()));
-			assertEquals(targetTags.get(entry.getKey()), entry.getValue());
-		}
-	}
+    private void checkTarget(TargetComponents targetComponents) {
+        for (Node node : targetComponents.getTargetGroup().getChildren()) {
+            TargetRegion region = (TargetRegion) node;
 
-	@Test
-	public void testXMLSerializationFile() {
-		Optional<TargetComponents> targetComponents = TargetIO.loadTarget(tempXMLTarget);
+            switch (region.getType()) {
+            case IMAGE:
+                ImageRegion img = (ImageRegion) region;
+                assertEquals(this.img.getX(), img.getX(), 0.5);
+                assertEquals(this.img.getY(), img.getY(), 0.5);
+                assertEquals(this.img.getImageFile().getAbsolutePath(), img.getImageFile().getAbsolutePath());
+                assertEquals("2", this.img.getTag("1"));
+                break;
+            case RECTANGLE:
+                RectangleRegion rec = (RectangleRegion) region;
+                assertEquals(this.rec.getX(), rec.getX(), 0.5);
+                assertEquals(this.rec.getY(), rec.getY(), 0.5);
+                assertEquals(this.rec.getWidth(), rec.getWidth(), 0.5);
+                assertEquals(this.rec.getHeight(), rec.getHeight(), 0.5);
+                assertEquals(this.rec.getFill(), rec.getFill());
+                assertEquals("b", this.rec.getTag("a"));
+                assertEquals("d", this.rec.getTag("c"));
+                break;
+            case ELLIPSE:
+                EllipseRegion ell = (EllipseRegion) region;
+                assertEquals(this.ell.getCenterX(), ell.getCenterX(), 0.5);
+                assertEquals(this.ell.getCenterY(), ell.getCenterY(), 0.5);
+                assertEquals(this.ell.getRadiusX(), ell.getRadiusX(), 0.5);
+                assertEquals(this.ell.getRadiusY(), ell.getRadiusY(), 0.5);
+                assertEquals(this.ell.getFill(), ell.getFill());
+                break;
+            case POLYGON:
+                PolygonRegion pol = (PolygonRegion) region;
+                assertEquals(this.pol.getPoints(), pol.getPoints());
+                assertEquals(this.pol.getFill(), pol.getFill());
+                break;
+            }
+        }
 
-		assertTrue(targetComponents.isPresent());
+        for (Entry<String, String> entry : targetComponents.getTargetTags().entrySet()) {
+            assertTrue(targetTags.containsKey(entry.getKey()));
+            assertEquals(targetTags.get(entry.getKey()), entry.getValue());
+        }
+    }
 
-		TargetComponents tc = targetComponents.get();
+    @Test
+    public void testXMLSerializationFile() {
+        Optional<TargetComponents> targetComponents = TargetIO.loadTarget(tempXMLTarget);
 
-		assertEquals(4, tc.getTargetGroup().getChildren().size());
+        assertTrue(targetComponents.isPresent());
 
-		checkTarget(tc);
-	}
+        TargetComponents tc = targetComponents.get();
 
-	@Test
-	public void testXMLSerializationStream() throws FileNotFoundException {
-		Optional<TargetComponents> targetComponents = TargetIO.loadTarget(new FileInputStream(tempXMLTarget), null);
+        assertEquals(4, tc.getTargetGroup().getChildren().size());
 
-		assertTrue(targetComponents.isPresent());
+        checkTarget(tc);
+    }
 
-		TargetComponents tc = targetComponents.get();
+    @Test
+    public void testXMLSerializationStream() throws FileNotFoundException {
+        Optional<TargetComponents> targetComponents = TargetIO.loadTarget(new FileInputStream(tempXMLTarget), null);
 
-		assertEquals(4, tc.getTargetGroup().getChildren().size());
+        assertTrue(targetComponents.isPresent());
 
-		checkTarget(tc);
-	}
+        TargetComponents tc = targetComponents.get();
 
-	@Test(expected = AssertionError.class)
-	public void testXMLSerializationExerciseStream() throws FileNotFoundException, ConfigurationException {
-		Configuration config = new Configuration(new String[0]);
+        assertEquals(4, tc.getTargetGroup().getChildren().size());
 
-		CamerasSupervisor cs = new CamerasSupervisor(config);
+        checkTarget(tc);
+    }
 
-		MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
+    @Test(expected = AssertionError.class)
+    public void testXMLSerializationExerciseStream() throws FileNotFoundException, ConfigurationException {
+        Configuration config = new Configuration(new String[0]);
 
-		ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
-		pteb.init(cs, new ShootOFFController(), pac);
+        CamerasSupervisor cs = new CamerasSupervisor(config);
 
-		pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
-	}
+        MockProjectorArenaController pac = new MockProjectorArenaController(config, new MockCanvasManager(config));
+
+        ProjectorTrainingExerciseBase pteb = new ProjectorTrainingExerciseBase(new ArrayList<Target>());
+        pteb.init(cs, new ShootOFFController(), pac);
+
+        pteb.addTarget(new File("@" + tempXMLTarget.getName()), 0, 0);
+    }
 }

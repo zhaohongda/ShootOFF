@@ -6,6 +6,7 @@ import java.util.Map;
 import javafx.scene.Node;
 
 public interface TargetReader {
-	public List<Node> getTargetNodes();
-	public Map<String, String> getTargetTags();
+    public List<Node> getTargetNodes();
+
+    public Map<String, String> getTargetTags();
 }

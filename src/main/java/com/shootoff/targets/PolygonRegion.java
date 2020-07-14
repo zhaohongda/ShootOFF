@@ -30,74 +30,74 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 
 public class PolygonRegion extends Polygon implements TargetRegion {
-	private final Map<String, String> tags = new HashMap<>();
+    private final Map<String, String> tags = new HashMap<>();
 
-	public PolygonRegion(double... points) {
-		super(points);
-	}
+    public PolygonRegion(double... points) {
+        super(points);
+    }
 
-	@Override
-	public void changeWidth(final double widthDelta) {
-		final ObservableList<Double> points = getPoints();
-		final List<Double> pointsX = new ArrayList<>();
+    @Override
+    public void changeWidth(final double widthDelta) {
+        final ObservableList<Double> points = getPoints();
+        final List<Double> pointsX = new ArrayList<>();
 
-		for (int i = 0; i < points.size(); i += 2) {
-			pointsX.add(points.get(i));
-		}
+        for (int i = 0; i < points.size(); i += 2) {
+            pointsX.add(points.get(i));
+        }
 
-		final double width = Collections.max(pointsX);
-		final double scaleFactor = (width + widthDelta) / width;
+        final double width = Collections.max(pointsX);
+        final double scaleFactor = (width + widthDelta) / width;
 
-		setScaleX(getScaleX() * scaleFactor);
-	}
+        setScaleX(getScaleX() * scaleFactor);
+    }
 
-	@Override
-	public void changeHeight(final double heightDelta) {
-		final ObservableList<Double> points = getPoints();
-		final List<Double> pointsY = new ArrayList<>();
+    @Override
+    public void changeHeight(final double heightDelta) {
+        final ObservableList<Double> points = getPoints();
+        final List<Double> pointsY = new ArrayList<>();
 
-		for (int i = 1; i < points.size(); i += 2) {
-			pointsY.add(points.get(i));
-		}
+        for (int i = 1; i < points.size(); i += 2) {
+            pointsY.add(points.get(i));
+        }
 
-		final double height = Collections.max(pointsY);
-		final double scaleFactor = (height + heightDelta) / height;
+        final double height = Collections.max(pointsY);
+        final double scaleFactor = (height + heightDelta) / height;
 
-		setScaleY(getScaleY() * scaleFactor);
-	}
+        setScaleY(getScaleY() * scaleFactor);
+    }
 
-	@Override
-	public RegionType getType() {
-		return RegionType.POLYGON;
-	}
+    @Override
+    public RegionType getType() {
+        return RegionType.POLYGON;
+    }
 
-	@Override
-	public void setFill(Color fill) {
-		if (Platform.isFxApplicationThread()) {
-			super.setFill(fill);
-		} else {
-			Platform.runLater(() -> super.setFill(fill));
-		}
-	}
+    @Override
+    public void setFill(Color fill) {
+        if (Platform.isFxApplicationThread()) {
+            super.setFill(fill);
+        } else {
+            Platform.runLater(() -> super.setFill(fill));
+        }
+    }
 
-	@Override
-	public boolean tagExists(final String name) {
-		return tags.containsKey(name);
-	}
+    @Override
+    public boolean tagExists(final String name) {
+        return tags.containsKey(name);
+    }
 
-	@Override
-	public String getTag(final String name) {
-		return tags.get(name);
-	}
+    @Override
+    public String getTag(final String name) {
+        return tags.get(name);
+    }
 
-	@Override
-	public Map<String, String> getAllTags() {
-		return tags;
-	}
+    @Override
+    public Map<String, String> getAllTags() {
+        return tags;
+    }
 
-	@Override
-	public void setTags(final Map<String, String> newTags) {
-		tags.clear();
-		tags.putAll(newTags);
-	}
+    @Override
+    public void setTags(final Map<String, String> newTags) {
+        tags.clear();
+        tags.putAll(newTags);
+    }
 }

@@ -1,7 +1,7 @@
 package com.shootoff.headless;
 
 public interface ConnectionListener {
-	void connectionEstablished();
-	
-	void bluetoothDisconnected();
+    void connectionEstablished();
+
+    void bluetoothDisconnected();
 }

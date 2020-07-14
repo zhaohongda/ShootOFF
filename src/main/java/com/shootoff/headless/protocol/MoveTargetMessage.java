@@ -21,21 +21,21 @@ package com.shootoff.headless.protocol;
 import java.util.UUID;
 
 public class MoveTargetMessage extends TargetMessage {
-	private final double newX;
-	private final double newY;
+    private final double newX;
+    private final double newY;
 
-	public MoveTargetMessage(UUID uuid, double newX, double newY) {
-		super(uuid);
+    public MoveTargetMessage(UUID uuid, double newX, double newY) {
+        super(uuid);
 
-		this.newX = newX;
-		this.newY = newY;
-	}
+        this.newX = newX;
+        this.newY = newY;
+    }
 
-	public double getNewX() {
-		return newX;
-	}
+    public double getNewX() {
+        return newX;
+    }
 
-	public double getNewY() {
-		return newY;
-	}
+    public double getNewY() {
+        return newY;
+    }
 }

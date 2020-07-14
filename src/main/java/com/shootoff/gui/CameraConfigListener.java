@@ -20,5 +20,5 @@ package com.shootoff.gui;
 
 @FunctionalInterface
 public interface CameraConfigListener {
-	void cameraConfigUpdated();
+    void cameraConfigUpdated();
 }

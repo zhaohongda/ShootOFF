@@ -21,5 +21,5 @@ package com.shootoff.camera.shotdetection;
 import com.shootoff.camera.cameratypes.Camera.CameraState;
 
 public interface CameraStateListener {
-	void cameraStateChange(CameraState state);
+    void cameraStateChange(CameraState state);
 }

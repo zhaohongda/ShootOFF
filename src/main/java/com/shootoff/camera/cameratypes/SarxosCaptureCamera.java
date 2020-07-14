@@ -40,243 +40,257 @@ import com.shootoff.camera.shotdetection.NativeShotDetector;
 import com.shootoff.camera.shotdetection.ShotDetector;
 
 public class SarxosCaptureCamera extends CalculatedFPSCamera {
-	private static final Logger logger = LoggerFactory.getLogger(SarxosCaptureCamera.class);
+    private static final Logger logger = LoggerFactory.getLogger(SarxosCaptureCamera.class);
 
-	public static final int CV_CAP_PROP_EXPOSURE = 15;
+    public static final int CV_CAP_PROP_EXPOSURE = 15;
 
-	private int cameraIndex = -1;
-	private final VideoCapture camera;
+    private int cameraIndex = -1;
+    private final VideoCapture camera;
 
-	private final AtomicBoolean closing = new AtomicBoolean(false);
+    private final AtomicBoolean closing = new AtomicBoolean(false);
 
-	// For testing
-	protected SarxosCaptureCamera() {
-		camera = null;
-	}
+    // For testing
+    protected SarxosCaptureCamera() {
+        camera = null;
+    }
 
-	public SarxosCaptureCamera(final String cameraName) {
-		final List<Webcam> webcams = Webcam.getWebcams();
-		int cameraIndex = -1;
+    public SarxosCaptureCamera(final String cameraName) {
+        final List<Webcam> webcams = Webcam.getWebcams();
+        int cameraIndex = -1;
 
-		for (int i = 0; i < webcams.size(); i++) {
-			if (webcams.get(i).getName().equals(cameraName)) {
-				cameraIndex = i;
-				break;
-			}
-		}
+        for (int i = 0; i < webcams.size(); i++) {
+            if (webcams.get(i).getName().equals(cameraName)) {
+                cameraIndex = i;
+                break;
+            }
+        }
 
-		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
+        if (cameraIndex < 0)
+            throw new IllegalArgumentException("Camera not found: " + cameraName);
 
-		camera = new VideoCapture();
-		this.cameraIndex = cameraIndex;
+        camera = new VideoCapture();
+        this.cameraIndex = cameraIndex;
 
-	}
+    }
 
-	public SarxosCaptureCamera(final String cameraName, int cameraIndex) {
-		if (cameraIndex < 0) throw new IllegalArgumentException("Camera not found: " + cameraName);
+    public SarxosCaptureCamera(final String cameraName, int cameraIndex) {
+        if (cameraIndex < 0)
+            throw new IllegalArgumentException("Camera not found: " + cameraName);
 
-		camera = new VideoCapture();
-		this.cameraIndex = cameraIndex;
+        camera = new VideoCapture();
+        this.cameraIndex = cameraIndex;
 
-	}
+    }
 
-	@Override
-	public Frame getFrame() {
-		final Mat frame = new Mat();
-		try {
-			if (!isOpen() || !camera.read(frame) || frame.size().height == 0 || frame.size().width == 0) return null;
-		} catch (final Exception e) {
-			// Sometimes there is a race condition on closing the camera vs.
-			// read()
-			return null;
-		}
+    @Override
+    public Frame getFrame() {
+        final Mat frame = new Mat();
+        try {
+            if (!isOpen() || !camera.read(frame) || frame.size().height == 0 || frame.size().width == 0)
+                return null;
+        } catch (final Exception e) {
+            // Sometimes there is a race condition on closing the camera vs.
+            // read()
+            return null;
+        }
 
-		final long currentFrameTimestamp = System.currentTimeMillis();
-		frameCount++;
-		return new Frame(frame, currentFrameTimestamp);
-	}
+        final long currentFrameTimestamp = System.currentTimeMillis();
+        frameCount++;
+        return new Frame(frame, currentFrameTimestamp);
+    }
 
-	@Override
-	public BufferedImage getBufferedImage() {
-		final Frame frame = getFrame();
+    @Override
+    public BufferedImage getBufferedImage() {
+        final Frame frame = getFrame();
 
-		if (frame == null) {
-			return null;
-		} else {
-			return frame.getOriginalBufferedImage();
-		}
-	}
+        if (frame == null) {
+            return null;
+        } else {
+            return frame.getOriginalBufferedImage();
+        }
+    }
 
-	@Override
-	public synchronized boolean open() {
-		if (logger.isTraceEnabled())
-			logger.trace("{} - open request isOpen {} closing {}", getName(), isOpen(), closing);
+    @Override
+    public synchronized boolean open() {
+        if (logger.isTraceEnabled())
+            logger.trace("{} - open request isOpen {} closing {}", getName(), isOpen(), closing);
 
-		if (isOpen() && !closing.get()) return true;
+        if (isOpen() && !closing.get())
+            return true;
 
-		closing.set(false);
+        closing.set(false);
 
-		final boolean open = camera.open(cameraIndex);
+        final boolean open = camera.open(cameraIndex);
 
-		if (open) {
-			// Set the max FPS to 60. If we don't set this it defaults
-			// to 30, which unnecessarily hampers higher end cameras
-			camera.set(5, 60);
+        if (open) {
+            // Set the max FPS to 60. If we don't set this it defaults
+            // to 30, which unnecessarily hampers higher end cameras
+            camera.set(5, 60);
 
-			CameraFactory.openCamerasAdd(this);
-		}
+            CameraFactory.openCamerasAdd(this);
+        }
 
-		return open;
-	}
+        return open;
+    }
 
-	@Override
-	public boolean isOpen() {
-		return camera.isOpened();
-	}
+    @Override
+    public boolean isOpen() {
+        return camera.isOpened();
+    }
 
-	@Override
-	public synchronized void close() {
-		if (logger.isTraceEnabled())
-			logger.trace("{} - close request isOpen {} closing {}", getName(), isOpen(), closing);
+    @Override
+    public synchronized void close() {
+        if (logger.isTraceEnabled())
+            logger.trace("{} - close request isOpen {} closing {}", getName(), isOpen(), closing);
 
-		if (isOpen() && !closing.get()) {
-			closing.set(true);
-			resetExposure();
-			camera.release();
+        if (isOpen() && !closing.get()) {
+            closing.set(true);
+            resetExposure();
+            camera.release();
 
-			CameraFactory.openCamerasRemove(this);
-			if (cameraEventListener.isPresent()) cameraEventListener.get().cameraClosed();
-			
-		} else if (isOpen() && closing.get()) {
-			return;
-		} else if (!isOpen()) {
-			closing.set(false);
-		}
+            CameraFactory.openCamerasRemove(this);
+            if (cameraEventListener.isPresent())
+                cameraEventListener.get().cameraClosed();
 
-		return;
-	}
+        } else if (isOpen() && closing.get()) {
+            return;
+        } else if (!isOpen()) {
+            closing.set(false);
+        }
 
-	@Override
-	public String getName() {
-		return Webcam.getWebcams().get(cameraIndex).getName();
-	}
+        return;
+    }
 
-	@Override
-	public void setViewSize(final Dimension size) {
-		camera.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, size.getWidth());
-		camera.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, size.getHeight());
-	}
+    @Override
+    public String getName() {
+        return Webcam.getWebcams().get(cameraIndex).getName();
+    }
 
-	@Override
-	public Dimension getViewSize() {
-		return new Dimension((int) camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),
-				(int) camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
-	}
+    @Override
+    public void setViewSize(final Dimension size) {
+        camera.set(Highgui.CV_CAP_PROP_FRAME_WIDTH, size.getWidth());
+        camera.set(Highgui.CV_CAP_PROP_FRAME_HEIGHT, size.getHeight());
+    }
 
-	public void launchCameraSettings() {
-		camera.set(Highgui.CV_CAP_PROP_SETTINGS, 1);
-	}
+    @Override
+    public Dimension getViewSize() {
+        return new Dimension((int) camera.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),
+                (int) camera.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
+    }
 
-	@Override
-	public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
-		if (NativeShotDetector.isSystemSupported())
-			return new NativeShotDetector(cameraManager, cameraView);
-		else if (JavaShotDetector.isSystemSupported())
-			return new JavaShotDetector(cameraManager, cameraView);
-		else
-			return null;
-	}
+    public void launchCameraSettings() {
+        camera.set(Highgui.CV_CAP_PROP_SETTINGS, 1);
+    }
 
-	@Override
-	public void run() {
-		while (isOpen() && !closing.get()) {
-			if (cameraEventListener.isPresent()) cameraEventListener.get().newFrame(getFrame());
+    @Override
+    public ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
+        if (NativeShotDetector.isSystemSupported())
+            return new NativeShotDetector(cameraManager, cameraView);
+        else if (JavaShotDetector.isSystemSupported())
+            return new JavaShotDetector(cameraManager, cameraView);
+        else
+            return null;
+    }
 
-			if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
-				estimateCameraFPS();
-			}
+    @Override
+    public void run() {
+        while (isOpen() && !closing.get()) {
+            if (cameraEventListener.isPresent())
+                cameraEventListener.get().newFrame(getFrame());
 
-		}
+            if (((int) (getFrameCount() % Math.min(getFPS(), 5)) == 0) && cameraState != CameraState.CALIBRATING) {
+                estimateCameraFPS();
+            }
 
-		if (logger.isTraceEnabled())
-			logger.trace("{} camera closed during run thread isOpen {} closing {}", getName(), isOpen(), closing);
+        }
 
-		if (!closing.get()) close();
-	}
+        if (logger.isTraceEnabled())
+            logger.trace("{} camera closed during run thread isOpen {} closing {}", getName(), isOpen(), closing);
 
-	@Override
-	public boolean isLocked() {
-		return false;
-	}
+        if (!closing.get())
+            close();
+    }
 
-	private Optional<Double> origExposure = Optional.empty();
+    @Override
+    public boolean isLocked() {
+        return false;
+    }
 
-	@Override
-	public boolean supportsExposureAdjustment() {
-		// If we already verified that it works,
-		// we have an origExposure value set
-		if (origExposure.isPresent()) return true;
+    private Optional<Double> origExposure = Optional.empty();
 
-		final double exp = camera.get(CV_CAP_PROP_EXPOSURE);
+    @Override
+    public boolean supportsExposureAdjustment() {
+        // If we already verified that it works,
+        // we have an origExposure value set
+        if (origExposure.isPresent())
+            return true;
 
-		if (logger.isInfoEnabled()) logger.info("Initial camera exposure {}", exp);
+        final double exp = camera.get(CV_CAP_PROP_EXPOSURE);
 
-		if (exp == 0) return false;
+        if (logger.isInfoEnabled())
+            logger.info("Initial camera exposure {}", exp);
 
-		origExposure = Optional.of(exp);
+        if (exp == 0)
+            return false;
 
-		if (!decreaseExposure()) {
-			resetExposure();
-			origExposure = Optional.empty();
-			return false;
-		}
+        origExposure = Optional.of(exp);
 
-		resetExposure();
-		return true;
-	}
+        if (!decreaseExposure()) {
+            resetExposure();
+            origExposure = Optional.empty();
+            return false;
+        }
 
-	@Override
-	public boolean decreaseExposure() {
-		// Logic:
-		// If camera exposure is positive, decrease towards zero
-		// If camera exposure is negative and between -9.9 and 0, increase
-		// towards zero (Logitech c270)
-		// If camera exposure is negative and less than -10, decrease away from
-		// zero (oCam)
+        resetExposure();
+        return true;
+    }
 
-		// In any case, if exposure doesn't change in the same direction when we
-		// change it, fail out.
-		final double curExp = camera.get(CV_CAP_PROP_EXPOSURE);
-		final double newExp;
-		if (curExp <= -10.0) {
-			newExp = curExp + (.1 * curExp);
-		} else {
-			newExp = curExp - (.1 * curExp);
-		}
+    @Override
+    public boolean decreaseExposure() {
+        // Logic:
+        // If camera exposure is positive, decrease towards zero
+        // If camera exposure is negative and between -9.9 and 0, increase
+        // towards zero (Logitech c270)
+        // If camera exposure is negative and less than -10, decrease away from
+        // zero (oCam)
 
-		if (logger.isTraceEnabled()) logger.trace("curExp[ {} newExp {}", curExp, newExp);
+        // In any case, if exposure doesn't change in the same direction when we
+        // change it, fail out.
+        final double curExp = camera.get(CV_CAP_PROP_EXPOSURE);
+        final double newExp;
+        if (curExp <= -10.0) {
+            newExp = curExp + (.1 * curExp);
+        } else {
+            newExp = curExp - (.1 * curExp);
+        }
 
-		// If they don't have the same sign, ABORT
-		if (!((curExp < 0) == (newExp < 0)) || Math.abs(curExp - newExp) < .001f) return false;
+        if (logger.isTraceEnabled())
+            logger.trace("curExp[ {} newExp {}", curExp, newExp);
 
-		camera.set(CV_CAP_PROP_EXPOSURE, newExp);
+        // If they don't have the same sign, ABORT
+        if (!((curExp < 0) == (newExp < 0)) || Math.abs(curExp - newExp) < .001f)
+            return false;
 
-		if (logger.isTraceEnabled()) logger.trace("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp,
-				camera.get(CV_CAP_PROP_EXPOSURE));
+        camera.set(CV_CAP_PROP_EXPOSURE, newExp);
 
-		if (curExp <= -10.0)
-			return (camera.get(CV_CAP_PROP_EXPOSURE) < curExp);
-		else
-			return (Math.abs(camera.get(CV_CAP_PROP_EXPOSURE)) < Math.abs(curExp));
-	}
+        if (logger.isTraceEnabled())
+            logger.trace("Reducing exposure - curExp[ {} newExp {} res {}", curExp, newExp,
+                    camera.get(CV_CAP_PROP_EXPOSURE));
 
-	@Override
-	public void resetExposure() {
-		if (origExposure.isPresent()) camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
-	}
+        if (curExp <= -10.0)
+            return (camera.get(CV_CAP_PROP_EXPOSURE) < curExp);
+        else
+            return (Math.abs(camera.get(CV_CAP_PROP_EXPOSURE)) < Math.abs(curExp));
+    }
 
-	@Override
-	public boolean limitsFrames() {
-		return false;
-	}
+    @Override
+    public void resetExposure() {
+        if (origExposure.isPresent())
+            camera.set(CV_CAP_PROP_EXPOSURE, origExposure.get());
+    }
+
+    @Override
+    public boolean limitsFrames() {
+        return false;
+    }
 }

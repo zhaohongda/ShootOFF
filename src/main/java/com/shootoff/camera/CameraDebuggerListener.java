@@ -21,7 +21,7 @@ package com.shootoff.camera;
 import java.awt.image.BufferedImage;
 
 public interface CameraDebuggerListener {
-	public void updateDebugView(BufferedImage thresholdImg);
+    public void updateDebugView(BufferedImage thresholdImg);
 
-	public void updateFeedData(double fps);
+    public void updateFeedData(double fps);
 }

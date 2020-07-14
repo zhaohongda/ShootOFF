@@ -22,51 +22,51 @@ import java.io.File;
 import java.util.UUID;
 
 public class AddedTargetMessage extends TargetMessage {
-	private final File targetFile;
-	private final double x;
-	private final double y;
-	private final double width;
-	private final double height;
-	private final double arenaWidth;
-	private final double arenaHeight;
+    private final File targetFile;
+    private final double x;
+    private final double y;
+    private final double width;
+    private final double height;
+    private final double arenaWidth;
+    private final double arenaHeight;
 
-	public AddedTargetMessage(UUID uuid, File targetFile, double x, double y, double width, double height,
-			double arenaWidth, double arenaHeight) {
-		super(uuid);
-		this.targetFile = targetFile;
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.arenaWidth = arenaWidth;
-		this.arenaHeight = arenaHeight;
-	}
+    public AddedTargetMessage(UUID uuid, File targetFile, double x, double y, double width, double height,
+            double arenaWidth, double arenaHeight) {
+        super(uuid);
+        this.targetFile = targetFile;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.arenaWidth = arenaWidth;
+        this.arenaHeight = arenaHeight;
+    }
 
-	public File getTargetFile() {
-		return targetFile;
-	}
+    public File getTargetFile() {
+        return targetFile;
+    }
 
-	public double getX() {
-		return x;
-	}
+    public double getX() {
+        return x;
+    }
 
-	public double getY() {
-		return y;
-	}
+    public double getY() {
+        return y;
+    }
 
-	public double getWidth() {
-		return width;
-	}
+    public double getWidth() {
+        return width;
+    }
 
-	public double getHeight() {
-		return height;
-	}
+    public double getHeight() {
+        return height;
+    }
 
-	public double getArenaWidth() {
-		return arenaWidth;
-	}
+    public double getArenaWidth() {
+        return arenaWidth;
+    }
 
-	public double getArenaHeight() {
-		return arenaHeight;
-	}
+    public double getArenaHeight() {
+        return arenaHeight;
+    }
 }

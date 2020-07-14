@@ -25,38 +25,38 @@ import com.shootoff.config.Configuration;
 import com.shootoff.plugins.TrainingExerciseBase;
 
 public class VirtualMagazineProcessor implements ShotProcessor {
-	private final Configuration config;
-	private boolean useTTS = true;
-	private int roundCount = 0;
+    private final Configuration config;
+    private boolean useTTS = true;
+    private int roundCount = 0;
 
-	public VirtualMagazineProcessor(Configuration config) {
-		this.config = config;
-		roundCount = config.getVirtualMagazineCapacity();
-	}
+    public VirtualMagazineProcessor(Configuration config) {
+        this.config = config;
+        roundCount = config.getVirtualMagazineCapacity();
+    }
 
-	public void setUseTTS(boolean useTTS) {
-		this.useTTS = useTTS;
-	}
+    public void setUseTTS(boolean useTTS) {
+        this.useTTS = useTTS;
+    }
 
-	public int getRountCount() {
-		return roundCount;
-	}
+    public int getRountCount() {
+        return roundCount;
+    }
 
-	@Override
-	public boolean processShot(Shot shot) {
-		if (roundCount == 0) {
-			roundCount = config.getVirtualMagazineCapacity();
-			if (useTTS)
-				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-reload.wav"));
-			return false;
-		}
+    @Override
+    public boolean processShot(Shot shot) {
+        if (roundCount == 0) {
+            roundCount = config.getVirtualMagazineCapacity();
+            if (useTTS)
+                TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-reload.wav"));
+            return false;
+        }
 
-		roundCount--;
-		return true;
-	}
+        roundCount--;
+        return true;
+    }
 
-	@Override
-	public void reset() {
-		roundCount = config.getVirtualMagazineCapacity();
-	}
+    @Override
+    public void reset() {
+        roundCount = config.getVirtualMagazineCapacity();
+    }
 }

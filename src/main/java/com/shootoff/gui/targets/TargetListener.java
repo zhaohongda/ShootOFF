@@ -21,5 +21,5 @@ package com.shootoff.gui.targets;
 import java.io.File;
 
 public interface TargetListener {
-	public void newTarget(File path);
+    public void newTarget(File path);
 }

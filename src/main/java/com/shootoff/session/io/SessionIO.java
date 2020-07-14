@@ -33,81 +33,81 @@ import com.shootoff.session.TargetRemovedEvent;
 import com.shootoff.session.TargetResizedEvent;
 
 public class SessionIO {
-	public static void saveSession(SessionRecorder sessionRecorder, File sessionFile) {
-		EventVisitor visitor;
+    public static void saveSession(SessionRecorder sessionRecorder, File sessionFile) {
+        EventVisitor visitor;
 
-		if (sessionFile.getName().endsWith("xml")) {
-			visitor = new XMLSessionWriter(sessionFile);
-		} else if (sessionFile.getName().endsWith("json")) {
-			visitor = new JSONSessionWriter(sessionFile);
-		} else {
-			System.err.println("Unknown session file type.");
-			return;
-		}
+        if (sessionFile.getName().endsWith("xml")) {
+            visitor = new XMLSessionWriter(sessionFile);
+        } else if (sessionFile.getName().endsWith("json")) {
+            visitor = new JSONSessionWriter(sessionFile);
+        } else {
+            System.err.println("Unknown session file type.");
+            return;
+        }
 
-		for (final String cameraName : sessionRecorder.getEvents().keySet()) {
-			visitor.visitCamera(cameraName);
+        for (final String cameraName : sessionRecorder.getEvents().keySet()) {
+            visitor.visitCamera(cameraName);
 
-			for (final Event e : sessionRecorder.getCameraEvents(cameraName)) {
-				switch (e.getType()) {
-				case SHOT:
-					final ShotEvent se = (ShotEvent) e;
-					visitor.visitShot(se.getTimestamp(), se.getShot(), se.isMalfunction(), se.isReload(),
-							se.getTargetIndex(), se.getHitRegionIndex(), se.getVideoString());
-					break;
+            for (final Event e : sessionRecorder.getCameraEvents(cameraName)) {
+                switch (e.getType()) {
+                case SHOT:
+                    final ShotEvent se = (ShotEvent) e;
+                    visitor.visitShot(se.getTimestamp(), se.getShot(), se.isMalfunction(), se.isReload(),
+                            se.getTargetIndex(), se.getHitRegionIndex(), se.getVideoString());
+                    break;
 
-				case TARGET_ADDED:
-					final TargetAddedEvent tae = (TargetAddedEvent) e;
-					visitor.visitTargetAdd(tae.getTimestamp(), tae.getTargetName());
-					break;
+                case TARGET_ADDED:
+                    final TargetAddedEvent tae = (TargetAddedEvent) e;
+                    visitor.visitTargetAdd(tae.getTimestamp(), tae.getTargetName());
+                    break;
 
-				case TARGET_REMOVED:
-					final TargetRemovedEvent tre = (TargetRemovedEvent) e;
-					visitor.visitTargetRemove(tre.getTimestamp(), tre.getTargetIndex());
-					break;
+                case TARGET_REMOVED:
+                    final TargetRemovedEvent tre = (TargetRemovedEvent) e;
+                    visitor.visitTargetRemove(tre.getTimestamp(), tre.getTargetIndex());
+                    break;
 
-				case TARGET_RESIZED:
-					final TargetResizedEvent trre = (TargetResizedEvent) e;
-					visitor.visitTargetResize(trre.getTimestamp(), trre.getTargetIndex(), trre.getNewWidth(),
-							trre.getNewHeight());
-					break;
+                case TARGET_RESIZED:
+                    final TargetResizedEvent trre = (TargetResizedEvent) e;
+                    visitor.visitTargetResize(trre.getTimestamp(), trre.getTargetIndex(), trre.getNewWidth(),
+                            trre.getNewHeight());
+                    break;
 
-				case TARGET_MOVED:
-					final TargetMovedEvent tme = (TargetMovedEvent) e;
-					visitor.visitTargetMove(tme.getTimestamp(), tme.getTargetIndex(), tme.getNewX(), tme.getNewY());
-					break;
+                case TARGET_MOVED:
+                    final TargetMovedEvent tme = (TargetMovedEvent) e;
+                    visitor.visitTargetMove(tme.getTimestamp(), tme.getTargetIndex(), tme.getNewX(), tme.getNewY());
+                    break;
 
-				case EXERCISE_FEED_MESSAGE:
-					final ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
-					visitor.visitExerciseFeedMessage(pfme.getTimestamp(), pfme.getMessage());
-					break;
-				}
-			}
+                case EXERCISE_FEED_MESSAGE:
+                    final ExerciseFeedMessageEvent pfme = (ExerciseFeedMessageEvent) e;
+                    visitor.visitExerciseFeedMessage(pfme.getTimestamp(), pfme.getMessage());
+                    break;
+                }
+            }
 
-			visitor.visitCameraEnd();
-		}
+            visitor.visitCameraEnd();
+        }
 
-		visitor.visitEnd();
-	}
+        visitor.visitEnd();
+    }
 
-	public static Optional<SessionRecorder> loadSession(File sessionFile) {
-		Map<String, List<Event>> events = null;
+    public static Optional<SessionRecorder> loadSession(File sessionFile) {
+        Map<String, List<Event>> events = null;
 
-		if (sessionFile.getName().endsWith("xml")) {
-			events = new XMLSessionReader(sessionFile).load();
-		} else if (sessionFile.getName().endsWith("json")) {
-			events = new JSONSessionReader(sessionFile).load();
-		} else {
-			System.err.println("Unknown session file type.");
-			return Optional.empty();
-		}
+        if (sessionFile.getName().endsWith("xml")) {
+            events = new XMLSessionReader(sessionFile).load();
+        } else if (sessionFile.getName().endsWith("json")) {
+            events = new JSONSessionReader(sessionFile).load();
+        } else {
+            System.err.println("Unknown session file type.");
+            return Optional.empty();
+        }
 
-		if (events == null) {
-			return Optional.empty();
-		} else {
-			final SessionRecorder sessionRecorder = new SessionRecorder();
-			sessionRecorder.addEvents(events);
-			return Optional.of(sessionRecorder);
-		}
-	}
+        if (events == null) {
+            return Optional.empty();
+        } else {
+            final SessionRecorder sessionRecorder = new SessionRecorder();
+            sessionRecorder.addEvents(events);
+            return Optional.of(sessionRecorder);
+        }
+    }
 }

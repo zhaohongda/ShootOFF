@@ -36,151 +36,153 @@ import com.shootoff.targets.TargetRegion;
  *
  */
 public class ParRandomShot extends ParForScore {
-	private final List<String> subtargets = new ArrayList<>();
-	private final Random rng = new Random();
-	private boolean foundTarget;
-	private int currentSubtarget;
+    private final List<String> subtargets = new ArrayList<>();
+    private final Random rng = new Random();
+    private boolean foundTarget;
+    private int currentSubtarget;
 
-	public ParRandomShot() {
+    public ParRandomShot() {
 
-	}
+    }
 
-	public ParRandomShot(List<Target> targets) {
-		super(targets);
-		fetchSubtargets(targets);
-	}
+    public ParRandomShot(List<Target> targets) {
+        super(targets);
+        fetchSubtargets(targets);
+    }
 
-	@Override
-	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("PAR Drill with a random Subtarget", "1.0", "Edward Kort",
-				"This exercise works with targets that have subtarget tags "
-						+ "assigned to some regions. When the exercise is started you "
-						+ "are asked to enter a range for randomly delayed starts, and "
-						+ "for the interval (PAR time) in which those scores will be "
-						+ "counted. You are then given 10 seconds to position yourself. "
-						+ "After a random wait (within the entered range), a randomly "
-						+ "selected subtarget is called out, telling you to draw the "
-						+ "pistol from its holster and fire at your target; a chime "
-						+ "signals the end of the Par time, to finally re-holster. The "
-						+ "score for each shot, performed during the PAR time and hitting "
-						+ "the subtarget, is points assigned to that subtarget (or 1 if "
-						+ "there is no assignment). This process is repeated as long as " + "this exercise is on.");
-	}
+    @Override
+    public ExerciseMetadata getInfo() {
+        return new ExerciseMetadata("PAR Drill with a random Subtarget", "1.0", "Edward Kort",
+                "This exercise works with targets that have subtarget tags "
+                        + "assigned to some regions. When the exercise is started you "
+                        + "are asked to enter a range for randomly delayed starts, and "
+                        + "for the interval (PAR time) in which those scores will be "
+                        + "counted. You are then given 10 seconds to position yourself. "
+                        + "After a random wait (within the entered range), a randomly "
+                        + "selected subtarget is called out, telling you to draw the "
+                        + "pistol from its holster and fire at your target; a chime "
+                        + "signals the end of the Par time, to finally re-holster. The "
+                        + "score for each shot, performed during the PAR time and hitting "
+                        + "the subtarget, is points assigned to that subtarget (or 1 if "
+                        + "there is no assignment). This process is repeated as long as " + "this exercise is on.");
+    }
 
-	@Override
-	protected void initService() {
-		if (foundTarget) {
-			super.initService();
-		}
-	}
+    @Override
+    protected void initService() {
+        if (foundTarget) {
+            super.initService();
+        }
+    }
 
-	@Override
-	protected void doRound() {
-		pickSubtarget();
-		saySubtarget();
-		pauseShotDetection(false);
-		startRoundTimer();
-		try {
-			Thread.sleep((long) (parTime * 1000.));
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
-		TrainingExerciseBase.playSound("sounds/chime.wav");
-		pauseShotDetection(true);
-		countScore = false;
-	}
+    @Override
+    protected void doRound() {
+        pickSubtarget();
+        saySubtarget();
+        pauseShotDetection(false);
+        startRoundTimer();
+        try {
+            Thread.sleep((long) (parTime * 1000.));
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
+        TrainingExerciseBase.playSound("sounds/chime.wav");
+        pauseShotDetection(true);
+        countScore = false;
+    }
 
-	@Override
-	public void shotListener(Shot shot, Optional<Hit> hit) {
-		setLength();
+    @Override
+    public void shotListener(Shot shot, Optional<Hit> hit) {
+        setLength();
 
-		if (!foundTarget || !hit.isPresent() || !countScore) return;
+        if (!foundTarget || !hit.isPresent() || !countScore)
+            return;
 
-		final String subtarget = subtargets.get(currentSubtarget);
-		final String hitTarget = getSubtarget(Optional.of(hit.get().getHitRegion()));
-		if (subtarget.equals(hitTarget)) {
-			final String points = getPoints(Optional.of(hit.get().getHitRegion()));
-			setPoints(shot.getColor(), points);
-		}
-	}
+        final String subtarget = subtargets.get(currentSubtarget);
+        final String hitTarget = getSubtarget(Optional.of(hit.get().getHitRegion()));
+        if (subtarget.equals(hitTarget)) {
+            final String points = getPoints(Optional.of(hit.get().getHitRegion()));
+            setPoints(shot.getColor(), points);
+        }
+    }
 
-	@Override
-	protected void resetValues() {
-		super.resetValues();
-		final List<Target> targets = super.getCurrentTargets();
-		fetchSubtargets(targets);
-	}
+    @Override
+    protected void resetValues() {
+        super.resetValues();
+        final List<Target> targets = super.getCurrentTargets();
+        fetchSubtargets(targets);
+    }
 
-	private String getPoints(Optional<TargetRegion> hitRegion) {
-		String points = "1";
+    private String getPoints(Optional<TargetRegion> hitRegion) {
+        String points = "1";
 
-		if (hitRegion.isPresent()) {
-			final TargetRegion region = hitRegion.get();
-			if (region.getAllTags().containsKey("points")) {
-				points = region.getTag("points");
-			}
-		}
+        if (hitRegion.isPresent()) {
+            final TargetRegion region = hitRegion.get();
+            if (region.getAllTags().containsKey("points")) {
+                points = region.getTag("points");
+            }
+        }
 
-		return points;
-	}
+        return points;
+    }
 
-	private String getSubtarget(Optional<TargetRegion> hitRegion) {
-		String subtargetName = null;
+    private String getSubtarget(Optional<TargetRegion> hitRegion) {
+        String subtargetName = null;
 
-		if (hitRegion.isPresent()) {
-			final TargetRegion region = hitRegion.get();
-			if (region.getAllTags().containsKey("subtarget")) {
-				subtargetName = region.getTag("subtarget");
-			}
-		}
+        if (hitRegion.isPresent()) {
+            final TargetRegion region = hitRegion.get();
+            if (region.getAllTags().containsKey("subtarget")) {
+                subtargetName = region.getTag("subtarget");
+            }
+        }
 
-		return subtargetName;
-	}
+        return subtargetName;
+    }
 
-	/**
-	 * @see RandomShoot.fetchSubtargets
-	 * @param targets
-	 * @return
-	 */
-	private void fetchSubtargets(List<Target> targets) {
-		subtargets.clear();
+    /**
+     * @see RandomShoot.fetchSubtargets
+     * @param targets
+     * @return
+     */
+    private void fetchSubtargets(List<Target> targets) {
+        subtargets.clear();
 
-		foundTarget = false;
-		for (final Target target : targets) {
-			for (final TargetRegion region : target.getRegions()) {
-				if (region.getAllTags().containsKey("subtarget")) {
-					subtargets.add(region.getTag("subtarget"));
-					foundTarget = true;
-				}
-			}
+        foundTarget = false;
+        for (final Target target : targets) {
+            for (final TargetRegion region : target.getRegions()) {
+                if (region.getAllTags().containsKey("subtarget")) {
+                    subtargets.add(region.getTag("subtarget"));
+                    foundTarget = true;
+                }
+            }
 
-			if (foundTarget) break;
-		}
+            if (foundTarget)
+                break;
+        }
 
-		if (!foundTarget) {
-			playSound(new File("sounds/voice/shootoff-subtargets-warning.wav"));
-		}
-	}
+        if (!foundTarget) {
+            playSound(new File("sounds/voice/shootoff-subtargets-warning.wav"));
+        }
+    }
 
-	private void pickSubtarget() {
-		if (foundTarget) {
-			currentSubtarget = rng.nextInt(subtargets.size());
-		}
-	}
+    private void pickSubtarget() {
+        if (foundTarget) {
+            currentSubtarget = rng.nextInt(subtargets.size());
+        }
+    }
 
-	private void saySubtarget() {
-		if (foundTarget) {
-			final String subValue = subtargets.get(currentSubtarget);
-			final File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subValue));
+    private void saySubtarget() {
+        if (foundTarget) {
+            final String subValue = subtargets.get(currentSubtarget);
+            final File targetNameSound = new File(String.format("sounds/voice/shootoff-%s.wav", subValue));
 
-			if (targetNameSound.exists()) {
-				playSound(targetNameSound);
-			} else {
-				// We don't have a voice actor sounds file for a target
-				// subregion, fall back
-				// to TTS
-				TextToSpeech.say(subValue);
-			}
-		}
-	}
+            if (targetNameSound.exists()) {
+                playSound(targetNameSound);
+            } else {
+                // We don't have a voice actor sounds file for a target
+                // subregion, fall back
+                // to TTS
+                TextToSpeech.say(subValue);
+            }
+        }
+    }
 }

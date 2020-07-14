@@ -19,37 +19,37 @@
 package com.shootoff.session;
 
 public class ExerciseFeedMessageEvent implements Event {
-	private final String cameraName;
-	private final long timestamp;
-	private final String message;
+    private final String cameraName;
+    private final long timestamp;
+    private final String message;
 
-	public ExerciseFeedMessageEvent(String cameraName, long timestamp, String message) {
-		this.cameraName = cameraName;
-		this.timestamp = timestamp;
-		this.message = message;
-	}
+    public ExerciseFeedMessageEvent(String cameraName, long timestamp, String message) {
+        this.cameraName = cameraName;
+        this.timestamp = timestamp;
+        this.message = message;
+    }
 
-	@Override
-	public EventType getType() {
-		return EventType.EXERCISE_FEED_MESSAGE;
-	}
+    @Override
+    public EventType getType() {
+        return EventType.EXERCISE_FEED_MESSAGE;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	@Override
-	public long getTimestamp() {
-		return timestamp;
-	}
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-	@Override
-	public String getCameraName() {
-		return cameraName;
-	}
+    @Override
+    public String getCameraName() {
+        return cameraName;
+    }
 
-	@Override
-	public String toString() {
-		return "training exercise feed message";
-	}
+    @Override
+    public String toString() {
+        return "training exercise feed message";
+    }
 }

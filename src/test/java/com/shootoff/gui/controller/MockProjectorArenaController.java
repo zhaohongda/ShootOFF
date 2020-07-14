@@ -8,14 +8,14 @@ import com.shootoff.gui.CanvasManager;
 import com.shootoff.gui.pane.ProjectorArenaPane;
 
 public class MockProjectorArenaController extends ProjectorArenaPane {
-	// Used for testing
-	public MockProjectorArenaController(Configuration config, CanvasManager canvasManager) {
-		super(config, canvasManager);
+    // Used for testing
+    public MockProjectorArenaController(Configuration config, CanvasManager canvasManager) {
+        super(config, canvasManager);
 
-		arenaStage = new Stage();
-		Scene scene = new Scene(this, 640, 360);
-		arenaStage.setScene(scene);
+        arenaStage = new Stage();
+        Scene scene = new Scene(this, 640, 360);
+        arenaStage.setScene(scene);
 
-	}
+    }
 
 }

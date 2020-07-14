@@ -28,47 +28,47 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 
 public class ShotSectorPane extends BorderPane {
-	private final CheckBox[][] sectors;
+    private final CheckBox[][] sectors;
 
-	public ShotSectorPane(Pane parent, CameraManager cameraManager) {
-		final GridPane checkboxGrid = new GridPane();
-		sectors = new CheckBox[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
+    public ShotSectorPane(Pane parent, CameraManager cameraManager) {
+        final GridPane checkboxGrid = new GridPane();
+        sectors = new CheckBox[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
-		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
-				final CheckBox sector = new CheckBox();
-				sectors[y][x] = sector;
-				sector.setSelected(cameraManager.isSectorOn(x, y));
+        for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
+            for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
+                final CheckBox sector = new CheckBox();
+                sectors[y][x] = sector;
+                sector.setSelected(cameraManager.isSectorOn(x, y));
 
-				sector.setOnAction((event) -> {
-					cameraManager.setSectorStatuses(getSectorStatuses());
-				});
+                sector.setOnAction((event) -> {
+                    cameraManager.setSectorStatuses(getSectorStatuses());
+                });
 
-				checkboxGrid.add(sector, x, y);
-			}
-		}
+                checkboxGrid.add(sector, x, y);
+            }
+        }
 
-		final Button doneButton = new Button("Done");
+        final Button doneButton = new Button("Done");
 
-		doneButton.setOnAction((event) -> {
-			parent.getChildren().remove(this);
-		});
+        doneButton.setOnAction((event) -> {
+            parent.getChildren().remove(this);
+        });
 
-		setTop(checkboxGrid);
-		setLeft(doneButton);
+        setTop(checkboxGrid);
+        setLeft(doneButton);
 
-		parent.getChildren().add(this);
-	}
+        parent.getChildren().add(this);
+    }
 
-	private boolean[][] getSectorStatuses() {
-		final boolean[][] sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
+    private boolean[][] getSectorStatuses() {
+        final boolean[][] sectorStatuses = new boolean[JavaShotDetector.SECTOR_ROWS][JavaShotDetector.SECTOR_COLUMNS];
 
-		for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
-			for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
-				sectorStatuses[y][x] = sectors[y][x].isSelected();
-			}
-		}
+        for (int x = 0; x < JavaShotDetector.SECTOR_COLUMNS; x++) {
+            for (int y = 0; y < JavaShotDetector.SECTOR_ROWS; y++) {
+                sectorStatuses[y][x] = sectors[y][x].isSelected();
+            }
+        }
 
-		return sectorStatuses;
-	}
+        return sectorStatuses;
+    }
 }

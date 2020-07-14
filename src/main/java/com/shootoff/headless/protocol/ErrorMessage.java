@@ -19,23 +19,23 @@
 package com.shootoff.headless.protocol;
 
 public class ErrorMessage extends Message {
-	private final String message;
-	private final ErrorType type;
+    private final String message;
+    private final ErrorType type;
 
-	public ErrorMessage(String message, ErrorType type) {
-		this.message = message;
-		this.type = type;
-	}
+    public ErrorMessage(String message, ErrorType type) {
+        this.message = message;
+        this.type = type;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	public ErrorType getType() {
-		return type;
-	}
+    public ErrorType getType() {
+        return type;
+    }
 
-	public enum ErrorType {
-		BACKGROUND, CAMERA, COURSE, EXERCISE, TARGET
-	}
+    public enum ErrorType {
+        BACKGROUND, CAMERA, COURSE, EXERCISE, TARGET
+    }
 }

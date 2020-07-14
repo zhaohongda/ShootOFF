@@ -28,114 +28,115 @@ import com.shootoff.camera.processors.ShotProcessor;
 import com.shootoff.config.Configuration;
 
 public class CamerasSupervisor {
-	private final Configuration config;
-	private final List<CameraManager> managers = new ArrayList<>();
+    private final Configuration config;
+    private final List<CameraManager> managers = new ArrayList<>();
 
-	private final AtomicBoolean allDetecting = new AtomicBoolean(true);
+    private final AtomicBoolean allDetecting = new AtomicBoolean(true);
 
-	public CamerasSupervisor(Configuration config) {
-		this.config = config;
-	}
+    public CamerasSupervisor(Configuration config) {
+        this.config = config;
+    }
 
-	public Optional<CameraManager> addCameraManager(Camera cameraInterface, CameraErrorView cameraErrorView,
-			CameraView cameraView) {
-		final CameraManager manager = new CameraManager(cameraInterface, cameraErrorView, cameraView);
+    public Optional<CameraManager> addCameraManager(Camera cameraInterface, CameraErrorView cameraErrorView,
+            CameraView cameraView) {
+        final CameraManager manager = new CameraManager(cameraInterface, cameraErrorView, cameraView);
 
-		if (manager.start()) {
-			managers.add(manager);
-			allDetecting.set(true);
-			return Optional.of(manager);
-		}
+        if (manager.start()) {
+            managers.add(manager);
+            allDetecting.set(true);
+            return Optional.of(manager);
+        }
 
-		return Optional.empty();
-	}
+        return Optional.empty();
+    }
 
-	public void clearManagers() {
-		setStreamingAll(false);
-		setDetectingAll(false);
-		allDetecting.set(false);
+    public void clearManagers() {
+        setStreamingAll(false);
+        setDetectingAll(false);
+        allDetecting.set(false);
 
-		for (final CameraManager manager : managers) {
-			manager.close();
-		}
+        for (final CameraManager manager : managers) {
+            manager.close();
+        }
 
-		managers.clear();
-	}
+        managers.clear();
+    }
 
-	public void clearManager(CameraManager manager) {
-		manager.close();
-		managers.remove(manager);
-	}
+    public void clearManager(CameraManager manager) {
+        manager.close();
+        managers.remove(manager);
+    }
 
-	public void clearShots() {
-		for (final CameraManager manager : managers) {
-			manager.clearShots();
-		}
-	}
+    public void clearShots() {
+        for (final CameraManager manager : managers) {
+            manager.clearShots();
+        }
+    }
 
-	public void reset() {
-		for (final CameraManager manager : managers) {
-			manager.reset();
-		}
+    public void reset() {
+        for (final CameraManager manager : managers) {
+            manager.reset();
+        }
 
-		for (final ShotProcessor processor : config.getShotProcessors()) {
-			processor.reset();
-		}
-	}
+        for (final ShotProcessor processor : config.getShotProcessors()) {
+            processor.reset();
+        }
+    }
 
-	public void setStreamingAll(final boolean isStreaming) {
-		for (final CameraManager manager : managers) {
-			manager.setStreaming(isStreaming);
-		}
-	}
+    public void setStreamingAll(final boolean isStreaming) {
+        for (final CameraManager manager : managers) {
+            manager.setStreaming(isStreaming);
+        }
+    }
 
-	public void setDetectingAll(final boolean isDetecting) {
-		allDetecting.set(isDetecting);
+    public void setDetectingAll(final boolean isDetecting) {
+        allDetecting.set(isDetecting);
 
-		for (final CameraManager manager : managers) {
-			manager.setDetecting(isDetecting);
-		}
-	}
+        for (final CameraManager manager : managers) {
+            manager.setDetecting(isDetecting);
+        }
+    }
 
-	public boolean areDetecting() {
-		return allDetecting.get();
-	}
+    public boolean areDetecting() {
+        return allDetecting.get();
+    }
 
-	public void closeAll() {
-		for (final CameraManager manager : managers) {
-			manager.close();
-		}
+    public void closeAll() {
+        for (final CameraManager manager : managers) {
+            manager.close();
+        }
 
-		allDetecting.set(false);
-	}
+        allDetecting.set(false);
+    }
 
-	public List<CameraManager> getCameraManagers() {
-		return managers;
-	}
+    public List<CameraManager> getCameraManagers() {
+        return managers;
+    }
 
-	public CameraManager getCameraManager(final int index) {
-		return managers.get(index);
-	}
+    public CameraManager getCameraManager(final int index) {
+        return managers.get(index);
+    }
 
-	public CameraManager getCameraManager(final Camera camera) {
-		for (final CameraManager manager : managers) {
-			if (manager.getCamera() == camera) return manager;
-		}
-		return null;
-	}
+    public CameraManager getCameraManager(final Camera camera) {
+        for (final CameraManager manager : managers) {
+            if (manager.getCamera() == camera)
+                return manager;
+        }
+        return null;
+    }
 
-	public List<CameraView> getCameraViews() {
-		final List<CameraView> cameraViews = new ArrayList<>();
+    public List<CameraView> getCameraViews() {
+        final List<CameraView> cameraViews = new ArrayList<>();
 
-		for (final CameraManager manager : managers) {
-			cameraViews.add(manager.getCameraView());
-		}
+        for (final CameraManager manager : managers) {
+            cameraViews.add(manager.getCameraView());
+        }
 
-		return cameraViews;
-	}
+        return cameraViews;
+    }
 
-	public CameraView getCameraView(final int index) {
-		return managers.get(index).getCameraView();
-	}
+    public CameraView getCameraView(final int index) {
+        return managers.get(index).getCameraView();
+    }
 
 }

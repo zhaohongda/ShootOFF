@@ -21,20 +21,20 @@ package com.shootoff.headless.protocol;
 import java.util.UUID;
 
 public class ResizeTargetMessage extends TargetMessage {
-	private final double newWidth;
-	private final double newHeight;
+    private final double newWidth;
+    private final double newHeight;
 
-	public ResizeTargetMessage(UUID uuid, double newWidth, double newHeight) {
-		super(uuid);
-		this.newWidth = newWidth;
-		this.newHeight = newHeight;
-	}
+    public ResizeTargetMessage(UUID uuid, double newWidth, double newHeight) {
+        super(uuid);
+        this.newWidth = newWidth;
+        this.newHeight = newHeight;
+    }
 
-	public double getNewWidth() {
-		return newWidth;
-	}
+    public double getNewWidth() {
+        return newWidth;
+    }
 
-	public double getNewHeight() {
-		return newHeight;
-	}
+    public double getNewHeight() {
+        return newHeight;
+    }
 }

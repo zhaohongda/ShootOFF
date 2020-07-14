@@ -50,133 +50,133 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
 public class XMLCourseReader {
-	private static final Logger logger = LoggerFactory.getLogger(XMLCourseReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(XMLCourseReader.class);
 
-	private final ProjectorArenaPane arenaPane;
-	private final File courseFile;
+    private final ProjectorArenaPane arenaPane;
+    private final File courseFile;
 
-	public XMLCourseReader(ProjectorArenaPane arenaPane, File courseFile) {
-		this.arenaPane = arenaPane;
-		this.courseFile = courseFile;
-	}
+    public XMLCourseReader(ProjectorArenaPane arenaPane, File courseFile) {
+        this.arenaPane = arenaPane;
+        this.courseFile = courseFile;
+    }
 
-	public Optional<Course> load() {
-		InputStream xmlInput = null;
-		try {
-			xmlInput = new FileInputStream(courseFile);
-			final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-			final CourseXMLHandler handler = new CourseXMLHandler();
-			saxParser.parse(xmlInput, handler);
+    public Optional<Course> load() {
+        InputStream xmlInput = null;
+        try {
+            xmlInput = new FileInputStream(courseFile);
+            final SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
+            final CourseXMLHandler handler = new CourseXMLHandler();
+            saxParser.parse(xmlInput, handler);
 
-			Course c;
+            Course c;
 
-			if (handler.getResolution().isPresent()) {
-				c = new Course(handler.getBackground(), handler.getTargets(), handler.getResolution().get());
-			} else if (handler.getBackground().isPresent()) {
-				c = new Course(handler.getBackground().get(), handler.getTargets());
-			} else {
-				c = new Course(handler.getTargets());
-			}
+            if (handler.getResolution().isPresent()) {
+                c = new Course(handler.getBackground(), handler.getTargets(), handler.getResolution().get());
+            } else if (handler.getBackground().isPresent()) {
+                c = new Course(handler.getBackground().get(), handler.getTargets());
+            } else {
+                c = new Course(handler.getTargets());
+            }
 
-			return Optional.of(c);
-		} catch (IOException | ParserConfigurationException | SAXException e) {
-			logger.error("Error reading XML course", e);
-		} finally {
-			if (xmlInput != null) {
-				try {
-					xmlInput.close();
-				} catch (final IOException e) {
-					logger.error("Error closing XML course opened for reading", e);
-				}
-			}
-		}
+            return Optional.of(c);
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+            logger.error("Error reading XML course", e);
+        } finally {
+            if (xmlInput != null) {
+                try {
+                    xmlInput.close();
+                } catch (final IOException e) {
+                    logger.error("Error closing XML course opened for reading", e);
+                }
+            }
+        }
 
-		return Optional.empty();
-	}
+        return Optional.empty();
+    }
 
-	private class CourseXMLHandler extends DefaultHandler {
-		private Optional<LocatedImage> background = Optional.empty();
-		private final List<Target> targets = new ArrayList<>();
-		private Optional<Dimension2D> resolution = Optional.empty();
+    private class CourseXMLHandler extends DefaultHandler {
+        private Optional<LocatedImage> background = Optional.empty();
+        private final List<Target> targets = new ArrayList<>();
+        private Optional<Dimension2D> resolution = Optional.empty();
 
-		public Optional<LocatedImage> getBackground() {
-			return background;
-		}
+        public Optional<LocatedImage> getBackground() {
+            return background;
+        }
 
-		public List<Target> getTargets() {
-			return targets;
-		}
+        public List<Target> getTargets() {
+            return targets;
+        }
 
-		public Optional<Dimension2D> getResolution() {
-			return resolution;
-		}
+        public Optional<Dimension2D> getResolution() {
+            return resolution;
+        }
 
-		@Override
-		public void startElement(String uri, String localName, String qName, Attributes attributes)
-				throws SAXException {
-			switch (qName) {
-			case "background": {
-				final boolean isResource = Boolean.parseBoolean(attributes.getValue("isResource"));
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes)
+                throws SAXException {
+            switch (qName) {
+            case "background": {
+                final boolean isResource = Boolean.parseBoolean(attributes.getValue("isResource"));
 
-				LocatedImage background;
+                LocatedImage background;
 
-				if (isResource) {
-					final InputStream is = this.getClass().getResourceAsStream(attributes.getValue("url"));
-					background = new LocatedImage(is, attributes.getValue("url"));
-				} else {
-					background = new LocatedImage(attributes.getValue("url"));
-				}
+                if (isResource) {
+                    final InputStream is = this.getClass().getResourceAsStream(attributes.getValue("url"));
+                    background = new LocatedImage(is, attributes.getValue("url"));
+                } else {
+                    background = new LocatedImage(attributes.getValue("url"));
+                }
 
-				this.background = Optional.of(background);
-			}
-			break;
+                this.background = Optional.of(background);
+            }
+                break;
 
-			case "target": {
-				final File targetFile = new File(attributes.getValue("file"));
-				final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
+            case "target": {
+                final File targetFile = new File(attributes.getValue("file"));
+                final Optional<TargetComponents> targetComponents = TargetIO.loadTarget(targetFile);
 
-				if (targetComponents.isPresent()) {
-					final TargetComponents tc = targetComponents.get();
+                if (targetComponents.isPresent()) {
+                    final TargetComponents tc = targetComponents.get();
 
-					final TargetView t = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
-							arenaPane.getCanvasManager(), true);
+                    final TargetView t = new TargetView(targetFile, tc.getTargetGroup(), tc.getTargetTags(),
+                            arenaPane.getCanvasManager(), true);
 
-					t.setPosition(Double.parseDouble(attributes.getValue("x")),
-							Double.parseDouble(attributes.getValue("y")));
+                    t.setPosition(Double.parseDouble(attributes.getValue("x")),
+                            Double.parseDouble(attributes.getValue("y")));
 
-					t.setDimensions(Double.parseDouble(attributes.getValue("width")),
-							Double.parseDouble(attributes.getValue("height")));
+                    t.setDimensions(Double.parseDouble(attributes.getValue("width")),
+                            Double.parseDouble(attributes.getValue("height")));
 
-					targets.add(t);
-				} else {
-					showTargetError(targetFile.getPath());
-				}
-			}
-			break;
+                    targets.add(t);
+                } else {
+                    showTargetError(targetFile.getPath());
+                }
+            }
+                break;
 
-			case "resolution": {
-				resolution = Optional.of(new Dimension2D(Double.parseDouble(attributes.getValue("width")),
-						Double.parseDouble(attributes.getValue("height"))));
-			}
-			break;
-			}
-		}
+            case "resolution": {
+                resolution = Optional.of(new Dimension2D(Double.parseDouble(attributes.getValue("width")),
+                        Double.parseDouble(attributes.getValue("height"))));
+            }
+                break;
+            }
+        }
 
-		private void showTargetError(String targetPath) {
-			Platform.runLater(() -> {
-				final Alert targetAlert = new Alert(AlertType.ERROR);
+        private void showTargetError(String targetPath) {
+            Platform.runLater(() -> {
+                final Alert targetAlert = new Alert(AlertType.ERROR);
 
-				final String message = String.format(
-						"The course %s requires the target %s, but the "
-								+ "target file is missing. This target will not appear in your projector arena.",
-								courseFile.getName(), targetPath);
+                final String message = String.format(
+                        "The course %s requires the target %s, but the "
+                                + "target file is missing. This target will not appear in your projector arena.",
+                        courseFile.getName(), targetPath);
 
-				targetAlert.setTitle("Missing Target");
-				targetAlert.setHeaderText("Missing Required Target File");
-				targetAlert.setResizable(true);
-				targetAlert.setContentText(message);
-				targetAlert.show();
-			});
-		}
-	}
+                targetAlert.setTitle("Missing Target");
+                targetAlert.setHeaderText("Missing Required Target File");
+                targetAlert.setResizable(true);
+                targetAlert.setContentText(message);
+                targetAlert.show();
+            });
+        }
+    }
 }

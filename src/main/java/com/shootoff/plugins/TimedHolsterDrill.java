@@ -36,173 +36,177 @@ import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 
 public class TimedHolsterDrill extends TrainingExerciseBase implements TrainingExercise, DelayedStartListener {
-	private final static String LENGTH_COL_NAME = "Length";
-	private final static int LENGTH_COL_WIDTH = 60;
-	private final static int START_DELAY = 10; // s
-	private final static int RESUME_DELAY = 5; // s
-	private static final int CORE_POOL_SIZE = 2;
-	private static final String PAUSE = "Pause";
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
-			new NamedThreadFactory("TimedHolsterDrillExercise"));
-	private int delayMin = 4;
-	private int delayMax = 8;
-	private boolean repeatExercise = true;
-	private long beepTime = 0;
-	private boolean hadShot = false;
-	private boolean coloredRows = false;
-	private Button pauseResumeButton;
+    private final static String LENGTH_COL_NAME = "Length";
+    private final static int LENGTH_COL_WIDTH = 60;
+    private final static int START_DELAY = 10; // s
+    private final static int RESUME_DELAY = 5; // s
+    private static final int CORE_POOL_SIZE = 2;
+    private static final String PAUSE = "Pause";
+    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+            new NamedThreadFactory("TimedHolsterDrillExercise"));
+    private int delayMin = 4;
+    private int delayMax = 8;
+    private boolean repeatExercise = true;
+    private long beepTime = 0;
+    private boolean hadShot = false;
+    private boolean coloredRows = false;
+    private Button pauseResumeButton;
 
-	public TimedHolsterDrill() {}
+    public TimedHolsterDrill() {
+    }
 
-	public TimedHolsterDrill(List<Target> targets) {
-		super(targets);
-	}
+    public TimedHolsterDrill(List<Target> targets) {
+        super(targets);
+    }
 
-	@Override
-	public void targetUpdate(Target target, TargetChange change) {}
+    @Override
+    public void targetUpdate(Target target, TargetChange change) {
+    }
 
-	@Override
-	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("Timed Holster Drill", "1.0", "phrack",
-				"This exercise does not require a target, but one may be used "
-						+ "to give the shooter something to shoot at. When the exercise "
-						+ "is started you are asked to enter a range for randomly "
-						+ "delayed starts. You are then given 10 seconds to position "
-						+ "yourself. After a random wait (within the entered range) a "
-						+ "beep tells you to draw their pistol from it's holster, "
-						+ "fire at your target, and finally re-holster. This process is "
-						+ "repeated as long as this exercise is on.");
-	}
+    @Override
+    public ExerciseMetadata getInfo() {
+        return new ExerciseMetadata("Timed Holster Drill", "1.0", "phrack",
+                "This exercise does not require a target, but one may be used "
+                        + "to give the shooter something to shoot at. When the exercise "
+                        + "is started you are asked to enter a range for randomly "
+                        + "delayed starts. You are then given 10 seconds to position "
+                        + "yourself. After a random wait (within the entered range) a "
+                        + "beep tells you to draw their pistol from it's holster, "
+                        + "fire at your target, and finally re-holster. This process is "
+                        + "repeated as long as this exercise is on.");
+    }
 
-	@Override
-	public void init() {
-		initUI();
-		initService();
-	}
+    @Override
+    public void init() {
+        initUI();
+        initService();
+    }
 
-	@Override
-	public void shotListener(Shot shot, Optional<Hit> hi) {
-		if (repeatExercise) {
-			hadShot = true;
-			setLength();
-		}
-	}
+    @Override
+    public void shotListener(Shot shot, Optional<Hit> hi) {
+        if (repeatExercise) {
+            hadShot = true;
+            setLength();
+        }
+    }
 
-	protected void setLength() {
-		final float drawShotLength = (float) (System.currentTimeMillis() - beepTime) / (float) 1000; // s
-		setShotTimerColumnText(LENGTH_COL_NAME, String.format("%.2f", drawShotLength));
-	}
+    protected void setLength() {
+        final float drawShotLength = (float) (System.currentTimeMillis() - beepTime) / (float) 1000; // s
+        setShotTimerColumnText(LENGTH_COL_NAME, String.format("%.2f", drawShotLength));
+    }
 
-	@Override
-	public void reset(List<Target> targets) {
-		repeatExercise = false;
-		pauseShotDetection(true);
-		executorService.shutdownNow();
-		pauseResumeButton.setText(PAUSE);
-		resetValues();
-		repeatExercise = true;
-		executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
-				new NamedThreadFactory("TimedHolsterDrillExercise"));
-		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
-	}
+    @Override
+    public void reset(List<Target> targets) {
+        repeatExercise = false;
+        pauseShotDetection(true);
+        executorService.shutdownNow();
+        pauseResumeButton.setText(PAUSE);
+        resetValues();
+        repeatExercise = true;
+        executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
+                new NamedThreadFactory("TimedHolsterDrillExercise"));
+        executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+    }
 
-	@Override
-	public void destroy() {
-		repeatExercise = false;
-		executorService.shutdownNow();
-		super.destroy();
-	}
+    @Override
+    public void destroy() {
+        repeatExercise = false;
+        executorService.shutdownNow();
+        super.destroy();
+    }
 
-	protected class SetupWait implements Runnable {
-		@Override
-		public void run() {
-			if (!repeatExercise) return;
+    protected class SetupWait implements Runnable {
+        @Override
+        public void run() {
+            if (!repeatExercise)
+                return;
 
-			pauseShotDetection(true);
-			playSound(new File("sounds/voice/shootoff-makeready.wav"));
-			final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+            pauseShotDetection(true);
+            playSound(new File("sounds/voice/shootoff-makeready.wav"));
+            final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
 
-			if (repeatExercise) executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
+            if (repeatExercise)
+                executorService.schedule(new Round(), randomDelay, TimeUnit.SECONDS);
 
-			return;
-		}
-	}
+            return;
+        }
+    }
 
-	protected class Round implements Runnable {
-		@Override
-		public void run() {
-			if (repeatExercise) {
-				doRound();
-				executorService.schedule(new Round(), setupRound(), TimeUnit.SECONDS);
-			}
+    protected class Round implements Runnable {
+        @Override
+        public void run() {
+            if (repeatExercise) {
+                doRound();
+                executorService.schedule(new Round(), setupRound(), TimeUnit.SECONDS);
+            }
 
-			return;
-		}
-	}
+            return;
+        }
+    }
 
-	protected void initUI() {
-		pauseResumeButton = addShootOFFButton(PAUSE, (event) -> {
-			final Button pauseResumeButton = (Button) event.getSource();
-			if (PAUSE.equals(pauseResumeButton.getText())) {
-				pauseResumeButton.setText("Resume");
-				repeatExercise = false;
-				pauseShotDetection(true);
-			} else {
-				pauseResumeButton.setText(PAUSE);
-				repeatExercise = true;
-				executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);
-			}
-		});
+    protected void initUI() {
+        pauseResumeButton = addShootOFFButton(PAUSE, (event) -> {
+            final Button pauseResumeButton = (Button) event.getSource();
+            if (PAUSE.equals(pauseResumeButton.getText())) {
+                pauseResumeButton.setText("Resume");
+                repeatExercise = false;
+                pauseShotDetection(true);
+            } else {
+                pauseResumeButton.setText(PAUSE);
+                repeatExercise = true;
+                executorService.schedule(new SetupWait(), RESUME_DELAY, TimeUnit.SECONDS);
+            }
+        });
 
-		addShootOFFButton("Clear Shots", (event) -> super.clearShots());
+        addShootOFFButton("Clear Shots", (event) -> super.clearShots());
 
-		addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
-	}
+        addShotTimerColumn(LENGTH_COL_NAME, LENGTH_COL_WIDTH);
+    }
 
-	protected void initService() {
-		pauseShotDetection(true);
-		resetValues();
+    protected void initService() {
+        pauseShotDetection(true);
+        resetValues();
 
-		executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
-	}
+        executorService.schedule(new SetupWait(), START_DELAY, TimeUnit.SECONDS);
+    }
 
-	protected int setupRound() {
-		// Only toggle the color if there was a shot in the last round
-		// otherwise the colors get out of sync if the user misses a
-		// round (thus you can have a string of shots that is all gray
-		// or white even though they were different rounds)
-		if (hadShot) {
-			coloredRows = !coloredRows;
-			hadShot = false;
-		}
-		
-		if (coloredRows) {
-			setShotTimerRowColor(Color.LIGHTGRAY);
-		} else {
-			setShotTimerRowColor(null);
-		}
+    protected int setupRound() {
+        // Only toggle the color if there was a shot in the last round
+        // otherwise the colors get out of sync if the user misses a
+        // round (thus you can have a string of shots that is all gray
+        // or white even though they were different rounds)
+        if (hadShot) {
+            coloredRows = !coloredRows;
+            hadShot = false;
+        }
 
-		final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
-		return randomDelay;
-	}
+        if (coloredRows) {
+            setShotTimerRowColor(Color.LIGHTGRAY);
+        } else {
+            setShotTimerRowColor(null);
+        }
 
-	protected void doRound() {
-		playSound("sounds/beep.wav");
-		pauseShotDetection(false);
-		startRoundTimer();
-	}
+        final int randomDelay = new Random().nextInt((delayMax - delayMin) + 1) + delayMin;
+        return randomDelay;
+    }
 
-	protected void startRoundTimer() {
-		beepTime = System.currentTimeMillis();
-	}
+    protected void doRound() {
+        playSound("sounds/beep.wav");
+        pauseShotDetection(false);
+        startRoundTimer();
+    }
 
-	@Override
-	public void updatedDelayedStartInterval(int min, int max) {
-		delayMin = min;
-		delayMax = max;
-	}
+    protected void startRoundTimer() {
+        beepTime = System.currentTimeMillis();
+    }
 
-	protected void resetValues() {
-		getDelayedStartInterval(this);
-	}
+    @Override
+    public void updatedDelayedStartInterval(int min, int max) {
+        delayMin = min;
+        delayMax = max;
+    }
+
+    protected void resetValues() {
+        getDelayedStartInterval(this);
+    }
 }

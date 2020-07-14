@@ -24,59 +24,60 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class SpriteAnimation extends Transition {
-	public static final int DEFAULT_DELAY = 100;
+    public static final int DEFAULT_DELAY = 100;
 
-	private final ImageView imageView;
-	private final ImageFrame[] frames;
-	private final int count;
+    private final ImageView imageView;
+    private final ImageFrame[] frames;
+    private final int count;
 
-	private int lastIndex;
-	private boolean isReversed = false;
+    private int lastIndex;
+    private boolean isReversed = false;
 
-	public SpriteAnimation(ImageView imageView, ImageFrame[] frames) {
-		this.imageView = imageView;
-		this.frames = new ImageFrame[frames.length];
-		System.arraycopy(frames, 0, this.frames, 0, frames.length);
-		count = frames.length;
-		setInterpolator(Interpolator.LINEAR);
-	}
+    public SpriteAnimation(ImageView imageView, ImageFrame[] frames) {
+        this.imageView = imageView;
+        this.frames = new ImageFrame[frames.length];
+        System.arraycopy(frames, 0, this.frames, 0, frames.length);
+        count = frames.length;
+        setInterpolator(Interpolator.LINEAR);
+    }
 
-	public Image getFrame(int frameNumber) {
-		return frames[frameNumber].getImage();
-	}
+    public Image getFrame(int frameNumber) {
+        return frames[frameNumber].getImage();
+    }
 
-	public void setCurrentFrame(int frameNumber) {
-		imageView.setImage(getFrame(frameNumber));
-	}
+    public void setCurrentFrame(int frameNumber) {
+        imageView.setImage(getFrame(frameNumber));
+    }
 
-	public Image getFirstFrame() {
-		return isReversed ? frames[frames.length - 1].getImage() : frames[0].getImage();
-	}
+    public Image getFirstFrame() {
+        return isReversed ? frames[frames.length - 1].getImage() : frames[0].getImage();
+    }
 
-	public int getFrameCount() {
-		return frames.length;
-	}
+    public int getFrameCount() {
+        return frames.length;
+    }
 
-	public void reset() {
-		if (getStatus() == Status.RUNNING) stop();
+    public void reset() {
+        if (getStatus() == Status.RUNNING)
+            stop();
 
-		isReversed = false;
-		lastIndex = 0;
-		setRate(Math.abs(getRate()));
-		imageView.setImage(getFirstFrame());
-	}
+        isReversed = false;
+        lastIndex = 0;
+        setRate(Math.abs(getRate()));
+        imageView.setImage(getFirstFrame());
+    }
 
-	@Override
-	protected void interpolate(double k) {
-		final int index = Math.min((int) Math.floor(k * count), count - 1);
-		if (index != lastIndex) {
-			imageView.setImage(frames[index].getImage());
-			lastIndex = index;
-		}
-	}
+    @Override
+    protected void interpolate(double k) {
+        final int index = Math.min((int) Math.floor(k * count), count - 1);
+        if (index != lastIndex) {
+            imageView.setImage(frames[index].getImage());
+            lastIndex = index;
+        }
+    }
 
-	public void reverse() {
-		isReversed = !isReversed;
-		setRate(getRate() * -1);
-	}
+    public void reverse() {
+        isReversed = !isReversed;
+        setRate(getRate() * -1);
+    }
 }

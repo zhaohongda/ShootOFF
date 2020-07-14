@@ -18,59 +18,59 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 
 public class MockCanvasManager extends CanvasManager {
-	private final Logger logger = LoggerFactory.getLogger(MockCanvasManager.class);
-	private final List<DisplayShot> shots = new ArrayList<DisplayShot>();
-	private final Configuration config;
-	private final String cameraName;
-	private final boolean useShotProcessors;
+    private final Logger logger = LoggerFactory.getLogger(MockCanvasManager.class);
+    private final List<DisplayShot> shots = new ArrayList<DisplayShot>();
+    private final Configuration config;
+    private final String cameraName;
+    private final boolean useShotProcessors;
 
-	public MockCanvasManager(Configuration config) {
-		super(new Group(), new ShootOFFController(), String.format("%d", System.nanoTime()),
-				FXCollections.observableArrayList());
-		new JFXPanel(); // Initialize the JFX toolkit
-		this.config = config;
-		this.cameraName = "Default";
-		this.useShotProcessors = false;
-	}
+    public MockCanvasManager(Configuration config) {
+        super(new Group(), new ShootOFFController(), String.format("%d", System.nanoTime()),
+                FXCollections.observableArrayList());
+        new JFXPanel(); // Initialize the JFX toolkit
+        this.config = config;
+        this.cameraName = "Default";
+        this.useShotProcessors = false;
+    }
 
-	public MockCanvasManager(Configuration config, boolean useShotProcessors) {
-		super(new Group(), new ShootOFFController(), String.format("%d", System.nanoTime()),
-				FXCollections.observableArrayList());
-		new JFXPanel(); // Initialize the JFX toolkit
-		this.config = config;
-		this.cameraName = "Default";
-		this.useShotProcessors = useShotProcessors;
-	}
+    public MockCanvasManager(Configuration config, boolean useShotProcessors) {
+        super(new Group(), new ShootOFFController(), String.format("%d", System.nanoTime()),
+                FXCollections.observableArrayList());
+        new JFXPanel(); // Initialize the JFX toolkit
+        this.config = config;
+        this.cameraName = "Default";
+        this.useShotProcessors = useShotProcessors;
+    }
 
-	public String getCameraName() {
-		return cameraName;
-	}
+    public String getCameraName() {
+        return cameraName;
+    }
 
-	@Override
-	public void addShot(DisplayShot shot, boolean mirroredShot) {
-		if (useShotProcessors) {
+    @Override
+    public void addShot(DisplayShot shot, boolean mirroredShot) {
+        if (useShotProcessors) {
 
-			for (ShotProcessor p : config.getShotProcessors()) {
-				if (!p.processShot(shot)) {
-					logger.info("Processing Shot: Shot Rejected By {}", p.getClass().getName());
-					return;
-				}
-			}
-		}
+            for (ShotProcessor p : config.getShotProcessors()) {
+                if (!p.processShot(shot)) {
+                    logger.info("Processing Shot: Shot Rejected By {}", p.getClass().getName());
+                    return;
+                }
+            }
+        }
 
-		logger.info("Processing Shot: Shot Validated {} {}", shot.getX(), shot.getY());
-		shots.add(shot);
-	}
+        logger.info("Processing Shot: Shot Validated {} {}", shot.getX(), shot.getY());
+        shots.add(shot);
+    }
 
-	public List<DisplayShot> getShots() {
-		return shots;
-	}
+    public List<DisplayShot> getShots() {
+        return shots;
+    }
 
-	@Override
-	public Target addTarget(Target newTarget) {
-		super.getCanvasGroup().getChildren().add(((TargetView) newTarget).getTargetGroup());
-		super.getTargets().add(newTarget);
+    @Override
+    public Target addTarget(Target newTarget) {
+        super.getCanvasGroup().getChildren().add(((TargetView) newTarget).getTargetGroup());
+        super.getTargets().add(newTarget);
 
-		return newTarget;
-	}
+        return newTarget;
+    }
 }

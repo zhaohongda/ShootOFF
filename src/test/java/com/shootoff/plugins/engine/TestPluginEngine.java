@@ -11,29 +11,32 @@ import org.junit.Test;
 import com.shootoff.plugins.TrainingExercise;
 
 public class TestPluginEngine {
-	private String pluginsPath;
-	private PluginEngine pe;
+    private String pluginsPath;
+    private PluginEngine pe;
 
-	@Before
-	public void setUp() throws IOException {
-		pluginsPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + File.separator
-				+ "exercises";
-		System.setProperty("shootoff.plugins", pluginsPath);
+    @Before
+    public void setUp() throws IOException {
+        pluginsPath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + File.separator
+                + "exercises";
+        System.setProperty("shootoff.plugins", pluginsPath);
 
-		pe = new PluginEngine(new PluginListener() {
-			@Override
-			public void registerExercise(TrainingExercise exercise) {}
+        pe = new PluginEngine(new PluginListener() {
+            @Override
+            public void registerExercise(TrainingExercise exercise) {
+            }
 
-			@Override
-			public void registerProjectorExercise(TrainingExercise exercise) {}
+            @Override
+            public void registerProjectorExercise(TrainingExercise exercise) {
+            }
 
-			@Override
-			public void unregisterExercise(TrainingExercise exercise) {}
-		});
-	}
+            @Override
+            public void unregisterExercise(TrainingExercise exercise) {
+            }
+        });
+    }
 
-	@Test
-	public void testExistingPlugins() {
-		assertEquals(2, pe.getPlugins().size());
-	}
+    @Test
+    public void testExistingPlugins() {
+        assertEquals(2, pe.getPlugins().size());
+    }
 }

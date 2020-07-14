@@ -26,31 +26,31 @@ import com.shootoff.config.Configuration;
 import com.shootoff.plugins.TrainingExerciseBase;
 
 public class MalfunctionsProcessor implements ShotProcessor {
-	private static boolean useTTS = true;
+    private static boolean useTTS = true;
 
-	private static final Random rand = new Random();
-	private final float prob;
+    private static final Random rand = new Random();
+    private final float prob;
 
-	public MalfunctionsProcessor(final Configuration config) {
-		prob = config.getMalfunctionsProbability() / 100;
-	}
+    public MalfunctionsProcessor(final Configuration config) {
+        prob = config.getMalfunctionsProbability() / 100;
+    }
 
-	public static void setUseTTS(final boolean useTTS) {
-		MalfunctionsProcessor.useTTS = useTTS;
-	}
+    public static void setUseTTS(final boolean useTTS) {
+        MalfunctionsProcessor.useTTS = useTTS;
+    }
 
-	@Override
-	public boolean processShot(Shot shot) {
-		if (rand.nextFloat() < prob) {
-			if (useTTS)
-				TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
-			return false;
-		}
+    @Override
+    public boolean processShot(Shot shot) {
+        if (rand.nextFloat() < prob) {
+            if (useTTS)
+                TrainingExerciseBase.playSound(new File("sounds/voice/shootoff-malfunction.wav"));
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	@Override
-	public void reset() {
-	}
+    @Override
+    public void reset() {
+    }
 }

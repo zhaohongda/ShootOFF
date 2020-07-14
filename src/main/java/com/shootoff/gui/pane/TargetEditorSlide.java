@@ -24,9 +24,9 @@ import javafx.scene.layout.Pane;
 
 public class TargetEditorSlide extends Slide {
 
-	public TargetEditorSlide(Pane parentControls, Pane parentBody, TargetEditorController editorController) {
-		super(parentControls, parentBody);
+    public TargetEditorSlide(Pane parentControls, Pane parentBody, TargetEditorController editorController) {
+        super(parentControls, parentBody);
 
-		addBodyNode(editorController.getPane());
-	}
+        addBodyNode(editorController.getPane());
+    }
 }

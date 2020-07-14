@@ -33,70 +33,70 @@ import com.shootoff.camera.shotdetection.ShotDetector;
 import com.xuggle.xuggler.video.ConverterFactory;
 
 public interface Camera extends Runnable, Closeable {
-	public enum CameraState {
-		CLOSED, NORMAL, DETECTING, DETECTING_CALIBRATED, CALIBRATING
-	};
+    public enum CameraState {
+        CLOSED, NORMAL, DETECTING, DETECTING_CALIBRATED, CALIBRATING
+    };
 
-	Frame getFrame();
+    Frame getFrame();
 
-	BufferedImage getBufferedImage();
+    BufferedImage getBufferedImage();
 
-	boolean open();
+    boolean open();
 
-	boolean isOpen();
+    boolean isOpen();
 
-	@Override
-	void close();
+    @Override
+    void close();
 
-	String getName();
+    String getName();
 
-	// Return false if the state change is not allowed
-	// for possible future use
-	boolean setState(CameraState state);
+    // Return false if the state change is not allowed
+    // for possible future use
+    boolean setState(CameraState state);
 
-	CameraState getState();
+    CameraState getState();
 
-	void setCameraEventListener(CameraEventListener cameraEventListener);
+    void setCameraEventListener(CameraEventListener cameraEventListener);
 
-	int getFrameCount();
+    int getFrameCount();
 
-	ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView);
+    ShotDetector getPreferredShotDetector(final CameraManager cameraManager, final CameraView cameraView);
 
-	boolean isLocked();
+    boolean isLocked();
 
-	void setViewSize(Dimension size);
+    void setViewSize(Dimension size);
 
-	Dimension getViewSize();
+    Dimension getViewSize();
 
-	boolean supportsExposureAdjustment();
+    boolean supportsExposureAdjustment();
 
-	boolean decreaseExposure();
+    boolean decreaseExposure();
 
-	void resetExposure();
+    void resetExposure();
 
-	static BufferedImage matToBufferedImage(Mat matBGR) {
-		final BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
-		final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-		matBGR.get(0, 0, targetPixels);
+    static BufferedImage matToBufferedImage(Mat matBGR) {
+        final BufferedImage image = new BufferedImage(matBGR.width(), matBGR.height(), BufferedImage.TYPE_3BYTE_BGR);
+        final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        matBGR.get(0, 0, targetPixels);
 
-		return image;
-	}
+        return image;
+    }
 
-	static Mat bufferedImageToMat(BufferedImage frame) {
-		final BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
-		final byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
-		final Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
-		mat.put(0, 0, pixels);
+    static Mat bufferedImageToMat(BufferedImage frame) {
+        final BufferedImage transformedFrame = ConverterFactory.convertToType(frame, BufferedImage.TYPE_3BYTE_BGR);
+        final byte[] pixels = ((DataBufferByte) transformedFrame.getRaster().getDataBuffer()).getData();
+        final Mat mat = new Mat(frame.getHeight(), frame.getWidth(), CvType.CV_8UC3);
+        mat.put(0, 0, pixels);
 
-		return mat;
-	}
+        return mat;
+    }
 
-	double getFPS();
+    double getFPS();
 
-	/**
-	 * @return True if the camera limits the number of frames that are delivered
-	 *         to CameraManager
-	 */
-	boolean limitsFrames();
+    /**
+     * @return True if the camera limits the number of frames that are delivered
+     *         to CameraManager
+     */
+    boolean limitsFrames();
 
 }

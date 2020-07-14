@@ -21,73 +21,73 @@ import javafx.scene.shape.Rectangle;
  * @author phrack
  */
 public interface Target {
-	public static final String TAG_IGNORE_HIT = "ignoreHit";
-	public static final String TAG_RESIZABLE = "isResizable";
-	public static final String TAG_OPACITY = "opacity";
-	public static final String TAG_VISIBLE = "visible";
-	public static final String TAG_FILL_CANVAS = "fillCanvas";
-	public static final String TAG_DEFAULT_PERCEIVED_WIDTH = "defaultPerceivedWidth";
-	public static final String TAG_DEFAULT_PERCEIVED_HEIGHT = "defaultPerceivedHeight";
-	public static final String TAG_DEFAULT_PERCEIVED_DISTANCE = "defaultDistance";
-	public static final String TAG_CURRENT_PERCEIVED_DISTANCE = "currentDistance";
-	public static final String TAG_SHOOTER_DISTANCE = "shooterDistance";
+    public static final String TAG_IGNORE_HIT = "ignoreHit";
+    public static final String TAG_RESIZABLE = "isResizable";
+    public static final String TAG_OPACITY = "opacity";
+    public static final String TAG_VISIBLE = "visible";
+    public static final String TAG_FILL_CANVAS = "fillCanvas";
+    public static final String TAG_DEFAULT_PERCEIVED_WIDTH = "defaultPerceivedWidth";
+    public static final String TAG_DEFAULT_PERCEIVED_HEIGHT = "defaultPerceivedHeight";
+    public static final String TAG_DEFAULT_PERCEIVED_DISTANCE = "defaultDistance";
+    public static final String TAG_CURRENT_PERCEIVED_DISTANCE = "currentDistance";
+    public static final String TAG_SHOOTER_DISTANCE = "shooterDistance";
 
-	File getTargetFile();
+    File getTargetFile();
 
-	int getTargetIndex();
-	
-	void fillParent();
+    int getTargetIndex();
 
-	void addTargetChild(Node child);
+    void fillParent();
 
-	void removeTargetChild(Node child);
+    void addTargetChild(Node child);
 
-	List<TargetRegion> getRegions();
+    void removeTargetChild(Node child);
 
-	/**
-	 * Check whether or not this target contains a particular region.
-	 * 
-	 * @param region
-	 *            a region that may exist in this target
-	 * @return <tt>true</tt> if the target contains <tt>region</tt>
-	 */
-	boolean hasRegion(TargetRegion region);
+    List<TargetRegion> getRegions();
 
-	void setVisible(boolean isVisible);
-	
-	boolean isVisible();
+    /**
+     * Check whether or not this target contains a particular region.
+     * 
+     * @param region
+     *            a region that may exist in this target
+     * @return <tt>true</tt> if the target contains <tt>region</tt>
+     */
+    boolean hasRegion(TargetRegion region);
 
-	void setPosition(double x, double y);
+    void setVisible(boolean isVisible);
 
-	Point2D getPosition();
+    boolean isVisible();
 
-	void setDimensions(double newWidth, double newHeight);
+    void setPosition(double x, double y);
 
-	Dimension2D getDimension();
+    Point2D getPosition();
 
-	void scale(double widthFactor, double heightFactor);
-	
-	Bounds getBoundsInParent();
+    void setDimensions(double newWidth, double newHeight);
 
-	Point2D parentToLocal(double x, double y);
-	
-	void setClip(Rectangle clip);
-	
-	void animate(TargetRegion region, List<String> args);
+    Dimension2D getDimension();
 
-	void reverseAnimation(TargetRegion region);
+    void scale(double widthFactor, double heightFactor);
 
-	Optional<Hit> isHit(double x, double y);
+    Bounds getBoundsInParent();
 
-	boolean tagExists(String name);
+    Point2D parentToLocal(double x, double y);
 
-	String getTag(String name);
+    void setClip(Rectangle clip);
 
-	Map<String, String> getAllTags();
+    void animate(TargetRegion region, List<String> args);
 
-	void setTargetSelectionListener(TargetSelectionListener selectionListener);
+    void reverseAnimation(TargetRegion region);
 
-	double getScaleX();
+    Optional<Hit> isHit(double x, double y);
 
-	double getScaleY();
+    boolean tagExists(String name);
+
+    String getTag(String name);
+
+    Map<String, String> getAllTags();
+
+    void setTargetSelectionListener(TargetSelectionListener selectionListener);
+
+    double getScaleX();
+
+    double getScaleY();
 }

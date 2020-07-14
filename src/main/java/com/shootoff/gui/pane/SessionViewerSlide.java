@@ -23,9 +23,9 @@ import com.shootoff.gui.controller.SessionViewerController;
 import javafx.scene.layout.Pane;
 
 public class SessionViewerSlide extends Slide {
-	public SessionViewerSlide(Pane parentControls, Pane parentBody, SessionViewerController sessionViewerController) {
-		super(parentControls, parentBody);
+    public SessionViewerSlide(Pane parentControls, Pane parentBody, SessionViewerController sessionViewerController) {
+        super(parentControls, parentBody);
 
-		addBodyNode(sessionViewerController.getPane());
-	}
+        addBodyNode(sessionViewerController.getPane());
+    }
 }

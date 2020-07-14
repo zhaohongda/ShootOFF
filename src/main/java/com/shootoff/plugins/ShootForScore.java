@@ -28,96 +28,99 @@ import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 
 public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
-	private final static String POINTS_COL_NAME = "Score";
-	private final static int POINTS_COL_WIDTH = 60;
+    private final static String POINTS_COL_NAME = "Score";
+    private final static int POINTS_COL_WIDTH = 60;
 
-	private int redScore = 0;
-	private int greenScore = 0;
+    private int redScore = 0;
+    private int greenScore = 0;
 
-	public ShootForScore() {}
+    public ShootForScore() {
+    }
 
-	public ShootForScore(List<Target> targets) {
-		super(targets);
-	}
+    public ShootForScore(List<Target> targets) {
+        super(targets);
+    }
 
-	@Override
-	public void init() {
-		super.addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
-	}
+    @Override
+    public void init() {
+        super.addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
+    }
 
-	@Override
-	public void targetUpdate(Target target, TargetChange change) {}
+    @Override
+    public void targetUpdate(Target target, TargetChange change) {
+    }
 
-	/**
-	 * Returns the score for the red player. This method exists to make this
-	 * exercise easier to test.
-	 * 
-	 * @return red's score
-	 */
-	protected int getRedScore() {
-		return redScore;
-	}
+    /**
+     * Returns the score for the red player. This method exists to make this
+     * exercise easier to test.
+     * 
+     * @return red's score
+     */
+    protected int getRedScore() {
+        return redScore;
+    }
 
-	/**
-	 * Returns the score for the green player. This method exists to make this
-	 * exercise easier to test.
-	 * 
-	 * @return green's score
-	 */
-	protected int getGreenScore() {
-		return greenScore;
-	}
+    /**
+     * Returns the score for the green player. This method exists to make this
+     * exercise easier to test.
+     * 
+     * @return green's score
+     */
+    protected int getGreenScore() {
+        return greenScore;
+    }
 
-	@Override
-	public ExerciseMetadata getInfo() {
-		return new ExerciseMetadata("Shoot for Score", "1.0", "phrack",
-				"This exercise works with targets that have score tags "
-						+ "assigned to regions. Any time a target region is hit, "
-						+ "the number of points assigned to that region are added " + "to your total score.");
-	}
+    @Override
+    public ExerciseMetadata getInfo() {
+        return new ExerciseMetadata("Shoot for Score", "1.0", "phrack",
+                "This exercise works with targets that have score tags "
+                        + "assigned to regions. Any time a target region is hit, "
+                        + "the number of points assigned to that region are added " + "to your total score.");
+    }
 
-	@Override
-	public void shotListener(Shot shot, Optional<Hit> hit) {
-		if (!hit.isPresent()) return;
+    @Override
+    public void shotListener(Shot shot, Optional<Hit> hit) {
+        if (!hit.isPresent())
+            return;
 
-		final TargetRegion r = hit.get().getHitRegion();
-		if (r.tagExists("points")) {
-			super.setShotTimerColumnText(POINTS_COL_NAME, r.getTag("points"));
+        final TargetRegion r = hit.get().getHitRegion();
+        if (r.tagExists("points")) {
+            super.setShotTimerColumnText(POINTS_COL_NAME, r.getTag("points"));
 
-			if (shot.getColor().equals(ShotColor.RED) || shot.getColor().equals(ShotColor.INFRARED)) {
-				redScore += Integer.parseInt(r.getTag("points"));
-			} else if (shot.getColor().equals(ShotColor.GREEN)) {
-				greenScore += Integer.parseInt(r.getTag("points"));
-			}
-		}
+            if (shot.getColor().equals(ShotColor.RED) || shot.getColor().equals(ShotColor.INFRARED)) {
+                redScore += Integer.parseInt(r.getTag("points"));
+            } else if (shot.getColor().equals(ShotColor.GREEN)) {
+                greenScore += Integer.parseInt(r.getTag("points"));
+            }
+        }
 
-		String message = "score: 0";
+        String message = "score: 0";
 
-		if (redScore > 0 && greenScore > 0) {
-			message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
-		}
+        if (redScore > 0 && greenScore > 0) {
+            message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
+        }
 
-		if (redScore > 0 && greenScore > 0) {
-			message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
-		} else if (redScore > 0) {
-			message = String.format("red score: %d", redScore);
-		} else if (greenScore > 0) {
-			message = String.format("green score: %d", greenScore);
-		}
+        if (redScore > 0 && greenScore > 0) {
+            message = String.format("red score: %d%ngreen score: %d", redScore, greenScore);
+        } else if (redScore > 0) {
+            message = String.format("red score: %d", redScore);
+        } else if (greenScore > 0) {
+            message = String.format("green score: %d", greenScore);
+        }
 
-		super.showTextOnFeed(message);
-	}
+        super.showTextOnFeed(message);
+    }
 
-	@Override
-	public void reset(List<Target> targets) {
-		redScore = 0;
-		greenScore = 0;
-		super.showTextOnFeed("score: 0");
-	}
+    @Override
+    public void reset(List<Target> targets) {
+        redScore = 0;
+        greenScore = 0;
+        super.showTextOnFeed("score: 0");
+    }
 
-	@Override
-	public void destroy() {
-		super.destroy();
-	}
+    @Override
+    public void destroy() {
+        super.destroy();
+    }
 
 }

@@ -27,46 +27,46 @@ import com.shootoff.targets.Target;
 import javafx.geometry.Dimension2D;
 
 public class Course {
-	private final Optional<LocatedImage> background;
-	private final List<Target> targets;
-	private final Optional<Dimension2D> resolution;
+    private final Optional<LocatedImage> background;
+    private final List<Target> targets;
+    private final Optional<Dimension2D> resolution;
 
-	public Course(final List<Target> targets) {
-		background = Optional.empty();
-		this.targets = targets;
-		resolution = Optional.empty();
-	}
+    public Course(final List<Target> targets) {
+        background = Optional.empty();
+        this.targets = targets;
+        resolution = Optional.empty();
+    }
 
-	public Course(final LocatedImage background, final List<Target> targets) {
-		this.background = Optional.of(background);
-		this.targets = targets;
-		resolution = Optional.empty();
-	}
+    public Course(final LocatedImage background, final List<Target> targets) {
+        this.background = Optional.of(background);
+        this.targets = targets;
+        resolution = Optional.empty();
+    }
 
-	public Course(final Optional<LocatedImage> background, final List<Target> targets, final Dimension2D resolution) {
-		this.background = background;
-		this.targets = targets;
-		this.resolution = Optional.of(resolution);
-	}
+    public Course(final Optional<LocatedImage> background, final List<Target> targets, final Dimension2D resolution) {
+        this.background = background;
+        this.targets = targets;
+        this.resolution = Optional.of(resolution);
+    }
 
-	public Optional<LocatedImage> getBackground() {
-		return background;
-	}
+    public Optional<LocatedImage> getBackground() {
+        return background;
+    }
 
-	public List<Target> getTargets() {
-		return targets;
-	}
+    public List<Target> getTargets() {
+        return targets;
+    }
 
-	/**
-	 * The dimensions of the arena when the course was saved.
-	 * 
-	 * @return Optional.empty for courses saved prior to 3.7
-	 */
-	public Optional<Dimension2D> getResolution() {
-		if (resolution.isPresent()) {
-			return resolution;
-		} else {
-			return Optional.empty();
-		}
-	}
+    /**
+     * The dimensions of the arena when the course was saved.
+     * 
+     * @return Optional.empty for courses saved prior to 3.7
+     */
+    public Optional<Dimension2D> getResolution() {
+        if (resolution.isPresent()) {
+            return resolution;
+        } else {
+            return Optional.empty();
+        }
+    }
 }

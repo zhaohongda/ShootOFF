@@ -20,35 +20,35 @@ import javafx.scene.paint.Color;
  * @author phrack
  */
 public interface CameraView extends Closeable {
-	/**
-	 * Add control to the GUI displaying camera and shot detection data.
-	 * 
-	 * @param c
-	 *            the control to add to the GUI
-	 * @return <tt>true</tt> if the GUI did not already contain <tt>c</tt>
-	 */
-	public boolean addChild(Node c);
+    /**
+     * Add control to the GUI displaying camera and shot detection data.
+     * 
+     * @param c
+     *            the control to add to the GUI
+     * @return <tt>true</tt> if the GUI did not already contain <tt>c</tt>
+     */
+    public boolean addChild(Node c);
 
-	public void addShot(DisplayShot shot, boolean isMirroredShot);
+    public void addShot(DisplayShot shot, boolean isMirroredShot);
 
-	public Optional<Target> addTarget(File targetFile);
+    public Optional<Target> addTarget(File targetFile);
 
-	public Target addTarget(Target newTarget);
+    public Target addTarget(Target newTarget);
 
-	public Label addDiagnosticMessage(String message, Color backgroundColor);
+    public Label addDiagnosticMessage(String message, Color backgroundColor);
 
-	public void clearShots();
+    public void clearShots();
 
-	@Override
-	public void close();
+    @Override
+    public void close();
 
-	public boolean removeChild(Node c);
+    public boolean removeChild(Node c);
 
-	public void removeDiagnosticMessage(Label diagnosticLabel);
+    public void removeDiagnosticMessage(Label diagnosticLabel);
 
-	public void reset();
+    public void reset();
 
-	public void setCameraManager(CameraManager cameraManager);
+    public void setCameraManager(CameraManager cameraManager);
 
-	public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds);
+    public void updateBackground(BufferedImage frame, Optional<Bounds> projectionBounds);
 }

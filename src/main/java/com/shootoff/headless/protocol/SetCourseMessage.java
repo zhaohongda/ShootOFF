@@ -21,13 +21,13 @@ package com.shootoff.headless.protocol;
 import java.io.File;
 
 public class SetCourseMessage extends Message {
-	private final File course;
+    private final File course;
 
-	public SetCourseMessage(File course) {
-		this.course = course;
-	}
+    public SetCourseMessage(File course) {
+        this.course = course;
+    }
 
-	public File getCourse() {
-		return course;
-	}
+    public File getCourse() {
+        return course;
+    }
 }

@@ -36,106 +36,102 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 
 public class TestTargetCommands {
-	@Rule public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
+    @Rule
+    public JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 
-	private Configuration config;
-	private TargetView poiTarget;
-	private List<Target> targets;
-	private CanvasManager canvasManager;
-	private CameraManager cameraManager;
-	private Bounds bounds;
+    private Configuration config;
+    private TargetView poiTarget;
+    private List<Target> targets;
+    private CanvasManager canvasManager;
+    private CameraManager cameraManager;
+    private Bounds bounds;
 
-	@Before
-	public void setUp() throws ConfigurationException {
-		System.setProperty("shootoff.home", System.getProperty("user.dir"));
+    @Before
+    public void setUp() throws ConfigurationException {
+        System.setProperty("shootoff.home", System.getProperty("user.dir"));
 
-		TextToSpeech.silence(true);
-		TrainingExerciseBase.silence(true);
-		
-		config = new Configuration(new String[0]);
-		canvasManager = new MockCanvasManager(config);
-		cameraManager = new MockCameraManager();
-		
-		bounds = new BoundingBox(100, 100, 540, 260);
-		
-		cameraManager.setProjectionBounds(bounds);
-		canvasManager.setCameraManager(cameraManager);
-		
-		ProjectorArenaPane projectorArenaPane = new MockProjectorArenaController(config, canvasManager);
-		
-		canvasManager.setProjectorArena(projectorArenaPane, bounds);
-		canvasManager.getCanvasGroup().getChildren().clear();
+        TextToSpeech.silence(true);
+        TrainingExerciseBase.silence(true);
 
-		targets = new ArrayList<Target>();
-		TargetComponents poiComponents = TargetIO.loadTarget(new File("targets/POI_Offset_Adjustment.target")).get();
-		poiTarget = (TargetView) canvasManager.addTarget(
-				new TargetView(poiComponents.getTargetGroup(), poiComponents.getTargetTags(), targets));
-		targets.add(poiTarget);
-		
-		canvasManager.addTarget(new File("targets/POI_Offset_Adjustment.target"));
-		
-		canvasManager.getTargets().get(0).setDimensions(640, 360);
-		canvasManager.getTargets().get(0).setPosition(0, 0);
-	}
+        config = new Configuration(new String[0]);
+        canvasManager = new MockCanvasManager(config);
+        cameraManager = new MockCameraManager();
 
-	
-	@Test
-	public void testPOIAdjust() {
-		Optional<TargetRegion> r = TargetView.getTargetRegionByName(targets,
-				(TargetRegion) poiTarget.getRegions().get(0), "center");
+        bounds = new BoundingBox(100, 100, 540, 260);
 
-		assertTrue(r.isPresent());
-		assertTrue(r.get().tagExists("name"));
-		assertEquals("center", r.get().getTag("name"));
-		
+        cameraManager.setProjectionBounds(bounds);
+        canvasManager.setCameraManager(cameraManager);
 
-		assertFalse(config.isAdjustingPOI());		
-		assertFalse(config.getPOIAdjustmentX().isPresent());
-		assertFalse(config.getPOIAdjustmentY().isPresent());
-		
-		BoundsShot bShot = new BoundsShot(ShotColor.GREEN, 271, 125, 0);
-		bShot.adjustBounds(100, 100);
-		
-		ArenaShot shot = new ArenaShot(new DisplayShot(bShot, 0));
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
+        ProjectorArenaPane projectorArenaPane = new MockProjectorArenaController(config, canvasManager);
 
+        canvasManager.setProjectorArena(projectorArenaPane, bounds);
+        canvasManager.getCanvasGroup().getChildren().clear();
 
-		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
+        targets = new ArrayList<Target>();
+        TargetComponents poiComponents = TargetIO.loadTarget(new File("targets/POI_Offset_Adjustment.target")).get();
+        poiTarget = (TargetView) canvasManager
+                .addTarget(new TargetView(poiComponents.getTargetGroup(), poiComponents.getTargetTags(), targets));
+        targets.add(poiTarget);
 
-		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
+        canvasManager.addTarget(new File("targets/POI_Offset_Adjustment.target"));
 
+        canvasManager.getTargets().get(0).setDimensions(640, 360);
+        canvasManager.getTargets().get(0).setPosition(0, 0);
+    }
 
-		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
+    @Test
+    public void testPOIAdjust() {
+        Optional<TargetRegion> r = TargetView.getTargetRegionByName(targets,
+                (TargetRegion) poiTarget.getRegions().get(0), "center");
 
-		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
+        assertTrue(r.isPresent());
+        assertTrue(r.get().tagExists("name"));
+        assertEquals("center", r.get().getTag("name"));
 
-		assertTrue(config.isAdjustingPOI());				
-		assertTrue(config.getPOIAdjustmentX().isPresent());
-		assertTrue(config.getPOIAdjustmentY().isPresent());
-		
-		assertEquals(-7.0, config.getPOIAdjustmentX().get(), 1.0);
-		assertEquals(-7.0, config.getPOIAdjustmentY().get(), 1.0);
+        assertFalse(config.isAdjustingPOI());
+        assertFalse(config.getPOIAdjustmentX().isPresent());
+        assertFalse(config.getPOIAdjustmentY().isPresent());
 
-		Shot nshot = new Shot(ShotColor.GREEN, 50, 50, 0, 0);
-		nshot.adjustPOI(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
-		assertEquals(43, nshot.getX(), 1);
-		assertEquals(43, nshot.getY(), 1);
-		
-		
-		shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
-		canvasManager.scaleShotToArenaBounds(shot);
-		canvasManager.addArenaShot(shot, Optional.empty(), false);
+        BoundsShot bShot = new BoundsShot(ShotColor.GREEN, 271, 125, 0);
+        bShot.adjustBounds(100, 100);
 
-		assertFalse(config.isAdjustingPOI());		
+        ArenaShot shot = new ArenaShot(new DisplayShot(bShot, 0));
+        canvasManager.scaleShotToArenaBounds(shot);
+        canvasManager.addArenaShot(shot, Optional.empty(), false);
 
-	}
+        shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
+        canvasManager.scaleShotToArenaBounds(shot);
+        canvasManager.addArenaShot(shot, Optional.empty(), false);
+
+        shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
+        canvasManager.scaleShotToArenaBounds(shot);
+        canvasManager.addArenaShot(shot, Optional.empty(), false);
+
+        shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
+        canvasManager.scaleShotToArenaBounds(shot);
+        canvasManager.addArenaShot(shot, Optional.empty(), false);
+
+        shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
+        canvasManager.scaleShotToArenaBounds(shot);
+        canvasManager.addArenaShot(shot, Optional.empty(), false);
+
+        assertTrue(config.isAdjustingPOI());
+        assertTrue(config.getPOIAdjustmentX().isPresent());
+        assertTrue(config.getPOIAdjustmentY().isPresent());
+
+        assertEquals(-7.0, config.getPOIAdjustmentX().get(), 1.0);
+        assertEquals(-7.0, config.getPOIAdjustmentY().get(), 1.0);
+
+        Shot nshot = new Shot(ShotColor.GREEN, 50, 50, 0, 0);
+        nshot.adjustPOI(config.getPOIAdjustmentX().get(), config.getPOIAdjustmentY().get());
+        assertEquals(43, nshot.getX(), 1);
+        assertEquals(43, nshot.getY(), 1);
+
+        shot = new ArenaShot(new DisplayShot(new Shot(ShotColor.GREEN, 381, 235, 0), 0));
+        canvasManager.scaleShotToArenaBounds(shot);
+        canvasManager.addArenaShot(shot, Optional.empty(), false);
+
+        assertFalse(config.isAdjustingPOI());
+
+    }
 }

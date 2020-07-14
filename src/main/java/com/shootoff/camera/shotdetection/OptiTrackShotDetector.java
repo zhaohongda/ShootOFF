@@ -32,82 +32,87 @@ import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.camera.cameratypes.OptiTrackCamera;
 
 public class OptiTrackShotDetector extends ShotYieldingShotDetector implements CameraStateListener {
-	private static final Logger logger = LoggerFactory.getLogger(OptiTrackShotDetector.class);
+    private static final Logger logger = LoggerFactory.getLogger(OptiTrackShotDetector.class);
 
-	private final CameraManager cameraManager;
+    private final CameraManager cameraManager;
 
-	private final long startTime = System.currentTimeMillis();
+    private final long startTime = System.currentTimeMillis();
 
-	public OptiTrackShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
-		super(cameraManager, cameraView);
+    public OptiTrackShotDetector(final CameraManager cameraManager, final CameraView cameraView) {
+        super(cameraManager, cameraView);
 
-		this.cameraManager = cameraManager;
+        this.cameraManager = cameraManager;
 
-		cameraManager.registerCameraStateListener(this);
-	}
+        cameraManager.registerCameraStateListener(this);
+    }
 
-	public static boolean isSystemSupported() {
-		return OptiTrackCamera.initialized();
-	}
+    public static boolean isSystemSupported() {
+        return OptiTrackCamera.initialized();
+    }
 
-	@Override
-	public void cameraStateChange(CameraState state) {
-		if (logger.isDebugEnabled()) logger.debug("got state change {}", state);
-		switch (state) {
-		case DETECTING_CALIBRATED:
-			Timer timer = new Timer();
-			timer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					if (cameraManager.isDetecting()) enableDetection();
-				}
-			}, 100);
-			break;
-		default:
-			disableDetection();
-			break;
+    @Override
+    public void cameraStateChange(CameraState state) {
+        if (logger.isDebugEnabled())
+            logger.debug("got state change {}", state);
+        switch (state) {
+        case DETECTING_CALIBRATED:
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (cameraManager.isDetecting())
+                        enableDetection();
+                }
+            }, 100);
+            break;
+        default:
+            disableDetection();
+            break;
 
-		}
-	}
+        }
+    }
 
-	private native void startDetectionModeNative();
+    private native void startDetectionModeNative();
 
-	private native void enableDetection();
+    private native void enableDetection();
 
-	private native void disableDetection();
+    private native void disableDetection();
 
-	@Override
-	public void setFrameSize(int width, int height) {}
+    @Override
+    public void setFrameSize(int width, int height) {
+    }
 
-	/**
-	 * Called by the native code to notify this class when a shot is detected.
-	 *
-	 * @param x
-	 *            the x coordinate of the new shot
-	 * @param y
-	 *            the y coordinate of the new shot
-	 * @param timestamp
-	 *            the timestamp of the shot not adjusted for the shot timer
-	 * @param rgb
-	 *            the rgb color of the new shot
-	 */
-	public void foundShot(int x, int y, long timestamp, int rgb) {
-		if (!cameraManager.isDetecting()) return;
+    /**
+     * Called by the native code to notify this class when a shot is detected.
+     *
+     * @param x
+     *            the x coordinate of the new shot
+     * @param y
+     *            the y coordinate of the new shot
+     * @param timestamp
+     *            the timestamp of the shot not adjusted for the shot timer
+     * @param rgb
+     *            the rgb color of the new shot
+     */
+    public void foundShot(int x, int y, long timestamp, int rgb) {
+        if (!cameraManager.isDetecting())
+            return;
 
-		final Point undist = cameraManager.undistortCoords(x, y);
+        final Point undist = cameraManager.undistortCoords(x, y);
 
-		if (logger.isTraceEnabled()) logger.trace("Translation: {} {} to {}", x, y, undist);
+        if (logger.isTraceEnabled())
+            logger.trace("Translation: {} {} to {}", x, y, undist);
 
-		super.addShot(ShotColor.INFRARED, undist.x, undist.y, startTime + timestamp, true);
-	}
+        super.addShot(ShotColor.INFRARED, undist.x, undist.y, startTime + timestamp, true);
+    }
 
-	@Override
-	public void initDetecting() {
-		startDetectionModeNative();
-	}
+    @Override
+    public void initDetecting() {
+        startDetectionModeNative();
+    }
 
-	@Override
-	protected boolean handlesBounds() {
-		return false;
-	}
+    @Override
+    protected boolean handlesBounds() {
+        return false;
+    }
 }
