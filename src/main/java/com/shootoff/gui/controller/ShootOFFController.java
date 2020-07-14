@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2016 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -19,7 +19,11 @@
 package com.shootoff.gui.controller;
 
 import java.awt.Toolkit;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
@@ -810,6 +814,41 @@ public class ShootOFFController implements CameraConfigListener, CameraErrorView
     @FXML
     public void resetClicked(ActionEvent event) {
         reset();
+    }
+
+    @FXML
+    public void saveTargetsClicked(ActionEvent event) throws IOException {
+        String targetsFile = System.getProperty("shootoff.home") + File.separator + "targets.txt";
+        BufferedWriter writer = new BufferedWriter(new FileWriter(targetsFile));
+        final List<Target> targets = ((CanvasManager) getSelectedCameraView()).getTargets();
+        for (final Target t : targets) {
+            final String relativeTargetFile = t.getTargetFile().getAbsolutePath()
+                    .replace(System.getProperty("shootoff.home") + File.separator, "");
+            double x = t.getPosition().getX(), y = t.getPosition().getY(), w = t.getDimension().getWidth(),
+                    h = t.getDimension().getHeight();
+            writer.write(relativeTargetFile + " " + x + " " + y + " " + w + " " + h);
+            writer.newLine();
+        }
+        writer.close();
+    }
+
+    @FXML
+    public void loadTargetsClicked(ActionEvent event) throws IOException {
+        String targetsFile = System.getProperty("shootoff.home") + File.separator + "targets.txt";
+        BufferedReader reader = new BufferedReader(new FileReader(targetsFile));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] strs = line.split(" ");
+            if (strs.length != 5)
+                continue;
+            String targetFile = System.getProperty("shootoff.home") + File.separator + strs[0];
+            double x = Double.parseDouble(strs[1]);
+            double y = Double.parseDouble(strs[2]);
+            double w = Double.parseDouble(strs[3]);
+            double h = Double.parseDouble(strs[4]);
+            getSelectedCameraView().restoreTarget(new File(targetFile), x, y, w, h);
+        }
+        reader.close();
     }
 
     @Override

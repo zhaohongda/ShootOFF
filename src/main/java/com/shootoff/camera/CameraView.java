@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 /**
  * Implemented by {@link com.shootoff.gui.CanvasManager} to display camera
  * frames, shots, and targets.
- * 
+ *
  * @author phrack
  */
 public interface CameraView extends Closeable {
@@ -32,6 +32,8 @@ public interface CameraView extends Closeable {
     public void addShot(DisplayShot shot, boolean isMirroredShot);
 
     public Optional<Target> addTarget(File targetFile);
+
+    public Optional<Target> restoreTarget(File targetFile, double x, double y, double w, double h);
 
     public Target addTarget(Target newTarget);
 

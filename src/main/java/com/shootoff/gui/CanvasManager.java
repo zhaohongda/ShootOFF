@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2016 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -64,10 +64,10 @@ import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
+import com.shootoff.util.SwingFXUtils;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import com.shootoff.util.SwingFXUtils;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
@@ -414,7 +414,7 @@ public class CanvasManager implements CameraView {
     /*
      * Takes a point x,y and translates it from an arena canvas to a camera
      * (feed) point.
-     * 
+     *
      * This is hackish because it will break if any of the math for these
      * calculations changes in other places.
      */
@@ -828,6 +828,42 @@ public class CanvasManager implements CameraView {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    // Restore a save target with predefined position and size
+    public Optional<Target> restoreTarget(File targetFile, double x, double y, double w, double h) {
+        final Optional<TargetComponents> targetComponents = loadTarget(targetFile, true);
+
+        if (targetComponents.isPresent()) {
+            final TargetComponents tc = targetComponents.get();
+            final Optional<Target> target = Optional
+                    .of(restoreTarget(targetFile, tc.getTargetGroup(), tc.getTargetTags(), true, x, y, w, h));
+
+            if (config.getSessionRecorder().isPresent() && target.isPresent()) {
+                config.getSessionRecorder().get().recordTargetAdded(cameraName, target.get());
+            }
+
+            return target;
+        }
+
+        return Optional.empty();
+    }
+
+    // Restore a save target with predefined position and size
+    public Target restoreTarget(File targetFile, Group targetGroup, Map<String, String> targetTags,
+            boolean userDeletable, double x, double y, double w, double h) {
+        final TargetView newTarget;
+
+        if (this instanceof MirroredCanvasManager) {
+            newTarget = new MirroredTarget(targetFile, targetGroup, targetTags, config, this, userDeletable);
+        } else {
+            newTarget = new TargetView(targetFile, targetGroup, targetTags, this, userDeletable);
+        }
+        newTarget.setPosition(x, y);
+        newTarget.setDimensions(w, h);
+
+        return addTarget(newTarget);
     }
 
     @Override

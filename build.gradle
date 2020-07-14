@@ -108,9 +108,10 @@ dependencies {
     compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.+'
 
     // tts dependencies
-    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.1.+'
-    compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.1.+'
-    compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.1.+'
+    compile group: 'de.dfki.mary', name: 'marytts-runtime', version: '5.2'
+    compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.2'
+    //compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.2'
+    compile group: 'de.dfki.mary', name: 'voice-cmu-bdl-hsmm', version: '5.2'
 
     // xuggle for recording and playing back video
     compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'

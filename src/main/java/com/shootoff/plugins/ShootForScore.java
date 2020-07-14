@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2016 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -53,7 +53,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
     /**
      * Returns the score for the red player. This method exists to make this
      * exercise easier to test.
-     * 
+     *
      * @return red's score
      */
     protected int getRedScore() {
@@ -63,7 +63,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
     /**
      * Returns the score for the green player. This method exists to make this
      * exercise easier to test.
-     * 
+     *
      * @return green's score
      */
     protected int getGreenScore() {
@@ -84,9 +84,9 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
             return;
 
         final TargetRegion r = hit.get().getHitRegion();
+
         if (r.tagExists("points")) {
             super.setShotTimerColumnText(POINTS_COL_NAME, r.getTag("points"));
-
             if (shot.getColor().equals(ShotColor.RED) || shot.getColor().equals(ShotColor.INFRARED)) {
                 redScore += Integer.parseInt(r.getTag("points"));
             } else if (shot.getColor().equals(ShotColor.GREEN)) {
@@ -109,6 +109,28 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
         }
 
         super.showTextOnFeed(message);
+
+        // Calculate the angle for shot
+        int clock = 0;
+        final Shot s = hit.get().getShot();
+        final Target t = hit.get().getTarget();
+        if (s != null && t != null) {
+            // Target 0,0 = Shot 290,250
+            double sx = s.getX(), sy = s.getY();
+            double tx = t.getPosition().getX() + 290.0, ty = t.getPosition().getY() + 250.0;
+            float angle = (float) Math.toDegrees(Math.atan2(sy - ty, sx - tx));
+            if (angle < 0) {
+                angle += 360;
+            }
+            clock = ((int) (angle + 15) / 30 + 3) % 12;
+            if (clock == 0)
+                clock = 12;
+        }
+
+        if (r.tagExists("points")) {
+            // Voice the current shot score
+            TextToSpeech.say(r.getTag("points") + " " + clock + " clock");
+        }
     }
 
     @Override

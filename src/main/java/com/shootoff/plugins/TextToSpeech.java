@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2016 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -35,7 +35,7 @@ import marytts.util.data.audio.AudioPlayer;
  * This facade class implements text-to-speech operations for dynamic audio
  * output. This class should be re-written if the text-to-speech library is
  * swapped for an alternative.
- * 
+ *
  * @author phrack
  */
 public final class TextToSpeech {
@@ -81,7 +81,7 @@ public final class TextToSpeech {
      * Allows TTS to be silenced or on. If silenced, instead of saying a comment
      * the desired comment will be printed to stdout. This exists so that
      * components can be easily tested even if they are reliant on TTS.
-     * 
+     *
      * @param isSilenced
      *            set to <tt>true</tt> if spoken phrases should instead be
      *            printed to stdout, <tt>false</tt> for normal operation.

@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2016 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -38,14 +38,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.shootoff.plugins.BouncingTargets;
+import com.shootoff.plugins.ClayBuster;
 import com.shootoff.plugins.DuelingTree;
 import com.shootoff.plugins.ExerciseMetadata;
 import com.shootoff.plugins.ISSFStandardPistol;
 import com.shootoff.plugins.ParForScore;
 import com.shootoff.plugins.ParRandomShot;
 import com.shootoff.plugins.RandomShoot;
+import com.shootoff.plugins.RunningMan;
 import com.shootoff.plugins.ShootDontShoot;
 import com.shootoff.plugins.ShootForScore;
+import com.shootoff.plugins.ShootOut;
 import com.shootoff.plugins.SteelChallenge;
 import com.shootoff.plugins.TimedHolsterDrill;
 import com.shootoff.plugins.TrainingExercise;
@@ -53,7 +56,7 @@ import com.shootoff.util.VersionChecker;
 
 /**
  * Watch for new plugin jars and manage plugin registration and deletion.
- * 
+ *
  * @author phrack
  */
 public class PluginEngine implements Runnable {
@@ -101,6 +104,9 @@ public class PluginEngine implements Runnable {
     }
 
     private void registerDefaultProjectorExercises() {
+        pluginListener.registerProjectorExercise(new ClayBuster());
+        pluginListener.registerProjectorExercise(new ShootOut());
+        pluginListener.registerProjectorExercise(new RunningMan());
         pluginListener.registerProjectorExercise(new BouncingTargets());
         pluginListener.registerProjectorExercise(new DuelingTree());
         pluginListener.registerProjectorExercise(new ShootDontShoot());

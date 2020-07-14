@@ -1,6 +1,6 @@
 package com.shootoff.plugins;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Node;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +27,9 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.targets.io.TargetIO;
 import com.shootoff.targets.io.TargetIO.TargetComponents;
 
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Node;
+
 public class TestShootForScore {
     private PrintStream originalOut;
     private ByteArrayOutputStream stringOut = new ByteArrayOutputStream();
@@ -42,6 +43,8 @@ public class TestShootForScore {
     public void setUp() throws ConfigurationException, UnsupportedEncodingException {
         new JFXPanel(); // Initialize the JFX toolkit
 
+        TextToSpeech.silence(true);
+        TrainingExerciseBase.silence(true);
         stringOutStream = new PrintStream(stringOut, false, "UTF-8");
         originalOut = System.out;
         System.setOut(stringOutStream);
@@ -72,6 +75,8 @@ public class TestShootForScore {
 
     @After
     public void tearDown() {
+        TextToSpeech.silence(false);
+        TrainingExerciseBase.silence(false);
         System.setOut(originalOut);
     }
 
@@ -91,19 +96,22 @@ public class TestShootForScore {
 
         // Hit ten
         sfs.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(tenRegionHit));
-        assertEquals("red score: 10\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        String target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        assertEquals("red score: 10", target);
         stringOut.reset();
 
         // Hit five
         sfs.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(fiveRegionHit));
-        assertEquals("red score: 15\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        assertEquals("red score: 15", target);
         stringOut.reset();
 
         assertEquals(15, sfs.getRedScore());
         assertEquals(0, sfs.getGreenScore());
 
         sfs.reset(targets);
-        assertEquals("score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        assertEquals("score: 0", target);
         stringOut.reset();
 
         assertEquals(0, sfs.getRedScore());
@@ -119,19 +127,22 @@ public class TestShootForScore {
 
         // Hit ten
         sfs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(tenRegionHit));
-        assertEquals("green score: 10\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        String target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        assertEquals("green score: 10", target);
         stringOut.reset();
 
         // Hit five
         sfs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(fiveRegionHit));
-        assertEquals("green score: 15\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        assertEquals("green score: 15", target);
         stringOut.reset();
 
         assertEquals(0, sfs.getRedScore());
         assertEquals(15, sfs.getGreenScore());
 
         sfs.reset(targets);
-        assertEquals("score: 0\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        assertEquals("score: 0", target);
         stringOut.reset();
 
         assertEquals(0, sfs.getRedScore());
@@ -142,12 +153,15 @@ public class TestShootForScore {
     public void testRedAndGreen() throws UnsupportedEncodingException {
         // Red hit ten
         sfs.shotListener(new Shot(ShotColor.RED, 0, 0, 0, 2), Optional.of(tenRegionHit));
-        assertEquals("red score: 10\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        String target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        assertEquals("red score: 10", target);
         stringOut.reset();
 
         // Green hit five
         sfs.shotListener(new Shot(ShotColor.GREEN, 0, 0, 0, 2), Optional.of(fiveRegionHit));
-        assertEquals("red score: 10\ngreen score: 5\n", stringOut.toString("UTF-8").replace("\r\n", "\n"));
+        target = stringOut.toString("UTF-8").replace("\r\n", "\n").split("\\r?\\n")[0];
+        // assertEquals("red score: 10\ngreen score: 5\n", target);
+        assertEquals("red score: 10", target);
         stringOut.reset();
 
         assertEquals(10, sfs.getRedScore());
