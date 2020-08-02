@@ -18,14 +18,30 @@
 
 package com.shootoff.plugins;
 
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 
+import javax.imageio.ImageIO;
+
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.shot.ShotColor;
+import com.shootoff.config.DynamicGlobal;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
+import com.shootoff.util.SwingFXUtils;
+
+import javafx.application.Platform;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 
 public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
     private final static String POINTS_COL_NAME = "Score";
@@ -33,6 +49,11 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 
     private int redScore = 0;
     private int greenScore = 0;
+    private int hitsCnt = 0;
+
+    private final ChoiceBox<Integer> maxHitsChoiceBox = new ChoiceBox<>();
+    private final CheckBox autoResetCheckBox = new CheckBox();
+    private final CheckBox autoSaveFeedBox = new CheckBox();
 
     public ShootForScore() {
     }
@@ -44,6 +65,30 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
     @Override
     public void init() {
         super.addShotTimerColumn(POINTS_COL_NAME, POINTS_COL_WIDTH);
+        initializeGui();
+    }
+
+    private void initializeGui() {
+        final GridPane exercisePane = new GridPane();
+
+        exercisePane.add(new Label("Maximum Hits"), 0, 0);
+        exercisePane.add(maxHitsChoiceBox, 1, 0);
+
+        maxHitsChoiceBox.getItems().add(2);
+        maxHitsChoiceBox.getItems().add(10);
+        maxHitsChoiceBox.getItems().add(20);
+
+        maxHitsChoiceBox.getSelectionModel().select(0);
+
+        exercisePane.add(new Label("Auto-Reset after max hits"), 0, 1);
+        exercisePane.add(autoResetCheckBox, 1, 1);
+        autoResetCheckBox.setSelected(false);
+
+        exercisePane.add(new Label("Auto-Save feed image after max hits"), 0, 2);
+        exercisePane.add(autoSaveFeedBox, 1, 2);
+        autoSaveFeedBox.setSelected(true);
+
+        addExercisePane(exercisePane);
     }
 
     @Override
@@ -82,6 +127,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
     public void shotListener(Shot shot, Optional<Hit> hit) {
         if (!hit.isPresent())
             return;
+        hitsCnt++;
 
         final TargetRegion r = hit.get().getHitRegion();
 
@@ -131,12 +177,41 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
             // Voice the current shot score
             TextToSpeech.say(r.getTag("points") + " " + clock + " clock");
         }
+
+        if (autoResetCheckBox.isSelected() && hitsCnt >= maxHitsChoiceBox.getValue()) {
+            try {
+                if (autoSaveFeedBox.isSelected()) {
+                    Platform.runLater(() -> {
+                        final Node container = DynamicGlobal.controller.getSelectedCameraContainer();
+                        final RenderedImage renderedImage = SwingFXUtils
+                                .fromFXImage(container.snapshot(new SnapshotParameters(), null), null);
+                        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date());
+                        String feedFile = System.getProperty("shootoff.home") + File.separator + "shootlog"
+                                + File.separator + timeStamp + ".png";
+                        File imageFile = new File(feedFile);
+                        imageFile.getParentFile().mkdirs();
+                        try {
+                            ImageIO.write(renderedImage, "png", imageFile);
+                        } catch (final IOException e) {
+                        }
+                    });
+                }
+                Thread.sleep(1000);
+                TextToSpeech.say("Total score " + redScore + ", reset in three seconds.");
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            super.reset();
+        }
     }
 
     @Override
     public void reset(List<Target> targets) {
         redScore = 0;
         greenScore = 0;
+        hitsCnt = 0;
         super.showTextOnFeed("score: 0");
     }
 

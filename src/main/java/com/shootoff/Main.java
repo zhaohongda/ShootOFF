@@ -44,6 +44,7 @@ import com.shootoff.camera.cameratypes.OptiTrackCamera;
 import com.shootoff.camera.cameratypes.PS3EyeCamera;
 import com.shootoff.config.Configuration;
 import com.shootoff.config.ConfigurationException;
+import com.shootoff.config.DynamicGlobal;
 import com.shootoff.gui.controller.ShootOFFController;
 import com.shootoff.headless.HeadlessController;
 import com.shootoff.plugins.TextToSpeech;
@@ -603,7 +604,7 @@ public class Main extends Application {
         try {
             final FXMLLoader loader = new FXMLLoader(Main.class.getResource("/com/shootoff/gui/ShootOFF.fxml"));
             loader.load();
-
+            DynamicGlobal.loader = loader;
             final Scene scene = new Scene(loader.getRoot());
 
             if (version.isPresent())
@@ -612,6 +613,7 @@ public class Main extends Application {
                 primaryStage.setTitle("ShootOFF");
             primaryStage.setScene(scene);
             final ShootOFFController controller = (ShootOFFController) loader.getController();
+            DynamicGlobal.controller = controller;
             controller.init(config);
             primaryStage.show();
         } catch (final IOException e) {
