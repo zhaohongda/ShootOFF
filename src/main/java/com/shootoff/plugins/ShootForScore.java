@@ -36,11 +36,14 @@ import com.shootoff.targets.TargetRegion;
 import com.shootoff.util.SwingFXUtils;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 public class ShootForScore extends TrainingExerciseBase implements TrainingExercise {
@@ -50,10 +53,14 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
     private int redScore = 0;
     private int greenScore = 0;
     private int hitsCnt = 0;
+    private double minX = Double.MAX_VALUE, maxX = 0, minY = Double.MAX_VALUE, maxY = 0;
+    private double targetX = 1;
 
     private final ChoiceBox<Integer> maxHitsChoiceBox = new ChoiceBox<>();
     private final CheckBox autoResetCheckBox = new CheckBox();
     private final CheckBox autoSaveFeedBox = new CheckBox();
+    private final TextField targetXSizeCM = new TextField();
+    private final TextField scaleFactor = new TextField();
 
     public ShootForScore() {
     }
@@ -87,6 +94,33 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
         exercisePane.add(new Label("Auto-Save feed image after max hits"), 0, 2);
         exercisePane.add(autoSaveFeedBox, 1, 2);
         autoSaveFeedBox.setSelected(true);
+
+        exercisePane.add(new Label("Target physical X Size (cm)"), 0, 3);
+        exercisePane.add(targetXSizeCM, 1, 3);
+        // Make the text field Numeric only
+        targetXSizeCM.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                    targetXSizeCM.setText(oldValue);
+                }
+            }
+        });
+        // targetXSizeCM.setText("50"); // ISSF 25m RAPID FIRE PISTOL
+        targetXSizeCM.setText("18"); // Homeless 5_25 Pistol Target Size
+
+        exercisePane.add(new Label("Training Scale (Simulated Distance/Real Distance)"), 0, 4);
+        exercisePane.add(scaleFactor, 1, 4);
+        // Make the text field Numeric only
+        scaleFactor.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                    scaleFactor.setText(oldValue);
+                }
+            }
+        });
+        scaleFactor.setText("5"); // Shoot at 5M for 25M target
 
         addExercisePane(exercisePane);
     }
@@ -163,7 +197,12 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
         if (s != null && t != null) {
             // Target 0,0 = Shot 290,250
             double sx = s.getX(), sy = s.getY();
+            minX = Math.min(minX, sx);
+            maxX = Math.max(maxX, sx);
+            minY = Math.min(minY, sx);
+            maxY = Math.max(maxY, sx);
             double tx = t.getPosition().getX() + 290.0, ty = t.getPosition().getY() + 250.0;
+            targetX = t.getDimension().getWidth();
             float angle = (float) Math.toDegrees(Math.atan2(sy - ty, sx - tx));
             if (angle < 0) {
                 angle += 360;
@@ -180,14 +219,15 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
 
         if (autoResetCheckBox.isSelected() && hitsCnt >= maxHitsChoiceBox.getValue()) {
             try {
+                double spread = getMOA();
                 if (autoSaveFeedBox.isSelected()) {
                     Platform.runLater(() -> {
                         final Node container = DynamicGlobal.controller.getSelectedCameraContainer();
                         final RenderedImage renderedImage = SwingFXUtils
                                 .fromFXImage(container.snapshot(new SnapshotParameters(), null), null);
-                        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date());
+                        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss-").format(new java.util.Date());
                         String feedFile = System.getProperty("shootoff.home") + File.separator + "shootlog"
-                                + File.separator + timeStamp + ".png";
+                                + File.separator + timeStamp + String.format("%.2f", spread) + ".png";
                         File imageFile = new File(feedFile);
                         imageFile.getParentFile().mkdirs();
                         try {
@@ -197,8 +237,9 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
                     });
                 }
                 Thread.sleep(1000);
-                TextToSpeech.say("Total score " + redScore + ", reset in three seconds.");
-                Thread.sleep(3000);
+                TextToSpeech.say(
+                        String.format("Total score %d, spread %.2f inches, reset in three seconds.", redScore, spread));
+                Thread.sleep(6000);
             } catch (InterruptedException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -207,11 +248,20 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
         }
     }
 
+    private double getMOA() {
+        double max = Math.max(maxX - minX, maxY - minY);
+        double cms = max * Double.parseDouble(targetXSizeCM.getText()) / targetX;
+        double inches = cms * Double.parseDouble(scaleFactor.getText()) / 2.54;
+        return inches;
+    }
+
     @Override
     public void reset(List<Target> targets) {
         redScore = 0;
         greenScore = 0;
         hitsCnt = 0;
+        minX = maxX = minY = maxY = 0;
+        targetX = 1;
         super.showTextOnFeed("score: 0");
     }
 
