@@ -30,6 +30,7 @@ import javax.imageio.ImageIO;
 import com.shootoff.camera.Shot;
 import com.shootoff.camera.shot.ShotColor;
 import com.shootoff.config.DynamicGlobal;
+import com.shootoff.gui.targets.TargetView;
 import com.shootoff.targets.Hit;
 import com.shootoff.targets.Target;
 import com.shootoff.targets.TargetRegion;
@@ -81,7 +82,7 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
         exercisePane.add(new Label("Maximum Hits"), 0, 0);
         exercisePane.add(maxHitsChoiceBox, 1, 0);
 
-        maxHitsChoiceBox.getItems().add(2);
+        maxHitsChoiceBox.getItems().add(5);
         maxHitsChoiceBox.getItems().add(10);
         maxHitsChoiceBox.getItems().add(20);
 
@@ -222,18 +223,22 @@ public class ShootForScore extends TrainingExerciseBase implements TrainingExerc
                 double spread = getMOA();
                 if (autoSaveFeedBox.isSelected()) {
                     Platform.runLater(() -> {
+                        // Hide the target for feed snapshot
+                        ((TargetView) t).getTargetGroup().setVisible(false);
                         final Node container = DynamicGlobal.controller.getSelectedCameraContainer();
                         final RenderedImage renderedImage = SwingFXUtils
                                 .fromFXImage(container.snapshot(new SnapshotParameters(), null), null);
-                        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss-").format(new java.util.Date());
+                        String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss-").format(new java.util.Date());
                         String feedFile = System.getProperty("shootoff.home") + File.separator + "shootlog"
-                                + File.separator + timeStamp + String.format("%.2f", spread) + ".png";
+                                + File.separator + timeStamp + String.format("%d-%.2f", redScore, spread) + ".png";
                         File imageFile = new File(feedFile);
                         imageFile.getParentFile().mkdirs();
                         try {
                             ImageIO.write(renderedImage, "png", imageFile);
                         } catch (final IOException e) {
                         }
+                        // Show the target after feed snapshot
+                        ((TargetView) t).getTargetGroup().setVisible(true);
                     });
                 }
                 Thread.sleep(1000);
