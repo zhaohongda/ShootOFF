@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2016 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -160,8 +160,8 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
     private Optional<Screen> getStageHomeScreen(Stage stage) {
         final double dpiScaleFactor = ShootOFFController.getDpiScaleFactorForScreen();
 
-        final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(stage.getX() / dpiScaleFactor,
-                stage.getY() / dpiScaleFactor, 1, 1);
+        final ObservableList<Screen> stageHomeScreens = Screen.getScreensForRectangle(
+                Math.max(stage.getX(), 2) / dpiScaleFactor, Math.max(stage.getY(), 2) / dpiScaleFactor, 1, 1);
 
         if (stageHomeScreens.isEmpty()) {
             final StringBuilder message = new StringBuilder(
@@ -596,7 +596,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
      * manager, bypassing the arena controller. Thus, the arena controller would
      * not be able to configure arena-specific target operations (e.g. setting a
      * targets distance).
-     * 
+     *
      * @param target
      *            a new target that was just added to the projector arena
      */
@@ -648,7 +648,7 @@ public class ProjectorArenaPane extends AnchorPane implements CalibrationListene
      * webcam feed pointed at the projection. It is also used to disable shot
      * detection when necessary to enhance user experience (e.g. when the mouse
      * cursor is on the arena because a user is resizing targets).
-     * 
+     *
      * @param canvasManager
      *            the canvas manager showing the webcam feed pointed at the
      *            projection for the projection arena controlled by this class

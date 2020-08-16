@@ -18,15 +18,15 @@
 
 <VBox fx:id="shootOffContainer" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shootoff.gui.controller.ShootOFFController">
    <children>
-      <HBox fx:id="controlsContainer" alignment="TOP_CENTER" minHeight="160.0" prefWidth="200.0" spacing="175.0">
+      <HBox fx:id="controlsContainer" alignment="TOP_CENTER" minHeight="40.0" prefWidth="200.0" spacing="175.0">
          <children>
-            <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="100.0" prefWidth="150.0" text="File" />
-            <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Targets" />
-            <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Training" />
-            <Button mnemonicParsing="false" onMouseClicked="#projectorButtonClicked" prefHeight="100.0" prefWidth="150.0" text="Projector" />
+            <Button mnemonicParsing="false" onMouseClicked="#fileButtonClicked" prefHeight="30.0" prefWidth="150.0" text="File" />
+            <Button mnemonicParsing="false" onMouseClicked="#targetsButtonClicked" prefHeight="30.0" prefWidth="150.0" text="Targets" />
+            <Button mnemonicParsing="false" onMouseClicked="#trainingButtonClicked" prefHeight="30.0" prefWidth="150.0" text="Training" />
+            <Button mnemonicParsing="false" onMouseClicked="#projectorButtonClicked" prefHeight="30.0" prefWidth="150.0" text="Projector" />
          </children>
          <padding>
-            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            <Insets bottom="5.0" left="30.0" right="30.0" top="5.0" />
          </padding>
       </HBox>
       <VBox fx:id="bodyContainer">
@@ -51,7 +51,7 @@
                   <Insets />
                </VBox.margin>
                <padding>
-                  <Insets bottom="30.0" left="30.0" right="30.0" />
+                  <Insets bottom="5.0" left="30.0" right="30.0" />
                </padding>
             </HBox>
             <ScrollPane fx:id="trainingExerciseScrollPane" hbarPolicy="NEVER" minHeight="150.0" HBox.hgrow="ALWAYS">
