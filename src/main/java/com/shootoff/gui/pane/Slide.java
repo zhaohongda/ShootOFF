@@ -1,17 +1,17 @@
 /*
  * ShootOFF - Software for Laser Dry Fire Training
  * Copyright (C) 2016 phrack
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -37,7 +37,7 @@ public abstract class Slide {
     // the size and alignment invariant.
     public static final int MAX_CONTROL_BUTTONS = 4;
     public static final int CONTROL_BUTTON_WIDTH = 150;
-    public static final int CONTROL_BUTTON_HEIGHT = 100;
+    public static final int CONTROL_BUTTON_HEIGHT = 30;
 
     private final List<Node> controlNodes = new ArrayList<>();
     private final List<Node> bodyNodes = new ArrayList<>();
@@ -53,7 +53,7 @@ public abstract class Slide {
         this.parentBody = parentBody;
 
         final ImageView backImage = new ImageView(
-                new Image(Slide.class.getResourceAsStream("/images/back_button.png"), 60.0, 60.0, true, true));
+                new Image(Slide.class.getResourceAsStream("/images/back_button.png"), 25.0, 25.0, true, true));
         final Button backButton = addSlideControlButton("", (Event) -> hide());
         backButton.setGraphic(backImage);
     }
