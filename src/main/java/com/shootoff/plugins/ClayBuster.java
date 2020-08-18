@@ -17,11 +17,20 @@ import com.shootoff.targets.Target;
 import com.shootoff.util.NamedThreadFactory;
 
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.transform.Rotate;
 
 public class ClayBuster extends ProjectorTrainingExerciseBase implements TrainingExercise {
-    private static final int CLAY_LAUNCH_DELAY = 7; /* seconds */
+    private static int CLAY_LAUNCH_DELAY = 10; /* seconds */
+    private static int MIN_CLAY_VELOCITY_X = 3;
+    private static int MAX_CLAY_VELOCITY_X = 7;
+    private static int MIN_CLAY_VELOCITY_Y = 5;
+    private static int MAX_CLAY_VELOCITY_Y = 20;
     private static final int BACKGROUND_WIDTH = 1920;
     private static final int BACKGROUND_HEIGHT = 1436;
     private static final int UNSCALED_BUNKER_X = 750;
@@ -36,6 +45,12 @@ public class ClayBuster extends ProjectorTrainingExerciseBase implements Trainin
     private int missedClays = 0;
     private int shots = 0;
     private final Set<Clay> visibleClays = new HashSet<Clay>();
+
+    private final TextField launchDelay = new TextField();
+    private final TextField minXSpeed = new TextField();
+    private final TextField maxXSpeed = new TextField();
+    private final TextField minYSpeed = new TextField();
+    private final TextField maxYSpeed = new TextField();
 
     private static final int CORE_POOL_SIZE = 8;
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE,
@@ -55,6 +70,7 @@ public class ClayBuster extends ProjectorTrainingExerciseBase implements Trainin
 
     @Override
     public void init() {
+        initializeGui();
         LocatedImage img = new LocatedImage("/arena/backgrounds/shotgun_range.gif");
         super.setArenaBackground(img);
 
@@ -67,6 +83,65 @@ public class ClayBuster extends ProjectorTrainingExerciseBase implements Trainin
         super.showTextOnFeed("Broken Clays: 0\nMissed Clays: 0\nShots: 0");
         executorService.schedule(() -> launchClay(), CLAY_LAUNCH_DELAY, TimeUnit.SECONDS);
         executorService.schedule(() -> moveClays(), 100, TimeUnit.MILLISECONDS);
+    }
+
+    private void initializeGui() {
+        final GridPane exercisePane = new GridPane();
+
+        exercisePane.add(new Label("Clay launch delay"), 0, 0);
+        exercisePane.add(launchDelay, 1, 0);
+        launchDelay.setText("10");
+
+        exercisePane.add(new Label("Min X Speed"), 0, 1);
+        exercisePane.add(minXSpeed, 1, 1);
+        // Make the text field Numeric only
+        minXSpeed.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                    minXSpeed.setText(oldValue);
+                }
+            }
+        });
+        minXSpeed.setText("3");
+
+        exercisePane.add(new Label("Max X Speed"), 0, 2);
+        exercisePane.add(maxXSpeed, 1, 2);
+        maxXSpeed.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                    maxXSpeed.setText(oldValue);
+                }
+            }
+        });
+        maxXSpeed.setText("7");
+
+        exercisePane.add(new Label("Min Y Speed"), 0, 3);
+        exercisePane.add(minYSpeed, 1, 3);
+        minYSpeed.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                    minYSpeed.setText(oldValue);
+                }
+            }
+        });
+        minYSpeed.setText("5");
+
+        exercisePane.add(new Label("Max Y Speed"), 0, 4);
+        exercisePane.add(maxYSpeed, 1, 4);
+        maxYSpeed.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                if (!newValue.matches("\\d{0,7}([\\.]\\d{0,4})?")) {
+                    maxYSpeed.setText(oldValue);
+                }
+            }
+        });
+        maxYSpeed.setText("20");
+
+        addExercisePane(exercisePane);
     }
 
     @Override
@@ -115,11 +190,6 @@ public class ClayBuster extends ProjectorTrainingExerciseBase implements Trainin
         private final int defaultTargetWidth;
         private final int defaultTargetHeight;
         private int targetDistance;
-
-        private static final int MIN_CLAY_VELOCITY_X = 3;
-        private static final int MAX_CLAY_VELOCITY_X = 7;
-        private static final int MIN_CLAY_VELOCITY_Y = 5;
-        private static final int MAX_CLAY_VELOCITY_Y = 20;
 
         private static final int MIN_CLAY_WIDTH = 10;
 
@@ -233,6 +303,11 @@ public class ClayBuster extends ProjectorTrainingExerciseBase implements Trainin
 
     @Override
     public void reset(List<Target> targets) {
+        CLAY_LAUNCH_DELAY = Integer.parseInt(launchDelay.getText());
+        MIN_CLAY_VELOCITY_X = Integer.parseInt(minXSpeed.getText());
+        MAX_CLAY_VELOCITY_X = Integer.parseInt(maxXSpeed.getText());
+        MIN_CLAY_VELOCITY_Y = Integer.parseInt(minYSpeed.getText());
+        MAX_CLAY_VELOCITY_Y = Integer.parseInt(maxYSpeed.getText());
         hitClays = 0;
         missedClays = 0;
         shots = 0;
