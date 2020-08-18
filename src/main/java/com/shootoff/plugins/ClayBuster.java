@@ -244,8 +244,6 @@ public class ClayBuster extends ProjectorTrainingExerciseBase implements Trainin
         visibleClays.clear();
 
         super.showTextOnFeed("Broken Clays: 0\nMissed Clays: 0\nShots: 0");
-
-        executorService.schedule(() -> launchClay(), CLAY_LAUNCH_DELAY, TimeUnit.SECONDS);
     }
 
     @Override
